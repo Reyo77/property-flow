@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCommunity;
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Contracts\BelongsToOneCommunity;
 use Database\Factories\BuildingFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,10 +28,10 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property-read Community $community
  */
 #[Fillable(['name', 'address', 'floors'])]
-class Building extends Model
+class Building extends Model implements BelongsToOneCommunity
 {
     /** @use HasFactory<BuildingFactory> */
-    use BelongsToCompany, HasFactory, LogsActivity, SoftDeletes;
+    use BelongsToCommunity, BelongsToCompany, HasFactory, LogsActivity, SoftDeletes;
 
     /**
      * @return array<string, string>

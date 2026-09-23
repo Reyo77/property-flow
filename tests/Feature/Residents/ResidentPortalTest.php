@@ -3,17 +3,11 @@
 use App\Livewire\Dashboard;
 use App\Models\Community;
 use App\Models\Residency;
-use App\Models\Resident;
 use App\Models\Unit;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-
-function residentWithLogin(): Resident
-{
-    return Resident::factory()->withLogin()->create();
-}
 
 it('shows residents only their own current homes', function () {
     $resident = residentWithLogin();

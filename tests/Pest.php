@@ -3,6 +3,9 @@
 use App\Enums\CompanyRole;
 use App\Models\Community;
 use App\Models\Company;
+use App\Models\Residency;
+use App\Models\Resident;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -76,4 +79,24 @@ function teamMember(CompanyRole $role, Company $company, array $communities = []
     $user->communities()->attach(array_map(fn (Community $community) => $community->id, $communities));
 
     return $user;
+}
+
+/**
+ * Create a resident with a portal login, in the given company or a new one.
+ */
+function residentWithLogin(?Company $company = null): Resident
+{
+    return Resident::factory()->for($company ?? Company::factory())->withLogin()->create();
+}
+
+/**
+ * Create a resident with a portal login and an active residency in the given community.
+ */
+function residentOf(Community $community, array $residencyAttributes = []): Resident
+{
+    $resident = residentWithLogin($community->company);
+
+    Residency::factory()->for(Unit::factory()->for($community))->for($resident)->create($residencyAttributes);
+
+    return $resident;
 }

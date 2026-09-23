@@ -17,6 +17,14 @@ enum Permission: string
     case ViewTeam = 'team.view';
     case ManageTeam = 'team.manage';
     case ManageRoles = 'roles.manage';
+    case ViewAnnouncements = 'announcements.view';
+    case ManageAnnouncements = 'announcements.manage';
+    case ViewDocuments = 'documents.view';
+    case ManageDocuments = 'documents.manage';
+    case ViewEvents = 'events.view';
+    case ManageEvents = 'events.manage';
+    case ViewPhoneBook = 'phonebook.view';
+    case ManagePhoneBook = 'phonebook.manage';
 
     public function label(): string
     {
@@ -34,6 +42,14 @@ enum Permission: string
             self::ViewTeam => __('View the team'),
             self::ManageTeam => __('Invite and manage team members'),
             self::ManageRoles => __('Manage roles'),
+            self::ViewAnnouncements => __('View announcements'),
+            self::ManageAnnouncements => __('Post and manage announcements'),
+            self::ViewDocuments => __('View documents'),
+            self::ManageDocuments => __('Upload and manage documents'),
+            self::ViewEvents => __('View events'),
+            self::ManageEvents => __('Create and manage events'),
+            self::ViewPhoneBook => __('View the phone book'),
+            self::ManagePhoneBook => __('Manage the phone book'),
         };
     }
 
@@ -44,6 +60,10 @@ enum Permission: string
             self::ViewBuildings, self::ManageBuildings, self::ViewUnits, self::ManageUnits, self::ImportUnits => __('Buildings & units'),
             self::ViewResidents, self::ManageResidents => __('Residents'),
             self::ViewTeam, self::ManageTeam, self::ManageRoles => __('Team'),
+            self::ViewAnnouncements, self::ManageAnnouncements => __('Announcements'),
+            self::ViewDocuments, self::ManageDocuments => __('Documents'),
+            self::ViewEvents, self::ManageEvents => __('Events'),
+            self::ViewPhoneBook, self::ManagePhoneBook => __('Phone book'),
         };
     }
 

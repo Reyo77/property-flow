@@ -38,7 +38,12 @@ arch('tenant models are scoped to a company')
     ->expect('App\Models')
     ->classes()
     ->toUseTrait('App\Models\Concerns\BelongsToCompany')
-    ->ignoring(['App\Models\Company', 'App\Models\User']);
+    ->ignoring([
+        'App\Models\Company',
+        'App\Models\User',
+        // Owned via user_id, which already ties it to exactly one company; it has no company_id column.
+        'App\Models\NotificationPreference',
+    ]);
 
 arch('no email is sent until an email provider is set up in Phase 12')
     ->expect(['Illuminate\Support\Facades\Mail', 'Illuminate\Mail', 'Illuminate\Notifications\Messages\MailMessage'])

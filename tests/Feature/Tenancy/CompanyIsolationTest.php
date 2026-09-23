@@ -3,10 +3,16 @@
 use App\Livewire\Buildings\Index as BuildingsIndex;
 use App\Livewire\CommunitySwitcher;
 use App\Livewire\Units\Index as UnitsIndex;
+use App\Models\Announcement;
 use App\Models\Building;
 use App\Models\Community;
 use App\Models\Company;
+use App\Models\Contact;
+use App\Models\Document;
+use App\Models\DocumentFolder;
 use App\Models\EmergencyContact;
+use App\Models\Event;
+use App\Models\EventRsvp;
 use App\Models\Invitation;
 use App\Models\Pet;
 use App\Models\Residency;
@@ -29,6 +35,12 @@ dataset('tenant models', [
     'pets' => fn () => Pet::factory(),
     'emergency contacts' => fn () => EmergencyContact::factory(),
     'invitations' => fn () => Invitation::factory(),
+    'contacts' => fn () => Contact::factory(),
+    'events' => fn () => Event::factory(),
+    'event rsvps' => fn () => EventRsvp::factory(),
+    'document folders' => fn () => DocumentFolder::factory(),
+    'documents' => fn () => Document::factory(),
+    'announcements' => fn () => Announcement::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {

@@ -46,11 +46,37 @@
                             </flux:sidebar.item>
                         @endcan
                     </flux:sidebar.group>
+
+                    <flux:sidebar.group :heading="__('Communication')" class="grid">
+                        @can('viewAny', [App\Models\Announcement::class, $currentCommunity])
+                            <flux:sidebar.item icon="megaphone" :href="route('communities.announcements.index', $currentCommunity)" :current="request()->routeIs('communities.announcements.*')" wire:navigate>
+                                {{ __('Announcements') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\Document::class, $currentCommunity])
+                            <flux:sidebar.item icon="document" :href="route('communities.documents.index', $currentCommunity)" :current="request()->routeIs('communities.documents.*')" wire:navigate>
+                                {{ __('Documents') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\Event::class, $currentCommunity])
+                            <flux:sidebar.item icon="calendar-days" :href="route('communities.events.index', $currentCommunity)" :current="request()->routeIs('communities.events.*')" wire:navigate>
+                                {{ __('Events') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\Contact::class, $currentCommunity])
+                            <flux:sidebar.item icon="phone" :href="route('communities.phone-book.index', $currentCommunity)" :current="request()->routeIs('communities.phone-book.*')" wire:navigate>
+                                {{ __('Phone book') }}
+                            </flux:sidebar.item>
+                        @endcan
+                    </flux:sidebar.group>
                 @endif
             </flux:sidebar.nav>
 
             <flux:spacer />
 
+            <div class="hidden items-center gap-2 px-2 lg:flex">
+                <livewire:notification-bell />
+            </div>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
@@ -60,6 +86,8 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            <livewire:notification-bell />
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

@@ -1,10 +1,17 @@
 <?php
 
+use App\Http\Controllers\DocumentDownloadController;
+use App\Http\Controllers\DocumentVersionDownloadController;
 use App\Http\Middleware\RememberCurrentCommunity;
+use App\Livewire\Announcements;
 use App\Livewire\Buildings;
 use App\Livewire\Communities;
 use App\Livewire\Dashboard;
+use App\Livewire\Documents;
+use App\Livewire\Events;
 use App\Livewire\Invitations;
+use App\Livewire\Notifications;
+use App\Livewire\PhoneBook;
 use App\Livewire\Residents;
 use App\Livewire\Team;
 use App\Livewire\Units;
@@ -18,6 +25,8 @@ Route::livewire('invitations/{token}', Invitations\Accept::class)
 
 Route::middleware('auth')->group(function () {
     Route::livewire('dashboard', Dashboard::class)->name('dashboard');
+
+    Route::livewire('notifications', Notifications\Index::class)->name('notifications.index');
 
     Route::livewire('team', Team\Index::class)->name('team.index');
     Route::livewire('team/roles', Team\Roles::class)->name('team.roles');
@@ -38,6 +47,12 @@ Route::middleware('auth')->group(function () {
             Route::livewire('units/{unit}', Units\Show::class)->name('units.show');
             Route::livewire('residents', Residents\Index::class)->name('residents.index');
             Route::livewire('residents/{resident}', Residents\Show::class)->name('residents.show');
+            Route::livewire('phone-book', PhoneBook\Index::class)->name('phone-book.index');
+            Route::livewire('events', Events\Index::class)->name('events.index');
+            Route::livewire('documents', Documents\Index::class)->name('documents.index');
+            Route::get('documents/{document}/download', DocumentDownloadController::class)->name('documents.download');
+            Route::get('documents/{document}/versions/{version}/download', DocumentVersionDownloadController::class)->name('documents.versions.download');
+            Route::livewire('announcements', Announcements\Index::class)->name('announcements.index');
         });
 });
 

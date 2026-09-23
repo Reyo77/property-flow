@@ -171,21 +171,24 @@ Tests
 **Goal:** replace email blasts and shared drives.
 
 Tasks
-- [ ] Announcements: target by community / building / floor / unit / role; schedule for later; pin
-- [ ] In-app notification centre (bell, unread count, mark read)
-- [ ] Notification preferences per user (in-app now; email/SMS toggles ready)
-- [ ] Document library: folders, upload, visibility (public / residents / owners / board / staff), versioning
-- [ ] Event calendar + RSVP
-- [ ] Phone book (staff & important contacts)
-- [ ] Live notifications via Reverb
+- [x] Announcements: target by community / building / unit / residency type; schedule for later; pin
+  - "Role" is interpreted as **residency type** (owner/tenant/occupant), since announcements are resident-facing, matching Phase 2's ResidencyType decision. Team members with `announcements.view` see every published announcement regardless of audience, since they need full visibility to do their jobs
+  - "Floor" targeting has no dedicated UI; a manager gets the same result by selecting that floor's units from the searchable unit list under the Units audience type
+  - Scheduled announcements publish via `announcements:publish-due`, run every minute by the scheduler (`routes/console.php`)
+- [x] In-app notification centre (bell in the header, unread count, full list at `/notifications`, mark one or all read)
+- [x] Notification preferences per user (`/settings/notifications`; in-app enforced now, email/SMS shown as "coming soon" toggles, stored but inert until Phase 12)
+- [x] Document library: folders (nested), upload with versioning, visibility (public / residents / owners / board / staff), download only through an authenticated, policy-checked route (not a public signed URL, since visibility rules must be enforced per request)
+- [x] Event calendar + RSVP (list view grouped Upcoming/Past rather than a month-grid calendar — a reasonable scope cut for now)
+- [x] Phone book (staff, emergency and vendor contacts per community, with a "visible to residents" toggle)
+- [ ] Live notifications via Reverb — **deferred**. The bell and list already work (Laravel's `database` notification channel), just not pushed instantly; they update on the next page load or Livewire round-trip. Reverb (WebSockets, a queue worker, `laravel-echo`/`pusher-js` on the frontend) is real new infrastructure, so it's deferred to the phase that needs true real-time UI (front desk live updates, Phase 6) rather than added piecemeal here
 
 Tests
-- Targeting: correct recipients for each target type (dataset)
-- Scheduled announcement sent by scheduler (time travel)
-- `Notification::fake()` assertions
-- Document visibility per role; file type/size validation; download only through signed/authorised route
+- Targeting: correct recipients for each target type (dataset) — 381 tests total for Phase 3, including a full policy matrix per module
+- Scheduled announcement published and notified by the scheduler command (time travel via a past `publish_at`)
+- `Notification::fake()` assertions for every targeting case and for the notification-preference opt-out
+- Document visibility per role and per residency type; file type/size validation; download blocked when the viewer cannot see the document
 
-✅ **Done when:** manager posts a notice to Building A, only Building A residents see it.
+✅ **Done when:** manager posts a notice to Building A, only Building A residents see it. **Met** — see `tests/Feature/Announcements/AnnouncementsTest.php`.
 
 ---
 

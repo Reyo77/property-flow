@@ -2,11 +2,24 @@
 
 namespace Database\Seeders;
 
+use App\Actions\Announcements\PublishAnnouncement;
+use App\Enums\AnnouncementAudience;
 use App\Enums\CompanyRole;
+use App\Enums\ContactCategory;
+use App\Enums\DocumentVisibility;
+use App\Enums\ResidencyType;
+use App\Enums\RsvpStatus;
+use App\Models\Announcement;
 use App\Models\Building;
 use App\Models\Community;
 use App\Models\Company;
+use App\Models\Contact;
+use App\Models\Document;
+use App\Models\DocumentFolder;
+use App\Models\DocumentVersion;
 use App\Models\EmergencyContact;
+use App\Models\Event;
+use App\Models\EventRsvp;
 use App\Models\Pet;
 use App\Models\Residency;
 use App\Models\Resident;
@@ -14,6 +27,7 @@ use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * A realistic company for trying the app. Every demo login uses the password "password":
@@ -32,6 +46,7 @@ class DemoSeeder extends Seeder
 
         $this->seedTeam($company, $condo, $hoa);
         $this->seedResidents($company, $condo, $hoa);
+        $this->seedCommunication($condo);
     }
 
     /**
@@ -144,5 +159,101 @@ class DemoSeeder extends Seeder
                 EmergencyContact::factory()->for($owner)->create();
             }
         }
+    }
+
+    /**
+     * Phone book contacts, events with RSVPs, a document library, and announcements in every state.
+     */
+    private function seedCommunication(Community $condo): void
+    {
+        $admin = User::where('email', 'demo@propertyflow.test')->sole();
+        $staff = User::where('email', 'staff@propertyflow.test')->sole();
+        $northTower = Building::where('community_id', $condo->id)->where('name', 'North Tower')->sole();
+        $resident = Resident::where('email', 'resident@propertyflow.test')->sole();
+
+        // Phone book
+        Contact::factory()->for($condo)->create(['name' => 'Sam Concierge', 'title' => 'Concierge', 'category' => ContactCategory::Staff, 'phone' => '416-555-0100']);
+        Contact::factory()->for($condo)->create(['name' => 'Building Superintendent', 'category' => ContactCategory::Staff, 'phone' => '416-555-0101']);
+        Contact::factory()->for($condo)->emergency()->create(['name' => 'Fire / Police / Ambulance', 'phone' => '911']);
+        Contact::factory()->for($condo)->staffOnly()->create(['name' => 'Alarm Monitoring Co.', 'category' => ContactCategory::Vendor]);
+
+        // Events
+        $bbq = Event::factory()->for($condo)->create([
+            'title' => 'Summer Rooftop BBQ',
+            'description' => 'Join your neighbours for burgers and drinks on the rooftop terrace.',
+            'location' => 'Rooftop terrace',
+            'created_by_id' => $admin->id,
+        ]);
+        EventRsvp::factory()->for($bbq)->create(['user_id' => $staff->id, 'status' => RsvpStatus::Going]);
+        if ($resident->user_id !== null) {
+            EventRsvp::factory()->for($bbq)->create(['user_id' => $resident->user_id, 'status' => RsvpStatus::Going]);
+        }
+        Event::factory()->for($condo)->past()->create(['title' => 'Annual General Meeting', 'created_by_id' => $admin->id]);
+
+        // Documents
+        $bylawsFolder = DocumentFolder::factory()->for($condo)->create(['name' => 'Bylaws & Rules', 'visibility' => DocumentVisibility::Residents]);
+        $boardFolder = DocumentFolder::factory()->for($condo)->create(['name' => 'Board Documents', 'visibility' => DocumentVisibility::Board]);
+        $this->seedDocument($condo, $bylawsFolder, 'Condo Declaration.pdf', DocumentVisibility::Residents, $admin);
+        $this->seedDocument($condo, $bylawsFolder, 'Rules & Regulations.pdf', DocumentVisibility::Residents, $admin);
+        $this->seedDocument($condo, $boardFolder, 'Reserve Fund Study.pdf', DocumentVisibility::Board, $admin);
+        $this->seedDocument($condo, null, 'Welcome Package.pdf', DocumentVisibility::Residents, $admin);
+
+        // Announcements: one of each state, so every part of the feature has something to show
+        $publishedForEveryone = Announcement::factory()->for($condo)->pinned()->create([
+            'title' => 'Elevator maintenance this Thursday',
+            'body' => "The North Tower elevator will be out of service Thursday 9am-3pm for scheduled maintenance.\n\nWe apologize for the inconvenience.",
+            'audience_type' => AnnouncementAudience::Buildings,
+            'created_by_id' => $admin->id,
+        ]);
+        $publishedForEveryone->buildings()->attach($northTower);
+        app(PublishAnnouncement::class)->handle($publishedForEveryone);
+
+        $publishedForOwners = Announcement::factory()->for($condo)->create([
+            'title' => 'AGM notice: reserve fund vote',
+            'body' => "Owners are invited to the Annual General Meeting to vote on the reserve fund top-up.\n\nSee the Board Documents folder for the reserve fund study.",
+            'audience_type' => AnnouncementAudience::ResidencyType,
+            'residency_type' => ResidencyType::Owner,
+            'created_by_id' => $admin->id,
+        ]);
+        app(PublishAnnouncement::class)->handle($publishedForOwners);
+
+        Announcement::factory()->for($condo)->create([
+            'title' => 'Holiday decorating contest',
+            'body' => 'Sign up at the front desk to enter this year\'s holiday decorating contest.',
+            'audience_type' => AnnouncementAudience::Community,
+            'publish_at' => now()->addDays(3),
+            'created_by_id' => $admin->id,
+        ]);
+
+        Announcement::factory()->for($condo)->draft()->create([
+            'title' => 'Pool opening date (draft)',
+            'body' => 'Draft: confirm the pool opening date with the maintenance vendor before publishing.',
+            'audience_type' => AnnouncementAudience::Community,
+            'created_by_id' => $admin->id,
+        ]);
+    }
+
+    private function seedDocument(Community $community, ?DocumentFolder $folder, string $filename, DocumentVisibility $visibility, User $uploadedBy): void
+    {
+        $document = Document::factory()->for($community)->create([
+            'folder_id' => $folder?->id,
+            'title' => pathinfo($filename, PATHINFO_FILENAME),
+            'visibility' => $visibility,
+            'uploaded_by_id' => $uploadedBy->id,
+        ]);
+
+        $diskPath = "documents/{$community->company_id}/{$document->id}/1-".fake()->uuid().'.pdf';
+        Storage::disk('local')->put($diskPath, "%PDF-1.4\n% Placeholder demo document: {$filename}\n");
+
+        $version = DocumentVersion::factory()->for($document)->create([
+            'uploaded_by_id' => $uploadedBy->id,
+            'version_number' => 1,
+            'disk_path' => $diskPath,
+            'original_filename' => $filename,
+            'mime_type' => 'application/pdf',
+            'size_bytes' => Storage::disk('local')->size($diskPath) ?: 0,
+        ]);
+
+        $document->forceFill(['current_version_id' => $version->id])->save();
     }
 }
