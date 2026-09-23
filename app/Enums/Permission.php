@@ -25,6 +25,14 @@ enum Permission: string
     case ManageEvents = 'events.manage';
     case ViewPhoneBook = 'phonebook.view';
     case ManagePhoneBook = 'phonebook.manage';
+    case ViewServiceRequests = 'service-requests.view';
+    case ManageServiceRequests = 'service-requests.manage';
+    case ViewVendors = 'vendors.view';
+    case ManageVendors = 'vendors.manage';
+    case ViewTasks = 'tasks.view';
+    case ManageTasks = 'tasks.manage';
+    case ViewAssets = 'assets.view';
+    case ManageAssets = 'assets.manage';
 
     public function label(): string
     {
@@ -50,6 +58,14 @@ enum Permission: string
             self::ManageEvents => __('Create and manage events'),
             self::ViewPhoneBook => __('View the phone book'),
             self::ManagePhoneBook => __('Manage the phone book'),
+            self::ViewServiceRequests => __('View service requests'),
+            self::ManageServiceRequests => __('Manage service requests and work orders'),
+            self::ViewVendors => __('View vendors'),
+            self::ManageVendors => __('Manage the vendor directory and invite vendors'),
+            self::ViewTasks => __('View tasks'),
+            self::ManageTasks => __('Create and manage tasks'),
+            self::ViewAssets => __('View assets and maintenance schedules'),
+            self::ManageAssets => __('Manage assets and maintenance schedules'),
         };
     }
 
@@ -64,6 +80,10 @@ enum Permission: string
             self::ViewDocuments, self::ManageDocuments => __('Documents'),
             self::ViewEvents, self::ManageEvents => __('Events'),
             self::ViewPhoneBook, self::ManagePhoneBook => __('Phone book'),
+            self::ViewServiceRequests, self::ManageServiceRequests => __('Maintenance'),
+            self::ViewVendors, self::ManageVendors => __('Vendors'),
+            self::ViewTasks, self::ManageTasks => __('Tasks'),
+            self::ViewAssets, self::ManageAssets => __('Assets'),
         };
     }
 

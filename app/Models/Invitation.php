@@ -19,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int|null $invited_by_id
  * @property int|null $resident_id
+ * @property int|null $vendor_id
  * @property string $name
  * @property string $email
  * @property string|null $role
@@ -30,6 +31,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property-read User|null $invitedBy
  * @property-read Resident|null $resident
+ * @property-read Vendor|null $vendor
  */
 class Invitation extends Model
 {
@@ -66,6 +68,14 @@ class Invitation extends Model
         return $this->belongsTo(Resident::class);
     }
 
+    /**
+     * @return BelongsTo<Vendor, $this>
+     */
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
     public static function hashToken(string $token): string
     {
         return hash('sha256', $token);
@@ -97,6 +107,11 @@ class Invitation extends Model
 
     public function isForTeam(): bool
     {
-        return $this->resident_id === null;
+        return $this->resident_id === null && $this->vendor_id === null;
+    }
+
+    public function isForVendor(): bool
+    {
+        return $this->vendor_id !== null;
     }
 }

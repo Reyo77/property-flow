@@ -96,6 +96,16 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     /**
+     * The vendor record behind this login, for people invited to the vendor portal.
+     *
+     * @return HasOne<Vendor, $this>
+     */
+    public function vendor(): HasOne
+    {
+        return $this->hasOne(Vendor::class);
+    }
+
+    /**
      * @return HasMany<NotificationPreference, $this>
      */
     public function notificationPreferences(): HasMany

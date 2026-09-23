@@ -27,6 +27,16 @@
                             {{ __('Team') }}
                         </flux:sidebar.item>
                     @endcan
+                    @can('viewAny', App\Models\Vendor::class)
+                        <flux:sidebar.item icon="wrench-screwdriver" :href="route('vendors.index')" :current="request()->routeIs('vendors.*')" wire:navigate>
+                            {{ __('Vendors') }}
+                        </flux:sidebar.item>
+                    @endcan
+                    @if (auth()->user()->vendor !== null)
+                        <flux:sidebar.item icon="clipboard-document-check" :href="route('work-orders.mine')" :current="request()->routeIs('work-orders.mine')" wire:navigate>
+                            {{ __('My work orders') }}
+                        </flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
 
                 @if ($currentCommunity = app(App\Support\Tenancy\CurrentCommunity::class)->get())
@@ -66,6 +76,24 @@
                         @can('viewAny', [App\Models\Contact::class, $currentCommunity])
                             <flux:sidebar.item icon="phone" :href="route('communities.phone-book.index', $currentCommunity)" :current="request()->routeIs('communities.phone-book.*')" wire:navigate>
                                 {{ __('Phone book') }}
+                            </flux:sidebar.item>
+                        @endcan
+                    </flux:sidebar.group>
+
+                    <flux:sidebar.group :heading="__('Maintenance')" class="grid">
+                        @can('viewAny', [App\Models\ServiceRequest::class, $currentCommunity])
+                            <flux:sidebar.item icon="wrench" :href="route('communities.service-requests.index', $currentCommunity)" :current="request()->routeIs('communities.service-requests.*')" wire:navigate>
+                                {{ __('Service requests') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\Task::class, $currentCommunity])
+                            <flux:sidebar.item icon="check-circle" :href="route('communities.tasks.index', $currentCommunity)" :current="request()->routeIs('communities.tasks.*')" wire:navigate>
+                                {{ __('Tasks') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\Asset::class, $currentCommunity])
+                            <flux:sidebar.item icon="cog-6-tooth" :href="route('communities.assets.index', $currentCommunity)" :current="request()->routeIs('communities.assets.*')" wire:navigate>
+                                {{ __('Assets') }}
                             </flux:sidebar.item>
                         @endcan
                     </flux:sidebar.group>

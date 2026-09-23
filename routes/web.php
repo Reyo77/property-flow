@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AttachmentDownloadController;
 use App\Http\Controllers\DocumentDownloadController;
 use App\Http\Controllers\DocumentVersionDownloadController;
 use App\Http\Middleware\RememberCurrentCommunity;
 use App\Livewire\Announcements;
+use App\Livewire\Assets;
 use App\Livewire\Buildings;
 use App\Livewire\Communities;
 use App\Livewire\Dashboard;
@@ -13,8 +15,12 @@ use App\Livewire\Invitations;
 use App\Livewire\Notifications;
 use App\Livewire\PhoneBook;
 use App\Livewire\Residents;
+use App\Livewire\ServiceRequests;
+use App\Livewire\Tasks;
 use App\Livewire\Team;
 use App\Livewire\Units;
+use App\Livewire\Vendors;
+use App\Livewire\WorkOrders;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -30,6 +36,8 @@ Route::middleware('auth')->group(function () {
 
     Route::livewire('team', Team\Index::class)->name('team.index');
     Route::livewire('team/roles', Team\Roles::class)->name('team.roles');
+    Route::livewire('vendors', Vendors\Index::class)->name('vendors.index');
+    Route::livewire('my-work-orders', WorkOrders\MyWorkOrders::class)->name('work-orders.mine');
 
     Route::livewire('communities', Communities\Index::class)->name('communities.index');
     Route::livewire('communities/create', Communities\Create::class)->name('communities.create');
@@ -53,6 +61,13 @@ Route::middleware('auth')->group(function () {
             Route::get('documents/{document}/download', DocumentDownloadController::class)->name('documents.download');
             Route::get('documents/{document}/versions/{version}/download', DocumentVersionDownloadController::class)->name('documents.versions.download');
             Route::livewire('announcements', Announcements\Index::class)->name('announcements.index');
+            Route::livewire('service-requests', ServiceRequests\Index::class)->name('service-requests.index');
+            Route::livewire('service-requests/create', ServiceRequests\Create::class)->name('service-requests.create');
+            Route::livewire('service-requests/{serviceRequest}', ServiceRequests\Show::class)->name('service-requests.show');
+            Route::get('attachments/{attachment}/download', AttachmentDownloadController::class)->name('attachments.download');
+            Route::livewire('tasks', Tasks\Index::class)->name('tasks.index');
+            Route::livewire('assets', Assets\Index::class)->name('assets.index');
+            Route::livewire('assets/{asset}', Assets\Show::class)->name('assets.show');
         });
 });
 

@@ -3,13 +3,20 @@
 namespace Database\Seeders;
 
 use App\Actions\Announcements\PublishAnnouncement;
+use App\Actions\Maintenance\GenerateDueMaintenanceWorkOrders;
 use App\Enums\AnnouncementAudience;
+use App\Enums\AssetCategory;
+use App\Enums\Assignee;
 use App\Enums\CompanyRole;
 use App\Enums\ContactCategory;
 use App\Enums\DocumentVisibility;
 use App\Enums\ResidencyType;
 use App\Enums\RsvpStatus;
+use App\Enums\ServiceRequestCategory;
+use App\Enums\ServiceRequestPriority;
+use App\Enums\ServiceRequestStatus;
 use App\Models\Announcement;
+use App\Models\Asset;
 use App\Models\Building;
 use App\Models\Community;
 use App\Models\Company;
@@ -20,18 +27,25 @@ use App\Models\DocumentVersion;
 use App\Models\EmergencyContact;
 use App\Models\Event;
 use App\Models\EventRsvp;
+use App\Models\MaintenanceSchedule;
 use App\Models\Pet;
 use App\Models\Residency;
 use App\Models\Resident;
+use App\Models\ServiceRequest;
+use App\Models\ServiceRequestComment;
+use App\Models\Task;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\Vendor;
+use App\Models\WorkOrder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
 /**
  * A realistic company for trying the app. Every demo login uses the password "password":
- * demo@ (company admin), manager@ (Harbour Towers only), board@, staff@ and resident@propertyflow.test.
+ * demo@ (company admin), manager@ (Harbour Towers only), board@, staff@, resident@ and
+ * vendor@propertyflow.test (a vendor with a work order to view and update).
  */
 class DemoSeeder extends Seeder
 {
@@ -47,6 +61,7 @@ class DemoSeeder extends Seeder
         $this->seedTeam($company, $condo, $hoa);
         $this->seedResidents($company, $condo, $hoa);
         $this->seedCommunication($condo);
+        $this->seedMaintenance($condo);
     }
 
     /**
@@ -231,6 +246,94 @@ class DemoSeeder extends Seeder
             'audience_type' => AnnouncementAudience::Community,
             'created_by_id' => $admin->id,
         ]);
+    }
+
+    /**
+     * Vendors, service requests in every stage of the workflow, tasks, and an asset with an
+     * overdue maintenance schedule ready to demonstrate the scheduler.
+     */
+    private function seedMaintenance(Community $condo): void
+    {
+        $admin = User::where('email', 'demo@propertyflow.test')->sole();
+        $manager = User::where('email', 'manager@propertyflow.test')->sole();
+        $staff = User::where('email', 'staff@propertyflow.test')->sole();
+        $resident = Resident::where('email', 'resident@propertyflow.test')->sole();
+        $residentUnit = Residency::where('resident_id', $resident->id)->active()->firstOrFail()->unit;
+
+        $plumber = Vendor::factory()->for($condo->company)->create(['name' => 'Ace Plumbing Co.', 'trade' => 'Plumbing', 'phone' => '416-555-0200']);
+        $elevatorVendor = Vendor::factory()->for($condo->company)->withLogin()->create(['name' => 'Reliable Elevator Services', 'trade' => 'Elevator maintenance', 'email' => 'vendor@propertyflow.test']);
+
+        // Open, unassigned request straight from a resident.
+        ServiceRequest::factory()->for($condo)->create([
+            'unit_id' => $residentUnit->id,
+            'reported_by_resident_id' => $resident->id,
+            'reported_by_user_id' => $resident->user_id,
+            'title' => 'Kitchen faucet is leaking',
+            'description' => "The kitchen faucet drips constantly, even when fully closed.\n\nStarted about a week ago.",
+            'category' => ServiceRequestCategory::Plumbing,
+            'priority' => ServiceRequestPriority::Medium,
+        ]);
+
+        // Assigned to a vendor, with a work order and both an internal and a resident-visible comment.
+        $assigned = ServiceRequest::factory()->for($condo)->assigned()->create([
+            'unit_id' => $residentUnit->id,
+            'reported_by_resident_id' => $resident->id,
+            'reported_by_user_id' => $resident->user_id,
+            'title' => 'No hot water',
+            'description' => 'The water heater for our unit is not producing hot water.',
+            'category' => ServiceRequestCategory::Plumbing,
+            'priority' => ServiceRequestPriority::Urgent,
+        ]);
+        ServiceRequestComment::factory()->for($assigned)->create(['author_id' => $manager->id, 'body' => 'Ace Plumbing is booked for tomorrow morning.', 'visible_to_resident' => true]);
+        ServiceRequestComment::factory()->for($assigned)->internal()->create(['author_id' => $manager->id, 'body' => 'Vendor quoted $250 if the tank needs replacing.']);
+        WorkOrder::factory()->for($condo)->assignedToVendor($plumber->id)->create([
+            'service_request_id' => $assigned->id,
+            'title' => 'Fix water heater',
+            'due_on' => now()->addDay(),
+            'created_by_id' => $manager->id,
+        ]);
+
+        // A resolved, closed request with its full history for reference.
+        $closed = ServiceRequest::factory()->for($condo)->create([
+            'title' => 'Hallway light out on 3rd floor',
+            'description' => 'The hallway light near unit 301 has been flickering and is now out.',
+            'category' => ServiceRequestCategory::Electrical,
+            'priority' => ServiceRequestPriority::Low,
+            'status' => ServiceRequestStatus::Closed,
+        ]);
+        WorkOrder::factory()->for($condo)->assignedToUser($staff->id)->completed()->create([
+            'service_request_id' => $closed->id,
+            'title' => 'Replace hallway bulb',
+            'completion_notes' => 'Replaced with a new LED bulb.',
+            'created_by_id' => $manager->id,
+        ]);
+
+        // Tasks: a mix of open, overdue and done.
+        Task::factory()->for($condo)->create(['title' => 'Order more salt for winter', 'assigned_to_id' => $staff->id, 'due_on' => now()->addWeek(), 'created_by_id' => $manager->id]);
+        Task::factory()->for($condo)->overdue()->create(['title' => 'Follow up with landscaping vendor', 'assigned_to_id' => $manager->id, 'created_by_id' => $admin->id]);
+        Task::factory()->for($condo)->done()->create(['title' => 'Post the AGM notice', 'assigned_to_id' => $manager->id, 'created_by_id' => $admin->id]);
+
+        // Assets: one with an overdue schedule (ready for "Generate due now" or the daily scheduler), one on track.
+        $elevator = Asset::factory()->for($condo)->create(['name' => 'North Tower Elevator', 'category' => AssetCategory::Elevator, 'location' => 'North Tower']);
+        MaintenanceSchedule::factory()->for($elevator)->overdue()->create([
+            'title' => 'Monthly elevator inspection',
+            'interval_days' => 30,
+            'assignee_type' => Assignee::Vendor,
+            'assigned_vendor_id' => $elevatorVendor->id,
+        ]);
+
+        $generator = Asset::factory()->for($condo)->create(['name' => 'Backup Generator', 'category' => AssetCategory::Generator, 'location' => 'Basement']);
+        MaintenanceSchedule::factory()->for($generator)->create([
+            'title' => 'Quarterly load test',
+            'interval_days' => 90,
+            'assignee_type' => Assignee::Staff,
+            'assigned_user_id' => $staff->id,
+        ]);
+
+        // Materialize the overdue elevator schedule into a real work order, so the vendor
+        // login has something to see immediately instead of waiting for the daily scheduler.
+        app(GenerateDueMaintenanceWorkOrders::class)
+            ->handle($elevator->maintenanceSchedules()->dueToGenerate()->get());
     }
 
     private function seedDocument(Community $community, ?DocumentFolder $folder, string $filename, DocumentVisibility $visibility, User $uploadedBy): void

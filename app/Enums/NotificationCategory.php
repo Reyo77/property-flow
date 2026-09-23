@@ -8,11 +8,13 @@ namespace App\Enums;
 enum NotificationCategory: string
 {
     case Announcements = 'announcements';
+    case MaintenanceUpdates = 'maintenance_updates';
 
     public function label(): string
     {
         return match ($this) {
             self::Announcements => __('Announcements'),
+            self::MaintenanceUpdates => __('Maintenance updates'),
         };
     }
 
@@ -20,6 +22,7 @@ enum NotificationCategory: string
     {
         return match ($this) {
             self::Announcements => __('New announcements for a community you belong to'),
+            self::MaintenanceUpdates => __('Updates on service requests you reported or live with'),
         };
     }
 }

@@ -6,6 +6,7 @@ use App\Concerns\PasswordValidationRules;
 use App\Models\Invitation;
 use App\Models\Resident;
 use App\Models\User;
+use App\Models\Vendor;
 use App\Support\Tenancy\CompanyRoles;
 use App\Support\Tenancy\PermissionTeam;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +46,10 @@ class AcceptInvitation
             ]);
             $user->forceFill(['company_id' => $invitation->company_id, 'email_verified_at' => now()])->save();
 
-            if ($invitation->isForTeam()) {
+            if ($invitation->isForVendor()) {
+                $this->grantTeamAccess($user, $invitation);
+                $this->linkVendor($user, $invitation);
+            } elseif ($invitation->isForTeam()) {
                 $this->grantTeamAccess($user, $invitation);
             } else {
                 $this->linkResident($user, $invitation);
@@ -80,5 +84,19 @@ class AcceptInvitation
         }
 
         $resident->forceFill(['user_id' => $user->id])->save();
+    }
+
+    private function linkVendor(User $user, Invitation $invitation): void
+    {
+        $vendor = Vendor::withoutGlobalScopes()
+            ->whereKey($invitation->vendor_id)
+            ->where('company_id', $invitation->company_id)
+            ->first();
+
+        if ($vendor === null || $vendor->user_id !== null) {
+            throw ValidationException::withMessages(['invitation' => __('This invitation is no longer valid.')]);
+        }
+
+        $vendor->forceFill(['user_id' => $user->id])->save();
     }
 }

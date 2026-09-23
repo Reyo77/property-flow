@@ -4,6 +4,7 @@ use App\Livewire\Buildings\Index as BuildingsIndex;
 use App\Livewire\CommunitySwitcher;
 use App\Livewire\Units\Index as UnitsIndex;
 use App\Models\Announcement;
+use App\Models\Asset;
 use App\Models\Building;
 use App\Models\Community;
 use App\Models\Company;
@@ -14,11 +15,17 @@ use App\Models\EmergencyContact;
 use App\Models\Event;
 use App\Models\EventRsvp;
 use App\Models\Invitation;
+use App\Models\MaintenanceSchedule;
 use App\Models\Pet;
 use App\Models\Residency;
 use App\Models\Resident;
+use App\Models\ServiceRequest;
+use App\Models\ServiceRequestComment;
+use App\Models\Task;
 use App\Models\Unit;
 use App\Models\Vehicle;
+use App\Models\Vendor;
+use App\Models\WorkOrder;
 use App\Support\Tenancy\CurrentCompany;
 use Livewire\Livewire;
 
@@ -41,6 +48,13 @@ dataset('tenant models', [
     'document folders' => fn () => DocumentFolder::factory(),
     'documents' => fn () => Document::factory(),
     'announcements' => fn () => Announcement::factory(),
+    'vendors' => fn () => Vendor::factory(),
+    'service requests' => fn () => ServiceRequest::factory(),
+    'service request comments' => fn () => ServiceRequestComment::factory(),
+    'work orders' => fn () => WorkOrder::factory(),
+    'assets' => fn () => Asset::factory(),
+    'maintenance schedules' => fn () => MaintenanceSchedule::factory(),
+    'tasks' => fn () => Task::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {

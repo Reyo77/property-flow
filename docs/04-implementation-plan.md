@@ -196,21 +196,22 @@ Tests
 **Goal:** every request tracked from open to closed.
 
 Tasks
-- [ ] Service requests: category, priority, photos, entry permission, status (`open → assigned → in_progress → on_hold → resolved → closed`)
-- [ ] Comments thread (internal notes vs resident-visible)
-- [ ] Vendors directory + vendor users (vendor portal)
-- [ ] Work orders from requests, assigned to staff or vendor
-- [ ] Tasks (general to-dos with due dates)
-- [ ] Assets (equipment inventory) + preventive maintenance schedules → auto work orders
-- [ ] Filters, SLA overdue flag, dashboard widgets
+- [x] Service requests: category, priority, photos, entry permission, status (`open → assigned → in_progress ↔ on_hold → resolved ↔ in_progress → closed`)
+- [x] Comments thread (internal notes vs resident-visible)
+- [x] Vendors directory + vendor users (vendor portal) — a vendor's own "My work orders" page (`/my-work-orders`) lists every job assigned to them across all communities, including preventive-maintenance work orders with no linked service request, which the embedded work-order view on a service request's page can't reach
+- [x] Work orders from requests, assigned to staff or vendor
+- [x] Tasks (general to-dos with due dates)
+- [x] Assets (equipment inventory) + preventive maintenance schedules → auto work orders, both from a daily scheduler command (`maintenance:generate-due-work-orders`) and an on-demand "Generate now" button scoped to that one asset
+- [x] Filters (status/category/priority) and an SLA overdue flag on service requests
+- [ ] Dashboard widgets — **deferred**. No maintenance summary card on the main dashboard yet; the service requests and assets index pages cover the same information today. Revisit once the dashboard has a real widget layout (not a one-off addition here)
 
 Tests
-- State machine: allowed/forbidden transitions
+- State machine: allowed/forbidden transitions — 463 tests total after Phase 4, including a full policy matrix per module
 - Internal notes never visible to residents
-- Vendor sees only assigned work orders
+- Vendor sees only assigned work orders, including PM-generated ones with no service request
 - Scheduler creates PM work orders on the correct dates (time travel)
 
-✅ **Done when:** resident reports a leak → manager assigns vendor → vendor completes → resident notified.
+✅ **Done when:** resident reports a leak → manager assigns vendor → vendor completes → resident notified. **Met** — see `tests/Feature/ServiceRequests/WorkOrdersTest.php`.
 
 ---
 
