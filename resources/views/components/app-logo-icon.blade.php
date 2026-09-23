@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 42" {{ $attributes }}>
+    <path
+        fill="currentColor"
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M20 0 0 12v30h14V28h12v14h14V12L20 0Zm-8 16h6v6h-6v-6Zm10 0h6v6h-6v-6Z"
+    />
+</svg>
