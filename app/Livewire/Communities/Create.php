@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Communities;
 
+use App\Enums\Permission;
+use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Livewire\Forms\CommunityForm;
 use App\Models\Community;
 use App\Support\Tenancy\CurrentCommunity;
@@ -12,6 +14,8 @@ use Livewire\Component;
 #[Title('New community')]
 class Create extends Component
 {
+    use InteractsWithCurrentUser;
+
     public CommunityForm $form;
 
     public function mount(): void
@@ -24,6 +28,12 @@ class Create extends Component
         $this->authorize('create', Community::class);
 
         $community = Community::create($this->form->validatedAttributes());
+
+        $user = $this->currentUser();
+
+        if (! $user->hasCompanyPermission(Permission::AccessAllCommunities)) {
+            $user->communities()->attach($community);
+        }
 
         $currentCommunity->set($community);
 

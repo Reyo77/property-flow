@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Livewire\Dashboard;
 use App\Models\Community;
+use App\Models\Residency;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -50,13 +51,17 @@ class DashboardTest extends TestCase
     {
         $admin = companyAdmin();
         $community = Community::factory()->for($admin->company)->create();
-        Unit::factory()->for($community)->count(3)->create();
-        Unit::factory()->count(5)->create();
+        $units = Unit::factory()->for($community)->count(4)->create();
+        Residency::factory()->for($units[0])->create();
+        Residency::factory()->for($units[1])->tenant()->create();
+        Residency::factory()->for($units[1])->create();
+        Residency::factory()->for($units[2])->movedOut()->create();
+        Residency::factory()->create();
 
         $this->actingAs($admin);
 
         $totals = Livewire::test(Dashboard::class)->instance()->totals();
 
-        $this->assertSame(['communities' => 1, 'buildings' => 0, 'units' => 3], $totals);
+        $this->assertSame(['communities' => 1, 'units' => 4, 'occupied_units' => 2, 'residents' => 3], $totals);
     }
 }

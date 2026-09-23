@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Support\Tenancy\CurrentCommunity;
 use Illuminate\Contracts\View\View;
@@ -11,17 +12,21 @@ use Livewire\Component;
 
 class CommunitySwitcher extends Component
 {
+    use InteractsWithCurrentUser;
+
     /**
      * @return Collection<int, Community>
      */
     #[Computed]
     public function communities(): Collection
     {
-        if (! auth()->user()?->can('viewAny', Community::class)) {
+        $user = $this->currentUser();
+
+        if (! $user->can('viewAny', Community::class)) {
             return new Collection;
         }
 
-        return Community::query()->orderBy('name')->get(['id', 'name']);
+        return Community::query()->accessibleBy($user)->orderBy('name')->get(['id', 'name']);
     }
 
     #[Computed]

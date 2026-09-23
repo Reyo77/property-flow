@@ -6,7 +6,13 @@ use App\Livewire\Units\Index as UnitsIndex;
 use App\Models\Building;
 use App\Models\Community;
 use App\Models\Company;
+use App\Models\EmergencyContact;
+use App\Models\Invitation;
+use App\Models\Pet;
+use App\Models\Residency;
+use App\Models\Resident;
 use App\Models\Unit;
+use App\Models\Vehicle;
 use App\Support\Tenancy\CurrentCompany;
 use Livewire\Livewire;
 
@@ -17,6 +23,12 @@ dataset('tenant models', [
     'communities' => fn () => Community::factory(),
     'buildings' => fn () => Building::factory(),
     'units' => fn () => Unit::factory(),
+    'residents' => fn () => Resident::factory(),
+    'residencies' => fn () => Residency::factory(),
+    'vehicles' => fn () => Vehicle::factory(),
+    'pets' => fn () => Pet::factory(),
+    'emergency contacts' => fn () => EmergencyContact::factory(),
+    'invitations' => fn () => Invitation::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {

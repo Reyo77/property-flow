@@ -6,25 +6,25 @@ use App\Enums\Permission;
 use App\Models\Building;
 use App\Models\Community;
 use App\Models\User;
+use App\Policies\Concerns\ChecksCommunityAccess;
 
 class BuildingPolicy
 {
+    use ChecksCommunityAccess;
+
     public function viewAny(User $user, Community $community): bool
     {
-        return $user->company_id === $community->company_id
-            && $user->hasCompanyPermission(Permission::ViewBuildings);
+        return $this->allowedIn($user, $community, Permission::ViewBuildings);
     }
 
     public function create(User $user, Community $community): bool
     {
-        return $user->company_id === $community->company_id
-            && $user->hasCompanyPermission(Permission::ManageBuildings);
+        return $this->allowedIn($user, $community, Permission::ManageBuildings);
     }
 
     public function update(User $user, Building $building): bool
     {
-        return $user->company_id === $building->company_id
-            && $user->hasCompanyPermission(Permission::ManageBuildings);
+        return $this->allowedFor($user, $building, Permission::ManageBuildings);
     }
 
     public function delete(User $user, Building $building): bool

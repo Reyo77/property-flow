@@ -4,11 +4,15 @@ namespace App\Models;
 
 use App\Enums\AreaUnit;
 use App\Enums\CommunityType;
+use App\Enums\Permission;
 use App\Models\Concerns\BelongsToCompany;
 use Database\Factories\CommunityFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -66,6 +70,49 @@ class Community extends Model
     public function units(): HasMany
     {
         return $this->hasMany(Unit::class);
+    }
+
+    /**
+     * @return HasMany<Residency, $this>
+     */
+    public function residencies(): HasMany
+    {
+        return $this->hasMany(Residency::class);
+    }
+
+    /**
+     * Everyone who has ever lived in or owned a unit here.
+     *
+     * @return BelongsToMany<Resident, $this>
+     */
+    public function residents(): BelongsToMany
+    {
+        return $this->belongsToMany(Resident::class, 'residencies')->distinct();
+    }
+
+    /**
+     * Team members assigned to this community.
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
+    /**
+     * Communities the user may work in: all of them with the "access every community" permission, otherwise their assignments.
+     *
+     * @param  Builder<Community>  $query
+     */
+    #[Scope]
+    protected function accessibleBy(Builder $query, User $user): void
+    {
+        if ($user->hasCompanyPermission(Permission::AccessAllCommunities)) {
+            return;
+        }
+
+        $query->whereHas('users', fn (Builder $query) => $query->whereKey($user->id));
     }
 
     /**

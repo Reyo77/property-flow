@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -32,7 +34,9 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property Carbon|null $deactivated_at
  * @property-read Company|null $company
+ * @property-read Resident|null $resident
  */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -40,6 +44,13 @@ class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'deactivated_at' => null,
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -50,6 +61,7 @@ class User extends Authenticatable implements PasskeyUser
     {
         return [
             'email_verified_at' => 'datetime',
+            'deactivated_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -60,6 +72,67 @@ class User extends Authenticatable implements PasskeyUser
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Communities this team member is assigned to.
+     *
+     * @return BelongsToMany<Community, $this>
+     */
+    public function communities(): BelongsToMany
+    {
+        return $this->belongsToMany(Community::class)->withTimestamps();
+    }
+
+    /**
+     * The resident record behind this login, for people who live in or own a unit.
+     *
+     * @return HasOne<Resident, $this>
+     */
+    public function resident(): HasOne
+    {
+        return $this->hasOne(Resident::class);
+    }
+
+    public function isDeactivated(): bool
+    {
+        return $this->deactivated_at !== null;
+    }
+
+    /**
+     * The name of the user's role in their company, or null for residents without a team role.
+     */
+    public function companyRoleName(): ?string
+    {
+        if ($this->company_id === null) {
+            return null;
+        }
+
+        return PermissionTeam::run($this->company_id, fn (): ?string => $this->roles()->value('name'));
+    }
+
+    /**
+     * Whether the user may work in the community as a team member.
+     */
+    public function canAccessCommunity(Community $community): bool
+    {
+        return $this->canAccessCommunityById($community->company_id, $community->id);
+    }
+
+    /**
+     * Whether the user may work in a community, by its ids, without loading it.
+     */
+    public function canAccessCommunityById(int $companyId, int $communityId): bool
+    {
+        if ($this->company_id === null || $this->company_id !== $companyId) {
+            return false;
+        }
+
+        if ($this->hasCompanyPermission(Permission::AccessAllCommunities)) {
+            return true;
+        }
+
+        return $this->communities->contains($communityId);
     }
 
     /**

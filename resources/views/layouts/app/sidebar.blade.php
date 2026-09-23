@@ -22,6 +22,11 @@
                             {{ __('Communities') }}
                         </flux:sidebar.item>
                     @endcan
+                    @can('viewAny', App\Models\User::class)
+                        <flux:sidebar.item icon="user-group" :href="route('team.index')" :current="request()->routeIs('team.*')" wire:navigate>
+                            {{ __('Team') }}
+                        </flux:sidebar.item>
+                    @endcan
                 </flux:sidebar.group>
 
                 @if ($currentCommunity = app(App\Support\Tenancy\CurrentCommunity::class)->get())
@@ -35,6 +40,11 @@
                         <flux:sidebar.item icon="home-modern" :href="route('communities.units.index', $currentCommunity)" :current="request()->routeIs('communities.units.*')" wire:navigate>
                             {{ __('Units') }}
                         </flux:sidebar.item>
+                        @can('viewAny', [App\Models\Resident::class, $currentCommunity])
+                            <flux:sidebar.item icon="users" :href="route('communities.residents.index', $currentCommunity)" :current="request()->routeIs('communities.residents.*')" wire:navigate>
+                                {{ __('Residents') }}
+                            </flux:sidebar.item>
+                        @endcan
                     </flux:sidebar.group>
                 @endif
             </flux:sidebar.nav>

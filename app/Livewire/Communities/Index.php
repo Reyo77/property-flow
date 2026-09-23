@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Communities;
 
+use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -12,6 +13,8 @@ use Livewire\Component;
 #[Title('Communities')]
 class Index extends Component
 {
+    use InteractsWithCurrentUser;
+
     public function mount(): void
     {
         $this->authorize('viewAny', Community::class);
@@ -24,6 +27,7 @@ class Index extends Component
     public function communities(): Collection
     {
         return Community::query()
+            ->accessibleBy($this->currentUser())
             ->withCount(['buildings', 'units'])
             ->orderBy('name')
             ->get();

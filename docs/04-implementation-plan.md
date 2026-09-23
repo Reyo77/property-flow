@@ -142,20 +142,25 @@ Tests
 **Goal:** the right people can log in and see the right things.
 
 Tasks
-- [ ] Roles: Company Admin, Property Manager, Board Member, Staff, Owner, Tenant, Vendor
-- [ ] Permissions seeded per module; custom roles per company
-- [ ] Invitations (signed link shown to the manager to copy and share — no email yet) → accept → set password
-- [ ] Residents: link user ↔ unit (owner/tenant/occupant, move-in/out, primary contact)
-- [ ] Vehicles, pets, emergency contacts
-- [ ] Unit profile page (residents, vehicles, history)
-- [ ] Resident directory with search & filters
-- [ ] Manager dashboard (units, occupancy, residents count)
-- [ ] Resident home page (my unit, my info)
-- [ ] Policies for every model
+- [x] Roles: Company Admin, Property Manager, Board Member, Staff, Vendor (+ custom roles). Owner / Tenant / Occupant are residency types on a unit, not roles, so a board member can also be an owner and residents without logins still appear
+- [x] Community access: team members see only assigned communities unless their role has "Access every community"
+- [x] Nobody can grant a role or permission they do not hold (prevents privilege escalation)
+- [x] Deactivate / reactivate team members (blocked at login and signed out of open sessions)
+- [x] Permissions seeded per module; custom roles per company
+- [x] Invitations (signed link shown to the manager to copy and share — no email yet) → accept → set password
+- [x] Company admins can set a new password for a team member (replaces self-service reset until email exists; audited)
+- [x] Residents: link user ↔ unit (owner/tenant/occupant, move-in/out, primary contact)
+- [x] Vehicles, pets, emergency contacts
+- [x] Unit profile page (residents, vehicles, history)
+- [x] Resident directory with search & filters
+- [x] Manager dashboard (units, occupancy, residents count)
+- [x] Resident home page (my unit, my info)
+- [x] Policies for every model
 
 Tests
 - Policy matrix: every role × every action (dataset-driven)
 - Invitation: expired link, used link, wrong company
+- Admin password reset: only company admins, only for their own company's users, logged in the audit trail
 - Resident sees only their unit(s); tenant after move-out loses access
 
 ✅ **Done when:** manager invites an owner, owner logs in and sees only their unit.

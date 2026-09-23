@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\CompanyRole;
+use App\Models\Community;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -61,4 +63,17 @@ function memberWithoutRole(?Company $company = null): User
     return User::factory()
         ->for($company ?? Company::factory())
         ->create();
+}
+
+/**
+ * Create a team member with a role, assigned to the given communities.
+ *
+ * @param  list<Community>  $communities
+ */
+function teamMember(CompanyRole $role, Company $company, array $communities = []): User
+{
+    $user = User::factory()->for($company)->withRole($role)->create();
+    $user->communities()->attach(array_map(fn (Community $community) => $community->id, $communities));
+
+    return $user;
 }

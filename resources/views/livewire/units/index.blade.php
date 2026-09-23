@@ -44,7 +44,9 @@
         <flux:table.rows>
             @forelse ($this->units as $unit)
                 <flux:table.row :key="$unit->id">
-                    <flux:table.cell variant="strong">{{ $unit->number }}</flux:table.cell>
+                    <flux:table.cell variant="strong">
+                        <flux:link :href="route('communities.units.show', [$community, $unit])" wire:navigate>{{ $unit->number }}</flux:link>
+                    </flux:table.cell>
                     <flux:table.cell>{{ $unit->building?->name }}</flux:table.cell>
                     <flux:table.cell align="end">{{ $unit->floor }}</flux:table.cell>
                     <flux:table.cell align="end">{{ $unit->area }}</flux:table.cell>

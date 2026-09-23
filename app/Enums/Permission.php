@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum Permission: string
 {
+    case AccessAllCommunities = 'communities.all';
     case ViewCommunities = 'communities.view';
     case ManageCommunities = 'communities.manage';
     case ViewBuildings = 'buildings.view';
@@ -11,4 +12,52 @@ enum Permission: string
     case ViewUnits = 'units.view';
     case ManageUnits = 'units.manage';
     case ImportUnits = 'units.import';
+    case ViewResidents = 'residents.view';
+    case ManageResidents = 'residents.manage';
+    case ViewTeam = 'team.view';
+    case ManageTeam = 'team.manage';
+    case ManageRoles = 'roles.manage';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::AccessAllCommunities => __('Access every community'),
+            self::ViewCommunities => __('View communities'),
+            self::ManageCommunities => __('Create, edit and delete communities'),
+            self::ViewBuildings => __('View buildings'),
+            self::ManageBuildings => __('Manage buildings'),
+            self::ViewUnits => __('View units'),
+            self::ManageUnits => __('Manage units'),
+            self::ImportUnits => __('Import units'),
+            self::ViewResidents => __('View residents'),
+            self::ManageResidents => __('Manage residents and invite them'),
+            self::ViewTeam => __('View the team'),
+            self::ManageTeam => __('Invite and manage team members'),
+            self::ManageRoles => __('Manage roles'),
+        };
+    }
+
+    public function group(): string
+    {
+        return match ($this) {
+            self::AccessAllCommunities, self::ViewCommunities, self::ManageCommunities => __('Communities'),
+            self::ViewBuildings, self::ManageBuildings, self::ViewUnits, self::ManageUnits, self::ImportUnits => __('Buildings & units'),
+            self::ViewResidents, self::ManageResidents => __('Residents'),
+            self::ViewTeam, self::ManageTeam, self::ManageRoles => __('Team'),
+        };
+    }
+
+    /**
+     * @return array<string, list<self>>
+     */
+    public static function grouped(): array
+    {
+        $groups = [];
+
+        foreach (self::cases() as $permission) {
+            $groups[$permission->group()][] = $permission;
+        }
+
+        return $groups;
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Support\Tenancy;
 
 use App\Models\Community;
 use Illuminate\Contracts\Session\Session;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Remembers which community the user is working in, across requests.
@@ -34,8 +35,9 @@ class CurrentCommunity
             return null;
         }
 
-        // The company scope ensures a stale or foreign id resolves to nothing.
-        $this->resolved = Community::query()->find($communityId);
+        // The company scope ensures a foreign id resolves to nothing; the policy drops communities the user lost access to.
+        $community = Community::query()->find($communityId);
+        $this->resolved = $community !== null && Gate::allows('view', $community) ? $community : null;
 
         if ($this->resolved === null) {
             $this->session->forget(self::SESSION_KEY);
