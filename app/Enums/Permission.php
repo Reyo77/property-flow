@@ -33,6 +33,8 @@ enum Permission: string
     case ManageTasks = 'tasks.manage';
     case ViewAssets = 'assets.view';
     case ManageAssets = 'assets.manage';
+    case ViewAmenities = 'amenities.view';
+    case ManageAmenities = 'amenities.manage';
 
     public function label(): string
     {
@@ -66,6 +68,8 @@ enum Permission: string
             self::ManageTasks => __('Create and manage tasks'),
             self::ViewAssets => __('View assets and maintenance schedules'),
             self::ManageAssets => __('Manage assets and maintenance schedules'),
+            self::ViewAmenities => __('View amenities and bookings'),
+            self::ManageAmenities => __('Manage amenities and decide on bookings'),
         };
     }
 
@@ -84,6 +88,7 @@ enum Permission: string
             self::ViewVendors, self::ManageVendors => __('Vendors'),
             self::ViewTasks, self::ManageTasks => __('Tasks'),
             self::ViewAssets, self::ManageAssets => __('Assets'),
+            self::ViewAmenities, self::ManageAmenities => __('Amenities'),
         };
     }
 

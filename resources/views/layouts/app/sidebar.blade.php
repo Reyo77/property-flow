@@ -78,6 +78,11 @@
                                 {{ __('Phone book') }}
                             </flux:sidebar.item>
                         @endcan
+                        @can('viewAny', [App\Models\Amenity::class, $currentCommunity])
+                            <flux:sidebar.item icon="calendar-date-range" :href="route('communities.amenities.index', $currentCommunity)" :current="request()->routeIs('communities.amenities.*')" wire:navigate>
+                                {{ __('Amenities') }}
+                            </flux:sidebar.item>
+                        @endcan
                     </flux:sidebar.group>
 
                     <flux:sidebar.group :heading="__('Maintenance')" class="grid">

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Actions\Amenities\CreateAmenityBooking;
 use App\Actions\Announcements\PublishAnnouncement;
 use App\Actions\Maintenance\GenerateDueMaintenanceWorkOrders;
 use App\Enums\AnnouncementAudience;
@@ -15,6 +16,7 @@ use App\Enums\RsvpStatus;
 use App\Enums\ServiceRequestCategory;
 use App\Enums\ServiceRequestPriority;
 use App\Enums\ServiceRequestStatus;
+use App\Models\Amenity;
 use App\Models\Announcement;
 use App\Models\Asset;
 use App\Models\Building;
@@ -62,6 +64,7 @@ class DemoSeeder extends Seeder
         $this->seedResidents($company, $condo, $hoa);
         $this->seedCommunication($condo);
         $this->seedMaintenance($condo);
+        $this->seedAmenities($condo);
     }
 
     /**
@@ -334,6 +337,47 @@ class DemoSeeder extends Seeder
         // login has something to see immediately instead of waiting for the daily scheduler.
         app(GenerateDueMaintenanceWorkOrders::class)
             ->handle($elevator->maintenanceSchedules()->dueToGenerate()->get());
+    }
+
+    /**
+     * Two amenities demonstrating both booking paths: one auto-confirms, one needs a manager's
+     * decision. Both bookings go through the real action, so they're subject to every rule.
+     */
+    private function seedAmenities(Community $condo): void
+    {
+        $resident = Resident::where('email', 'resident@propertyflow.test')->sole();
+        $residentUser = User::where('email', 'resident@propertyflow.test')->sole();
+        $residentUnit = Residency::where('resident_id', $resident->id)->active()->firstOrFail()->unit;
+        $createBooking = app(CreateAmenityBooking::class);
+
+        $partyRoom = Amenity::factory()->for($condo)->create([
+            'name' => 'Party Room',
+            'description' => 'Seats up to 20. Kitchenette included.',
+            'opens_at_minutes' => 10 * 60,
+            'closes_at_minutes' => 22 * 60,
+            'slot_minutes' => 120,
+            'capacity' => 1,
+            'cancellation_notice_hours' => 48,
+            'fee_cents' => 5000,
+            'deposit_cents' => 20000,
+            'terms' => "No smoking. Remove decorations and take out trash before leaving.\nDamage will be deducted from the deposit.",
+        ]);
+        $partyRoomSlot = $partyRoom->availableSlots($partyRoom->minBookableDate()->addDays(4))[0]['starts_at'];
+        $createBooking->handle($partyRoom, $residentUser, $partyRoomSlot, $residentUnit->id, 'Birthday party, around 15 guests.', true);
+
+        $guestSuite = Amenity::factory()->for($condo)->needsApproval()->create([
+            'name' => 'Guest Suite',
+            'description' => 'A private room for out-of-town visitors.',
+            'opens_at_minutes' => 0,
+            'closes_at_minutes' => 23 * 60 + 59,
+            'slot_minutes' => 23 * 60 + 59,
+            'capacity' => 1,
+            'max_bookings_per_unit' => 2,
+            'max_bookings_period_days' => 90,
+            'fee_cents' => 7500,
+        ]);
+        $guestSuiteSlot = $guestSuite->availableSlots($guestSuite->minBookableDate()->addDays(10))[0]['starts_at'];
+        $createBooking->handle($guestSuite, $residentUser, $guestSuiteSlot, $residentUnit->id, 'My parents are visiting next month.', false);
     }
 
     private function seedDocument(Community $community, ?DocumentFolder $folder, string $filename, DocumentVisibility $visibility, User $uploadedBy): void

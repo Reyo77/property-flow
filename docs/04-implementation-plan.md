@@ -219,18 +219,21 @@ Tests
 **Goal:** self-service bookings without conflicts.
 
 Tasks
-- [ ] Amenities: hours, slot length, capacity, max bookings per unit per period, advance window, blackout dates, needs approval, fee & deposit amounts
-- [ ] Availability calendar (resident) and schedule view (manager)
-- [ ] Book, cancel, approve, reject; booking rules & terms acceptance
-- [ ] Fees/deposits create charges in Phase 7 (store as pending now)
+- [x] Amenities: hours (daily open/close + closed weekdays), slot length, capacity, max bookings per unit within a rolling period, advance-booking window, min notice, blackout dates, needs approval, fee & deposit amounts
+  - Hours are a single daily open/close range in minutes-since-midnight (`opens_at_minutes`/`closes_at_minutes`, e.g. "closed Mondays" via `closed_weekdays`), not a per-weekday schedule — a reasonable scope cut, matching Phase 3's events precedent
+  - "Max bookings per unit per period" is a rolling window looking forward from now (`max_bookings_per_unit` within the next `max_bookings_period_days` days), not a calendar month/week — the more useful real-world rule (stops a unit stacking future bookings) and the more testable one
+  - A booking is exactly one grid slot; there's no multi-slot ("book 2 hours") or multi-day booking. A guest suite books a whole day as one long slot instead
+- [x] Availability + booking (resident) and a bookings-to-manage list + blackout management (manager), on one amenity page — a date picker plus a slot-button grid rather than a calendar-grid UI, the same reasonable scope cut Phase 3 made for events
+- [x] Book, cancel, approve, reject; terms acceptance required when an amenity has terms text
+- [x] Fees/deposits are snapshotted onto the booking at creation time (so a later price change doesn't rewrite history) but no Charge record is created yet — Phase 7 doesn't have a billing model to create one against. Revisit then
 
 Tests
-- No double-booking (including concurrent requests → DB lock/unique constraint)
-- Every rule enforced (dataset)
-- Timezone and DST edge cases
-- Cancel window rules
+- No double-booking: the amenity's own row is locked (`lockForUpdate`) for the duration of the booking transaction, so capacity and the per-unit limit are checked and the row inserted atomically — 31 tests total for Phase 5, including capacity-at-the-limit and per-unit-limit cases
+- Every rule enforced: hours, closed weekdays, blackout dates, capacity, per-unit limit, advance window, min notice, terms acceptance, cancellation notice window (resident vs. manager override, and an always-cancellable pending booking)
+- DST: booking-slot generation resolves each calendar date's own UTC offset (`CarbonImmutable::create` per date, not fixed-offset arithmetic), verified against a dynamically-located real spring-forward transition
+- Notification preference opt-out and tenant isolation, matching every other module's coverage
 
-✅ **Done when:** two residents can't book the same slot, rules always apply.
+✅ **Done when:** two residents can't book the same slot, rules always apply. **Met** — see `tests/Feature/Amenities/AmenityBookingsTest.php`.
 
 ---
 

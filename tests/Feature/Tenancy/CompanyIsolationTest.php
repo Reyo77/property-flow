@@ -3,6 +3,9 @@
 use App\Livewire\Buildings\Index as BuildingsIndex;
 use App\Livewire\CommunitySwitcher;
 use App\Livewire\Units\Index as UnitsIndex;
+use App\Models\Amenity;
+use App\Models\AmenityBlackout;
+use App\Models\AmenityBooking;
 use App\Models\Announcement;
 use App\Models\Asset;
 use App\Models\Building;
@@ -55,6 +58,9 @@ dataset('tenant models', [
     'assets' => fn () => Asset::factory(),
     'maintenance schedules' => fn () => MaintenanceSchedule::factory(),
     'tasks' => fn () => Task::factory(),
+    'amenities' => fn () => Amenity::factory(),
+    'amenity blackouts' => fn () => AmenityBlackout::factory(),
+    'amenity bookings' => fn () => AmenityBooking::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {

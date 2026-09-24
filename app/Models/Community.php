@@ -153,6 +153,22 @@ class Community extends Model
     }
 
     /**
+     * @return HasMany<Amenity, $this>
+     */
+    public function amenities(): HasMany
+    {
+        return $this->hasMany(Amenity::class);
+    }
+
+    /**
+     * @return HasMany<AmenityBooking, $this>
+     */
+    public function amenityBookings(): HasMany
+    {
+        return $this->hasMany(AmenityBooking::class);
+    }
+
+    /**
      * Everyone who has ever lived in or owned a unit here.
      *
      * @return BelongsToMany<Resident, $this>

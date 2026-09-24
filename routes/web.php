@@ -4,6 +4,7 @@ use App\Http\Controllers\AttachmentDownloadController;
 use App\Http\Controllers\DocumentDownloadController;
 use App\Http\Controllers\DocumentVersionDownloadController;
 use App\Http\Middleware\RememberCurrentCommunity;
+use App\Livewire\Amenities;
 use App\Livewire\Announcements;
 use App\Livewire\Assets;
 use App\Livewire\Buildings;
@@ -68,6 +69,8 @@ Route::middleware('auth')->group(function () {
             Route::livewire('tasks', Tasks\Index::class)->name('tasks.index');
             Route::livewire('assets', Assets\Index::class)->name('assets.index');
             Route::livewire('assets/{asset}', Assets\Show::class)->name('assets.show');
+            Route::livewire('amenities', Amenities\Index::class)->name('amenities.index');
+            Route::livewire('amenities/{amenity}', Amenities\Show::class)->name('amenities.show');
         });
 });
 
