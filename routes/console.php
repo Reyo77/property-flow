@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('announcements:publish-due')->everyMinute();
 Schedule::command('maintenance:generate-due-work-orders')->daily();
+Schedule::command('packages:remind-uncollected')->daily();

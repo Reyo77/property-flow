@@ -241,24 +241,24 @@ Tests
 **Goal:** concierge/security run a full shift in the app.
 
 Tasks
-- [ ] Packages: log (carrier, tracking, shelf), notify resident, release with signature pad, reminders for uncollected
-- [ ] Visitors log + resident-created guest passes
-- [ ] Visitor parking permits (plate, dates, limits per unit)
-- [ ] Incident reports with photos
-- [ ] Key tracking (sign-out/in, overdue)
-- [ ] Entry authorizations (who may enter a unit)
-- [ ] Patrols: routes, QR checkpoints (printable), scan from phone, missed-checkpoint report
-- [ ] Front-desk mode: large fast-entry screen, live updates (Reverb)
-- [ ] Shift log
+- [x] Packages: log (carrier, tracking, shelf), notify resident, release with a canvas signature pad, daily reminders for packages still uncollected after 3 days
+- [x] Visitors log (staff-only, not resident-visible — front-desk records aren't a resident's business) + resident-created guest passes (a 6-character code, redeemed at the desk, which also logs the guest as a visitor in the same step)
+- [x] Visitor parking permits (plate, dates). "Limits per unit" is a fixed cap of 3 simultaneously-active permits — the plan didn't specify a number, and a fixed cap avoids a whole configurable-limits UI for one setting
+- [x] Incident reports with photos (reuses the polymorphic `Attachment` model from service requests), severity levels, resolution notes — an internal staff/security record, not resident-visible
+- [x] Key tracking: sign-out/in with who and when, an optional due-back time, `isOverdue()`
+- [x] Entry authorizations (who may enter a unit without the resident present)
+- [x] Patrols: routes with ordered checkpoints, each with a real scannable QR code (`endroid/qr-code`, added with approval — self-hosted, no network calls), scanning requires the guard's own authenticated session so the scan is attributed to them, missed-checkpoint report per day
+- [x] Front-desk mode: a large quick-link screen per community with a live activity feed over a private Reverb channel (`laravel/reverb`, added with approval — needs `php artisan reverb:start` plus a queue worker running locally alongside Herd). The feed only shows activity that happens while the screen is open; each module's own index page remains the source of truth for history
+- [x] Shift log: append-only freeform notes, no edit/delete — a log loses its point if it can be quietly rewritten
 
 Tests
-- Package lifecycle and notifications
-- Permit limits and expiry
-- Staff-only access; residents see only their own packages/passes
-- Patrol scan validates route/checkpoint and time window
-- Broadcast events asserted
+- Package lifecycle and notifications, including the notification-preference opt-out — 552 tests total after Phase 6
+- Permit limits (capacity and expiry freeing the limit back up)
+- Staff-only access throughout; residents see only their own packages and guest passes, and have no access at all to the visitor log, incident reports, keys, patrols or shift log
+- Patrol scan requires `manage-patrols`, 404s for another company's checkpoint token, and the missed-checkpoint report correctly distinguishes a scanned checkpoint from a missed one
+- Broadcast events asserted with `Event::fake()` against `App\Events\FrontDeskActivity`
 
-✅ **Done when:** a full front-desk shift can be logged without paper.
+✅ **Done when:** a full front-desk shift can be logged without paper. **Met** — see `tests/Feature/Packages/PackagesTest.php`, `tests/Feature/Patrols/PatrolsTest.php`.
 
 ---
 

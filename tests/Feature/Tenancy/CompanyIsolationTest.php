@@ -3,6 +3,8 @@
 use App\Livewire\Buildings\Index as BuildingsIndex;
 use App\Livewire\CommunitySwitcher;
 use App\Livewire\Units\Index as UnitsIndex;
+use App\Models\AccessKey;
+use App\Models\AccessKeySignout;
 use App\Models\Amenity;
 use App\Models\AmenityBlackout;
 use App\Models\AmenityBooking;
@@ -15,19 +17,29 @@ use App\Models\Contact;
 use App\Models\Document;
 use App\Models\DocumentFolder;
 use App\Models\EmergencyContact;
+use App\Models\EntryAuthorization;
 use App\Models\Event;
 use App\Models\EventRsvp;
+use App\Models\GuestPass;
+use App\Models\IncidentReport;
 use App\Models\Invitation;
 use App\Models\MaintenanceSchedule;
+use App\Models\Package;
+use App\Models\ParkingPermit;
+use App\Models\PatrolCheckpoint;
+use App\Models\PatrolRoute;
+use App\Models\PatrolScan;
 use App\Models\Pet;
 use App\Models\Residency;
 use App\Models\Resident;
 use App\Models\ServiceRequest;
 use App\Models\ServiceRequestComment;
+use App\Models\ShiftLogEntry;
 use App\Models\Task;
 use App\Models\Unit;
 use App\Models\Vehicle;
 use App\Models\Vendor;
+use App\Models\Visitor;
 use App\Models\WorkOrder;
 use App\Support\Tenancy\CurrentCompany;
 use Livewire\Livewire;
@@ -61,6 +73,18 @@ dataset('tenant models', [
     'amenities' => fn () => Amenity::factory(),
     'amenity blackouts' => fn () => AmenityBlackout::factory(),
     'amenity bookings' => fn () => AmenityBooking::factory(),
+    'packages' => fn () => Package::factory(),
+    'visitors' => fn () => Visitor::factory(),
+    'guest passes' => fn () => GuestPass::factory(),
+    'parking permits' => fn () => ParkingPermit::factory(),
+    'incident reports' => fn () => IncidentReport::factory(),
+    'access keys' => fn () => AccessKey::factory(),
+    'access key signouts' => fn () => AccessKeySignout::factory(),
+    'entry authorizations' => fn () => EntryAuthorization::factory(),
+    'patrol routes' => fn () => PatrolRoute::factory(),
+    'patrol checkpoints' => fn () => PatrolCheckpoint::factory(),
+    'patrol scans' => fn () => PatrolScan::factory(),
+    'shift log entries' => fn () => ShiftLogEntry::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {

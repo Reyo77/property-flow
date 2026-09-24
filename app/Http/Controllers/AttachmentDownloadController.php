@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attachment;
 use App\Models\Community;
+use App\Models\IncidentReport;
 use App\Models\ServiceRequest;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
@@ -21,7 +22,7 @@ class AttachmentDownloadController extends Controller
     {
         $attachable = $attachment->attachable;
 
-        abort_unless($attachable instanceof ServiceRequest, 404);
+        abort_unless($attachable instanceof ServiceRequest || $attachable instanceof IncidentReport, 404);
 
         $this->authorize('view', $attachable);
 

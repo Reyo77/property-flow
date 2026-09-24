@@ -35,6 +35,22 @@ enum Permission: string
     case ManageAssets = 'assets.manage';
     case ViewAmenities = 'amenities.view';
     case ManageAmenities = 'amenities.manage';
+    case ViewPackages = 'packages.view';
+    case ManagePackages = 'packages.manage';
+    case ViewVisitors = 'visitors.view';
+    case ManageVisitors = 'visitors.manage';
+    case ViewParkingPermits = 'parking-permits.view';
+    case ManageParkingPermits = 'parking-permits.manage';
+    case ViewIncidents = 'incidents.view';
+    case ManageIncidents = 'incidents.manage';
+    case ViewKeys = 'keys.view';
+    case ManageKeys = 'keys.manage';
+    case ViewEntryAuthorizations = 'entry-authorizations.view';
+    case ManageEntryAuthorizations = 'entry-authorizations.manage';
+    case ViewPatrols = 'patrols.view';
+    case ManagePatrols = 'patrols.manage';
+    case ViewShiftLog = 'shift-log.view';
+    case ManageShiftLog = 'shift-log.manage';
 
     public function label(): string
     {
@@ -70,6 +86,22 @@ enum Permission: string
             self::ManageAssets => __('Manage assets and maintenance schedules'),
             self::ViewAmenities => __('View amenities and bookings'),
             self::ManageAmenities => __('Manage amenities and decide on bookings'),
+            self::ViewPackages => __('View packages'),
+            self::ManagePackages => __('Log and release packages'),
+            self::ViewVisitors => __('View the visitor log'),
+            self::ManageVisitors => __('Log visitors and redeem guest passes'),
+            self::ViewParkingPermits => __('View parking permits'),
+            self::ManageParkingPermits => __('Issue and manage parking permits'),
+            self::ViewIncidents => __('View incident reports'),
+            self::ManageIncidents => __('File and manage incident reports'),
+            self::ViewKeys => __('View keys'),
+            self::ManageKeys => __('Manage keys and sign-outs'),
+            self::ViewEntryAuthorizations => __('View entry authorizations'),
+            self::ManageEntryAuthorizations => __('Manage who may enter a unit'),
+            self::ViewPatrols => __('View patrols'),
+            self::ManagePatrols => __('Manage patrol routes and checkpoints'),
+            self::ViewShiftLog => __('View the shift log'),
+            self::ManageShiftLog => __('Post to the shift log'),
         };
     }
 
@@ -89,6 +121,14 @@ enum Permission: string
             self::ViewTasks, self::ManageTasks => __('Tasks'),
             self::ViewAssets, self::ManageAssets => __('Assets'),
             self::ViewAmenities, self::ManageAmenities => __('Amenities'),
+            self::ViewPackages, self::ManagePackages => __('Packages'),
+            self::ViewVisitors, self::ManageVisitors => __('Visitors'),
+            self::ViewParkingPermits, self::ManageParkingPermits => __('Parking permits'),
+            self::ViewIncidents, self::ManageIncidents => __('Incident reports'),
+            self::ViewKeys, self::ManageKeys => __('Keys'),
+            self::ViewEntryAuthorizations, self::ManageEntryAuthorizations => __('Entry authorizations'),
+            self::ViewPatrols, self::ManagePatrols => __('Patrols'),
+            self::ViewShiftLog, self::ManageShiftLog => __('Shift log'),
         };
     }
 

@@ -4,6 +4,10 @@ namespace Database\Seeders;
 
 use App\Actions\Amenities\CreateAmenityBooking;
 use App\Actions\Announcements\PublishAnnouncement;
+use App\Actions\FrontDesk\CreateIncidentReport;
+use App\Actions\FrontDesk\IssueParkingPermit;
+use App\Actions\FrontDesk\LogPackage;
+use App\Actions\FrontDesk\ScanPatrolCheckpoint;
 use App\Actions\Maintenance\GenerateDueMaintenanceWorkOrders;
 use App\Enums\AnnouncementAudience;
 use App\Enums\AssetCategory;
@@ -11,11 +15,15 @@ use App\Enums\Assignee;
 use App\Enums\CompanyRole;
 use App\Enums\ContactCategory;
 use App\Enums\DocumentVisibility;
+use App\Enums\IncidentSeverity;
+use App\Enums\PackageStatus;
 use App\Enums\ResidencyType;
 use App\Enums\RsvpStatus;
 use App\Enums\ServiceRequestCategory;
 use App\Enums\ServiceRequestPriority;
 use App\Enums\ServiceRequestStatus;
+use App\Models\AccessKey;
+use App\Models\AccessKeySignout;
 use App\Models\Amenity;
 use App\Models\Announcement;
 use App\Models\Asset;
@@ -27,19 +35,25 @@ use App\Models\Document;
 use App\Models\DocumentFolder;
 use App\Models\DocumentVersion;
 use App\Models\EmergencyContact;
+use App\Models\EntryAuthorization;
 use App\Models\Event;
 use App\Models\EventRsvp;
+use App\Models\GuestPass;
 use App\Models\MaintenanceSchedule;
+use App\Models\PatrolCheckpoint;
+use App\Models\PatrolRoute;
 use App\Models\Pet;
 use App\Models\Residency;
 use App\Models\Resident;
 use App\Models\ServiceRequest;
 use App\Models\ServiceRequestComment;
+use App\Models\ShiftLogEntry;
 use App\Models\Task;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\Vendor;
+use App\Models\Visitor;
 use App\Models\WorkOrder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
@@ -65,6 +79,7 @@ class DemoSeeder extends Seeder
         $this->seedCommunication($condo);
         $this->seedMaintenance($condo);
         $this->seedAmenities($condo);
+        $this->seedFrontDesk($condo);
     }
 
     /**
@@ -378,6 +393,109 @@ class DemoSeeder extends Seeder
         ]);
         $guestSuiteSlot = $guestSuite->availableSlots($guestSuite->minBookableDate()->addDays(10))[0]['starts_at'];
         $createBooking->handle($guestSuite, $residentUser, $guestSuiteSlot, $residentUnit->id, 'My parents are visiting next month.', false);
+    }
+
+    /**
+     * One or two examples of every front-desk & security module, most created through their
+     * real actions so notifications, snapshots and broadcasts fire just like they would live.
+     */
+    private function seedFrontDesk(Community $condo): void
+    {
+        $admin = User::where('email', 'demo@propertyflow.test')->sole();
+        $staff = User::where('email', 'staff@propertyflow.test')->sole();
+        $resident = Resident::where('email', 'resident@propertyflow.test')->sole();
+        $residentUser = User::where('email', 'resident@propertyflow.test')->sole();
+        $residentUnit = Residency::where('resident_id', $resident->id)->active()->firstOrFail()->unit;
+
+        // Packages: one still on the shelf, one already picked up with a signature.
+        app(LogPackage::class)->handle($condo, $staff, [
+            'unit_id' => $residentUnit->id,
+            'resident_id' => $resident->id,
+            'carrier' => 'UPS',
+            'tracking_number' => '1Z999AA10123456784',
+            'shelf_location' => 'Shelf B',
+        ]);
+        $pickedUpPackage = app(LogPackage::class)->handle($condo, $staff, [
+            'unit_id' => $residentUnit->id,
+            'resident_id' => $resident->id,
+            'carrier' => 'Amazon',
+            'tracking_number' => null,
+            'shelf_location' => 'Shelf A',
+        ]);
+        $pickedUpPackage->forceFill([
+            'status' => PackageStatus::PickedUp,
+            'released_at' => now()->subDay(),
+            'released_by_id' => $staff->id,
+            'released_to_name' => $resident->name,
+        ])->save();
+
+        // Visitors: one still on site, one already checked out.
+        Visitor::factory()->for($condo)->create(['visitor_name' => 'Contractor - HVAC Service', 'unit_id' => null, 'purpose' => 'Annual inspection', 'logged_by_id' => $staff->id]);
+        Visitor::factory()->for($condo)->checkedOut()->create(['visitor_name' => 'Dana Plumber', 'unit_id' => $residentUnit->id, 'purpose' => 'Plumbing repair', 'logged_by_id' => $staff->id]);
+
+        // A guest pass the resident created for an upcoming visitor, still unredeemed.
+        GuestPass::factory()->for($condo)->create([
+            'unit_id' => $residentUnit->id,
+            'resident_id' => $resident->id,
+            'guest_name' => 'Rita\'s Sister',
+        ]);
+
+        // An active visitor parking permit.
+        app(IssueParkingPermit::class)->handle($condo, $staff, [
+            'unit_id' => $residentUnit->id,
+            'plate_number' => 'CXYZ 123',
+            'visitor_name' => 'Weekend guest',
+            'starts_on' => now()->toDateString(),
+            'ends_on' => now()->addDays(2)->toDateString(),
+            'notes' => null,
+        ]);
+
+        // A resolved and an open incident report.
+        $resolvedIncident = app(CreateIncidentReport::class)->handle($condo, $staff, [
+            'unit_id' => null,
+            'title' => 'Slippery lobby floor after cleaning',
+            'description' => 'Wet floor sign was missing after the cleaning crew mopped the lobby.',
+            'location' => 'Main lobby',
+            'severity' => IncidentSeverity::Low->value,
+            'occurred_at' => now()->subDays(3)->toDateTimeString(),
+        ]);
+        $resolvedIncident->forceFill(['resolved_at' => now()->subDays(2), 'resolution_notes' => 'Spoke with cleaning contractor about signage.'])->save();
+
+        app(CreateIncidentReport::class)->handle($condo, $staff, [
+            'unit_id' => null,
+            'title' => 'Suspicious vehicle in visitor parking',
+            'description' => 'A vehicle without a permit has been parked in a visitor spot for two days.',
+            'location' => 'Visitor parking',
+            'severity' => IncidentSeverity::Medium->value,
+            'occurred_at' => now()->subHours(6)->toDateTimeString(),
+        ]);
+
+        // A key currently signed out to a vendor.
+        $elevatorKey = AccessKey::factory()->for($condo)->create(['label' => 'Elevator machine room key']);
+        AccessKeySignout::factory()->for($elevatorKey)->create([
+            'signed_out_to' => 'Reliable Elevator Services',
+            'signed_out_by_id' => $staff->id,
+            'due_back_at' => now()->addHours(4),
+        ]);
+
+        // Someone pre-authorized to enter the resident's unit without them being home.
+        $entryAuthorization = EntryAuthorization::factory()->for($condo)->create([
+            'unit_id' => $residentUnit->id,
+            'name' => 'Maple Cleaning Co.',
+            'relationship' => 'Cleaner',
+        ]);
+        $entryAuthorization->forceFill(['created_by_id' => $resident->user_id])->save();
+
+        // A patrol route with checkpoints, one already scanned tonight.
+        $route = PatrolRoute::factory()->for($condo)->create(['name' => 'Night patrol']);
+        $lobby = PatrolCheckpoint::factory()->for($route)->create(['name' => 'Main lobby', 'position' => 1]);
+        PatrolCheckpoint::factory()->for($route)->create(['name' => 'Parking garage', 'position' => 2]);
+        PatrolCheckpoint::factory()->for($route)->create(['name' => 'Pool gate', 'position' => 3]);
+        app(ScanPatrolCheckpoint::class)->handle($lobby, $staff);
+
+        // Shift log entries.
+        ShiftLogEntry::factory()->for($condo)->create(['user_id' => $staff->id, 'body' => 'Shift started. All common areas quiet.']);
+        ShiftLogEntry::factory()->for($condo)->create(['user_id' => $admin->id, 'body' => 'Reviewed the open incident about visitor parking with the manager.']);
     }
 
     private function seedDocument(Community $community, ?DocumentFolder $folder, string $filename, DocumentVisibility $visibility, User $uploadedBy): void

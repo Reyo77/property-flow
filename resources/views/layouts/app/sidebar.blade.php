@@ -102,6 +102,60 @@
                             </flux:sidebar.item>
                         @endcan
                     </flux:sidebar.group>
+
+                    <flux:sidebar.group :heading="__('Front desk')" class="grid">
+                        @can('viewAny', [App\Models\Package::class, $currentCommunity])
+                            <flux:sidebar.item icon="bolt" :href="route('communities.front-desk.mode', $currentCommunity)" :current="request()->routeIs('communities.front-desk.*')" wire:navigate>
+                                {{ __('Front-desk mode') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="archive-box" :href="route('communities.packages.index', $currentCommunity)" :current="request()->routeIs('communities.packages.*')" wire:navigate>
+                                {{ __('Packages') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\Visitor::class, $currentCommunity])
+                            <flux:sidebar.item icon="user-plus" :href="route('communities.visitors.index', $currentCommunity)" :current="request()->routeIs('communities.visitors.*')" wire:navigate>
+                                {{ __('Visitors') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\GuestPass::class, $currentCommunity])
+                            <flux:sidebar.item icon="ticket" :href="route('communities.guest-passes.index', $currentCommunity)" :current="request()->routeIs('communities.guest-passes.*')" wire:navigate>
+                                {{ __('Guest passes') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\ParkingPermit::class, $currentCommunity])
+                            <flux:sidebar.item icon="truck" :href="route('communities.parking-permits.index', $currentCommunity)" :current="request()->routeIs('communities.parking-permits.*')" wire:navigate>
+                                {{ __('Parking permits') }}
+                            </flux:sidebar.item>
+                        @endcan
+                    </flux:sidebar.group>
+
+                    <flux:sidebar.group :heading="__('Security')" class="grid">
+                        @can('viewAny', [App\Models\IncidentReport::class, $currentCommunity])
+                            <flux:sidebar.item icon="exclamation-triangle" :href="route('communities.incident-reports.index', $currentCommunity)" :current="request()->routeIs('communities.incident-reports.*')" wire:navigate>
+                                {{ __('Incident reports') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\AccessKey::class, $currentCommunity])
+                            <flux:sidebar.item icon="key" :href="route('communities.access-keys.index', $currentCommunity)" :current="request()->routeIs('communities.access-keys.*')" wire:navigate>
+                                {{ __('Keys') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\EntryAuthorization::class, $currentCommunity])
+                            <flux:sidebar.item icon="identification" :href="route('communities.entry-authorizations.index', $currentCommunity)" :current="request()->routeIs('communities.entry-authorizations.*')" wire:navigate>
+                                {{ __('Entry authorizations') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\PatrolRoute::class, $currentCommunity])
+                            <flux:sidebar.item icon="map" :href="route('communities.patrol-routes.index', $currentCommunity)" :current="request()->routeIs('communities.patrol-routes.*')" wire:navigate>
+                                {{ __('Patrols') }}
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('viewAny', [App\Models\ShiftLogEntry::class, $currentCommunity])
+                            <flux:sidebar.item icon="clipboard-document-list" :href="route('communities.shift-log.index', $currentCommunity)" :current="request()->routeIs('communities.shift-log.*')" wire:navigate>
+                                {{ __('Shift log') }}
+                            </flux:sidebar.item>
+                        @endcan
+                    </flux:sidebar.group>
                 @endif
             </flux:sidebar.nav>
 

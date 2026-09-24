@@ -3,7 +3,11 @@
 use App\Http\Controllers\AttachmentDownloadController;
 use App\Http\Controllers\DocumentDownloadController;
 use App\Http\Controllers\DocumentVersionDownloadController;
+use App\Http\Controllers\PackageSignatureController;
+use App\Http\Controllers\PatrolCheckpointQrController;
+use App\Http\Controllers\PatrolScanController;
 use App\Http\Middleware\RememberCurrentCommunity;
+use App\Livewire\AccessKeys;
 use App\Livewire\Amenities;
 use App\Livewire\Announcements;
 use App\Livewire\Assets;
@@ -11,16 +15,25 @@ use App\Livewire\Buildings;
 use App\Livewire\Communities;
 use App\Livewire\Dashboard;
 use App\Livewire\Documents;
+use App\Livewire\EntryAuthorizations;
 use App\Livewire\Events;
+use App\Livewire\FrontDesk;
+use App\Livewire\GuestPasses;
+use App\Livewire\IncidentReports;
 use App\Livewire\Invitations;
 use App\Livewire\Notifications;
+use App\Livewire\Packages;
+use App\Livewire\ParkingPermits;
+use App\Livewire\PatrolRoutes;
 use App\Livewire\PhoneBook;
 use App\Livewire\Residents;
 use App\Livewire\ServiceRequests;
+use App\Livewire\ShiftLog;
 use App\Livewire\Tasks;
 use App\Livewire\Team;
 use App\Livewire\Units;
 use App\Livewire\Vendors;
+use App\Livewire\Visitors;
 use App\Livewire\WorkOrders;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::livewire('team/roles', Team\Roles::class)->name('team.roles');
     Route::livewire('vendors', Vendors\Index::class)->name('vendors.index');
     Route::livewire('my-work-orders', WorkOrders\MyWorkOrders::class)->name('work-orders.mine');
+    Route::get('patrol-scan/{qrToken}', PatrolScanController::class)->name('patrol-scan');
 
     Route::livewire('communities', Communities\Index::class)->name('communities.index');
     Route::livewire('communities/create', Communities\Create::class)->name('communities.create');
@@ -71,6 +85,20 @@ Route::middleware('auth')->group(function () {
             Route::livewire('assets/{asset}', Assets\Show::class)->name('assets.show');
             Route::livewire('amenities', Amenities\Index::class)->name('amenities.index');
             Route::livewire('amenities/{amenity}', Amenities\Show::class)->name('amenities.show');
+            Route::livewire('packages', Packages\Index::class)->name('packages.index');
+            Route::get('packages/{package}/signature', PackageSignatureController::class)->name('packages.signature');
+            Route::livewire('visitors', Visitors\Index::class)->name('visitors.index');
+            Route::livewire('guest-passes', GuestPasses\Index::class)->name('guest-passes.index');
+            Route::livewire('parking-permits', ParkingPermits\Index::class)->name('parking-permits.index');
+            Route::livewire('incident-reports', IncidentReports\Index::class)->name('incident-reports.index');
+            Route::livewire('incident-reports/{incidentReport}', IncidentReports\Show::class)->name('incident-reports.show');
+            Route::livewire('keys', AccessKeys\Index::class)->name('access-keys.index');
+            Route::livewire('entry-authorizations', EntryAuthorizations\Index::class)->name('entry-authorizations.index');
+            Route::livewire('patrol-routes', PatrolRoutes\Index::class)->name('patrol-routes.index');
+            Route::livewire('patrol-routes/{patrolRoute}', PatrolRoutes\Show::class)->name('patrol-routes.show');
+            Route::get('patrol-checkpoints/{patrolCheckpoint}/qr', PatrolCheckpointQrController::class)->name('patrol-checkpoints.qr');
+            Route::livewire('shift-log', ShiftLog\Index::class)->name('shift-log.index');
+            Route::livewire('front-desk', FrontDesk\Mode::class)->name('front-desk.mode');
         });
 });
 

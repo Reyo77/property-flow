@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -166,6 +167,89 @@ class Community extends Model
     public function amenityBookings(): HasMany
     {
         return $this->hasMany(AmenityBooking::class);
+    }
+
+    /**
+     * @return HasMany<Package, $this>
+     */
+    public function packages(): HasMany
+    {
+        return $this->hasMany(Package::class);
+    }
+
+    /**
+     * @return HasMany<Visitor, $this>
+     */
+    public function visitors(): HasMany
+    {
+        return $this->hasMany(Visitor::class);
+    }
+
+    /**
+     * @return HasMany<GuestPass, $this>
+     */
+    public function guestPasses(): HasMany
+    {
+        return $this->hasMany(GuestPass::class);
+    }
+
+    /**
+     * @return HasMany<ParkingPermit, $this>
+     */
+    public function parkingPermits(): HasMany
+    {
+        return $this->hasMany(ParkingPermit::class);
+    }
+
+    /**
+     * @return HasMany<IncidentReport, $this>
+     */
+    public function incidentReports(): HasMany
+    {
+        return $this->hasMany(IncidentReport::class);
+    }
+
+    /**
+     * @return HasMany<AccessKey, $this>
+     */
+    public function accessKeys(): HasMany
+    {
+        return $this->hasMany(AccessKey::class);
+    }
+
+    /**
+     * @return HasMany<EntryAuthorization, $this>
+     */
+    public function entryAuthorizations(): HasMany
+    {
+        return $this->hasMany(EntryAuthorization::class);
+    }
+
+    /**
+     * @return HasMany<PatrolRoute, $this>
+     */
+    public function patrolRoutes(): HasMany
+    {
+        return $this->hasMany(PatrolRoute::class);
+    }
+
+    /**
+     * Only for route-model-binding scoped to a community (`communities/{community}/patrol-checkpoints/{patrolCheckpoint}`);
+     * use a route's own `checkpoints()` relation for everything else.
+     *
+     * @return HasManyThrough<PatrolCheckpoint, PatrolRoute, $this>
+     */
+    public function patrolCheckpoints(): HasManyThrough
+    {
+        return $this->hasManyThrough(PatrolCheckpoint::class, PatrolRoute::class);
+    }
+
+    /**
+     * @return HasMany<ShiftLogEntry, $this>
+     */
+    public function shiftLogEntries(): HasMany
+    {
+        return $this->hasMany(ShiftLogEntry::class);
     }
 
     /**
