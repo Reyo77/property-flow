@@ -105,6 +105,11 @@
 
                     @can('viewAny', [App\Models\Ballot::class, $currentCommunity])
                         <flux:sidebar.group :heading="__('Governance')" class="grid">
+                            @can('create', [App\Models\Ballot::class, $currentCommunity])
+                                <flux:sidebar.item icon="briefcase" :href="route('communities.board', $currentCommunity)" :current="request()->routeIs('communities.board')" wire:navigate>
+                                    {{ __('Board portal') }}
+                                </flux:sidebar.item>
+                            @endcan
                             <flux:sidebar.item icon="check-badge" :href="route('communities.ballots.index', $currentCommunity)" :current="request()->routeIs('communities.ballots.*')" wire:navigate>
                                 {{ __('Ballots') }}
                             </flux:sidebar.item>
@@ -113,6 +118,15 @@
                             </flux:sidebar.item>
                             <flux:sidebar.item icon="home-modern" :href="route('communities.architectural-requests.index', $currentCommunity)" :current="request()->routeIs('communities.architectural-requests.*')" wire:navigate>
                                 {{ __('Renovation requests') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="chart-bar" :href="route('communities.surveys.index', $currentCommunity)" :current="request()->routeIs('communities.surveys.*')" wire:navigate>
+                                {{ __('Surveys & polls') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="pencil-square" :href="route('communities.consent-forms.index', $currentCommunity)" :current="request()->routeIs('communities.consent-forms.*')" wire:navigate>
+                                {{ __('Forms to sign') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="chat-bubble-left-right" :href="route('communities.forum.index', $currentCommunity)" :current="request()->routeIs('communities.forum.*')" wire:navigate>
+                                {{ __('Community board') }}
                             </flux:sidebar.item>
                             @can('viewAny', [App\Models\ViolationRule::class, $currentCommunity])
                                 <flux:sidebar.item icon="shield-exclamation" :href="route('communities.violations.index', $currentCommunity)" :current="request()->routeIs('communities.violations.*')" wire:navigate>

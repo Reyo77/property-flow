@@ -16,6 +16,7 @@ use App\Models\Residency;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\Governance\VotingRoll;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
@@ -425,4 +426,14 @@ it('keeps an audit trail of every vote, without recording how anyone voted', fun
         ->and($log[2]->causer_id)->toBe($holder->id)
         ->and($log[2]->properties->all())->toEqual(['unit_id' => $unit->id, 'unit' => $unit->number, 'via_proxy' => true])
         ->and(json_encode($log->pluck('properties')))->not->toContain('No');
+});
+
+it('leaves deleted units off the voting roll', function () {
+    $community = Community::factory()->create();
+    [$unit, $owner] = votingUnit($community);
+    votingUnit($community);
+    $unit->delete();
+
+    expect(app(VotingRoll::class)->eligibleUnits($community))->toHaveCount(1)
+        ->and(app(VotingRoll::class)->unitsOwnedBy($owner, $community))->toBeEmpty();
 });

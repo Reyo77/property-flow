@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Actions\Finance\RunBilling;
 use App\Models\Community;
 use App\Models\RecurringCharge;
+use App\Support\Tenancy\CompanyScope;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
@@ -32,7 +33,7 @@ class RunBillingCommand extends Command
         $communityIds = RecurringCharge::query()->withoutGlobalScopes()->where('is_active', true)->distinct()->pluck('community_id');
         $issued = 0;
 
-        Community::query()->withoutGlobalScopes()->whereIn('id', $communityIds)->orderBy('id')->each(function (Community $community) use ($runBilling, $month, &$issued): void {
+        Community::query()->withoutGlobalScope(CompanyScope::class)->whereIn('id', $communityIds)->orderBy('id')->each(function (Community $community) use ($runBilling, $month, &$issued): void {
             $billedMonth = is_string($month)
                 ? CarbonImmutable::createFromFormat('Y-m-d', "{$month}-01", $community->timezone)
                 : CarbonImmutable::now($community->timezone);

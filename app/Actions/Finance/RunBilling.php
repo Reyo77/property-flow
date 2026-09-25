@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Support\Finance\BillingRunResult;
 use App\Support\Finance\InvoiceLineData;
 use App\Support\Finance\Money;
+use App\Support\Tenancy\CompanyScope;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -44,7 +45,7 @@ class RunBilling
             return new BillingRunResult(0, 0, 0, 0);
         }
 
-        $units = Unit::query()->withoutGlobalScopes()->where('community_id', $community->id)->with('community')->orderBy('id')->get();
+        $units = Unit::query()->withoutGlobalScope(CompanyScope::class)->where('community_id', $community->id)->with('community')->orderBy('id')->get();
         [$linesByUnit, $unitsWithoutFactor] = $this->linesByUnit($community, $charges, $units, $month);
 
         $alreadyBilled = Invoice::query()->withoutGlobalScopes()

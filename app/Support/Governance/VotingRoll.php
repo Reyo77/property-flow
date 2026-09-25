@@ -8,6 +8,7 @@ use App\Models\Community;
 use App\Models\Residency;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\Tenancy\CompanyScope;
 use Illuminate\Support\Collection;
 
 /**
@@ -26,7 +27,7 @@ class VotingRoll
      */
     public function eligibleUnits(Community $community): Collection
     {
-        return Unit::query()->withoutGlobalScopes()
+        return Unit::query()->withoutGlobalScope(CompanyScope::class)
             ->where('community_id', $community->id)
             ->whereHas('residencies', fn ($query) => $query->active()->where('type', ResidencyType::Owner))
             ->with('building')
@@ -49,9 +50,11 @@ class VotingRoll
      */
     public function isOwner(User $user, Unit $unit): bool
     {
-        return $user->resident !== null && Residency::query()->withoutGlobalScopes()
+        $resident = $user->loadMissing('resident')->resident;
+
+        return $resident !== null && Residency::query()->withoutGlobalScopes()
             ->where('unit_id', $unit->id)
-            ->where('resident_id', $user->resident->id)
+            ->where('resident_id', $resident->id)
             ->where('type', ResidencyType::Owner)
             ->active()
             ->exists();
@@ -64,13 +67,13 @@ class VotingRoll
      */
     public function unitsOwnedBy(User $user, Community $community): Collection
     {
-        $resident = $user->resident;
+        $resident = $user->loadMissing('resident')->resident;
 
         if ($resident === null) {
             return new Collection;
         }
 
-        return Unit::query()->withoutGlobalScopes()
+        return Unit::query()->withoutGlobalScope(CompanyScope::class)
             ->where('community_id', $community->id)
             ->whereHas('residencies', fn ($query) => $query->active()->where('type', ResidencyType::Owner)->where('resident_id', $resident->id))
             ->with('building')

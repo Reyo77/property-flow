@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArchitecturalDecisionLetterController;
 use App\Http\Controllers\AttachmentDownloadController;
+use App\Http\Controllers\ConsentSignatureImageController;
 use App\Http\Controllers\DocumentDownloadController;
 use App\Http\Controllers\DocumentVersionDownloadController;
 use App\Http\Controllers\FinancialReportExportController;
@@ -24,6 +25,7 @@ use App\Livewire\Buildings;
 use App\Livewire\Communities;
 use App\Livewire\Dashboard;
 use App\Livewire\Documents;
+use App\Livewire\Engagement;
 use App\Livewire\EntryAuthorizations;
 use App\Livewire\Events;
 use App\Livewire\Finance;
@@ -118,6 +120,15 @@ Route::middleware('auth')->group(function () {
             Route::livewire('ballots/{ballot}', Governance\BallotShow::class)->name('ballots.show');
             Route::livewire('ballots/{ballot}/edit', Governance\BallotForm::class)->name('ballots.edit');
             Route::livewire('meetings', Governance\Meetings::class)->name('meetings.index');
+            Route::livewire('board', Governance\BoardPortal::class)->name('board');
+            Route::livewire('surveys', Engagement\Surveys::class)->name('surveys.index');
+            Route::livewire('surveys/create', Engagement\SurveyForm::class)->name('surveys.create');
+            Route::livewire('surveys/{survey}', Engagement\SurveyShow::class)->name('surveys.show');
+            Route::livewire('forms', Engagement\ConsentForms::class)->name('consent-forms.index');
+            Route::livewire('forms/{consentForm}', Engagement\ConsentFormShow::class)->name('consent-forms.show');
+            Route::get('forms/{consentForm}/signatures/{signature}', ConsentSignatureImageController::class)->name('consent-forms.signature');
+            Route::livewire('board-posts', Engagement\Forum::class)->name('forum.index');
+            Route::livewire('board-posts/{forumTopic}', Engagement\ForumTopicShow::class)->name('forum.show');
             Route::livewire('violations', Violations\Index::class)->name('violations.index');
             Route::livewire('violations/{violation}', Violations\Show::class)->name('violations.show');
             Route::get('violations/{violation}/notices/{notice}/letter', ViolationNoticeLetterController::class)->name('violations.notices.letter');

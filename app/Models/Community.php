@@ -319,6 +319,38 @@ class Community extends Model
     }
 
     /**
+     * @return HasMany<Survey, $this>
+     */
+    public function surveys(): HasMany
+    {
+        return $this->hasMany(Survey::class);
+    }
+
+    /**
+     * @return HasMany<ConsentForm, $this>
+     */
+    public function consentForms(): HasMany
+    {
+        return $this->hasMany(ConsentForm::class);
+    }
+
+    /**
+     * @return HasMany<ForumTopic, $this>
+     */
+    public function forumTopics(): HasMany
+    {
+        return $this->hasMany(ForumTopic::class);
+    }
+
+    /**
+     * @return HasMany<ContentReport, $this>
+     */
+    public function contentReports(): HasMany
+    {
+        return $this->hasMany(ContentReport::class);
+    }
+
+    /**
      * @return HasMany<ViolationRule, $this>
      */
     public function violationRules(): HasMany

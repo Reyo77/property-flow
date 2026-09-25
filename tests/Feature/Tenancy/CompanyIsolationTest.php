@@ -25,7 +25,10 @@ use App\Models\Building;
 use App\Models\ChargeType;
 use App\Models\Community;
 use App\Models\Company;
+use App\Models\ConsentForm;
+use App\Models\ConsentSignature;
 use App\Models\Contact;
+use App\Models\ContentReport;
 use App\Models\Document;
 use App\Models\DocumentFolder;
 use App\Models\EmergencyContact;
@@ -33,6 +36,8 @@ use App\Models\EntryAuthorization;
 use App\Models\Event;
 use App\Models\EventRsvp;
 use App\Models\FiscalYear;
+use App\Models\ForumPost;
+use App\Models\ForumTopic;
 use App\Models\GuestPass;
 use App\Models\IncidentReport;
 use App\Models\Invitation;
@@ -59,6 +64,11 @@ use App\Models\Resident;
 use App\Models\ServiceRequest;
 use App\Models\ServiceRequestComment;
 use App\Models\ShiftLogEntry;
+use App\Models\Survey;
+use App\Models\SurveyAnswer;
+use App\Models\SurveyOption;
+use App\Models\SurveyQuestion;
+use App\Models\SurveyResponse;
 use App\Models\Task;
 use App\Models\Unit;
 use App\Models\Vehicle;
@@ -141,6 +151,16 @@ dataset('tenant models', [
     'violations' => fn () => Violation::factory(),
     'violation notices' => fn () => ViolationNotice::factory(),
     'architectural requests' => fn () => ArchitecturalRequest::factory(),
+    'surveys' => fn () => Survey::factory(),
+    'survey questions' => fn () => SurveyQuestion::factory(),
+    'survey options' => fn () => SurveyOption::factory(),
+    'survey responses' => fn () => SurveyResponse::factory(),
+    'survey answers' => fn () => SurveyAnswer::factory(),
+    'consent forms' => fn () => ConsentForm::factory(),
+    'consent signatures' => fn () => ConsentSignature::factory(),
+    'forum topics' => fn () => ForumTopic::factory(),
+    'forum posts' => fn () => ForumPost::factory(),
+    'content reports' => fn () => ContentReport::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {
@@ -201,6 +221,10 @@ it('returns 404 for pages of another company\'s community', function (string $ro
     'meetings' => 'communities.meetings.index',
     'violations' => 'communities.violations.index',
     'renovation requests' => 'communities.architectural-requests.index',
+    'board portal' => 'communities.board',
+    'surveys' => 'communities.surveys.index',
+    'forms' => 'communities.consent-forms.index',
+    'community board' => 'communities.forum.index',
 ]);
 
 it('refuses to edit a unit of another company', function () {

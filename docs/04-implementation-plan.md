@@ -300,23 +300,29 @@ Tests
 ### Phase 8 — Governance
 **Goal:** boards run the community online.
 
+Delivered in three milestones (8a e-voting & meetings, 8b violations & renovation requests, 8c surveys, consent, board portal & community board).
+
 Tasks
-- [ ] Violations: rule library, log with photos, notices (PDF letter), escalation, fines → ledger, resolution
-- [ ] Architectural change requests: submit with plans, review by committee/board, conditions, decision letter
-- [ ] E-voting: ballots, questions, options, eligibility (owners only), weighted by unit factor or 1-unit-1-vote, quorum, open/close times, proxies, locked results, audit trail
-- [ ] Surveys & polls
-- [ ] E-consent forms with typed/drawn signature
-- [ ] Meetings/AGM: agenda, attendance (quorum), minutes, linked ballots
-- [ ] Board portal: approvals queue, financials, board-only documents
-- [ ] Forum & classifieds with moderation
+- [x] Violations: rule library (cure days, fine, maximum fines), log with photos, courtesy notice → warning → fines, one step per cure period (`violations:escalate` daily), fines invoiced to the unit on the Fines account (idempotent), notice letters as PDF, resolve/dismiss. Escalation stops at the rule's limit and waits for the board
+- [x] Architectural (renovation) change requests: owners submit with plans, board reviews and approves, approves with conditions (conditions required) or denies (reason required), decision letter PDF, owner notified
+- [x] E-voting: ballots with questions and options; owners only (tenants/occupants never vote); weighted by unit factor or one unit one vote; quorum; open/close times in the community's own time zone; proxies (per ballot, replaceable, revocable until used); results counted and frozen at close (`ballots:close-ended` every minute); nobody sees a tally while voting is open; audit trail of who voted for which unit and when — never how
+- [x] Surveys & polls: single/multiple choice, 1–5 ratings, written answers; residents or owners only; anonymous option; one response per person; poll voters see live results
+- [x] E-consent forms with typed name and drawn signature, IP and time, and a fingerprint of the exact text signed (so a later edit can't pass as consented to)
+- [x] Meetings/AGM: agenda, attendance per unit (in person, online, proxy), live quorum, minutes (draft → published), linked ballots; board meetings hidden from residents
+- [x] Board portal: approvals queue (bills needing the board, renovation requests, violations awaiting a decision, ballots to close), fiscal-year-to-date financials, upcoming meetings, board-only documents
+- [x] Forum & classifieds (for sale, wanted, free, services) with reporting, and moderation that hides rather than deletes (plus lock and pin)
 
 Tests
-- One vote per eligible unit; tenants cannot vote; proxy can't be double-used
-- Weighted results math; quorum calculation
-- Votes rejected outside open window; results immutable after close
-- Violation escalation timeline (time travel)
+- One vote per unit, enforced by a unique index: two owners of one unit, an owner and their proxy, or a proxy twice — only the first counts; tenants, occupants, former owners and other communities' units are refused
+- Weighted results math and quorum against hand-computed values (unit factor and per unit), including a turnout one hair under quorum, and a unit that voted then lost its owner
+- Votes rejected before opening and from the closing minute; closing early refused; results unchanged by later changes to units or owners; votes append-only
+- Violation escalation timeline with time travel (each boundary day), idempotent under repeat and stale concurrent runs, stops at the fine limit or at a warning for fine-less rules
+- Survey answer validation per question kind; consent signature fingerprint detects a changed form; moderation, reporting and visibility rules
+- Tenant isolation for every new model and page
 
-✅ **Done when:** a board runs an AGM with a weighted vote end-to-end.
+✅ **Done when:** a board runs an AGM with a weighted vote end-to-end. **Met** — `tests/Feature/Governance/GovernancePagesTest.php` schedules an AGM, checks owners in until quorum, and the demo seed runs last year's AGM (closed ballot with frozen results, published minutes) and this year's budget vote (open, with a proxy vote).
+
+Bugs found and fixed along the way (in earlier phases' code): soft-deleted units were still billed monthly and counted on the voting roll, and the scheduled finance jobs still ran for deleted communities (`withoutGlobalScopes()` also removes the soft-delete scope); draft meeting minutes leaked into residents' page source through Livewire's serialised component state.
 
 ---
 

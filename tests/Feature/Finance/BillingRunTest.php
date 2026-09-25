@@ -267,3 +267,82 @@ describe('command', function () {
         artisan('finance:run-billing')->expectsOutputToContain('Harbour Towers: 1 unit(s) have no unit factor')->assertSuccessful();
     });
 });
+
+describe('edge cases', function () {
+    it('reports an empty result when nothing is billable', function () {
+        $community = Community::factory()->create();
+        unitsWithFactors($community, ['50']);
+
+        $result = runBilling($community);
+
+        expect([$result->issued, $result->alreadyBilled, $result->unitsWithoutFactor, $result->totalCents])->toBe([0, 0, 0, 0]);
+    });
+
+    it('reports no units left out when only fixed charges are billed', function () {
+        $community = Community::factory()->create();
+        unitsWithFactors($community, [null, null]);
+        RecurringCharge::factory()->for($community)->create();
+
+        expect(runBilling($community)->unitsWithoutFactor)->toBe(0);
+    });
+
+    it('keeps the due day within every month', function (int $dueDay, string $expected) {
+        $community = Community::factory()->create(['billing_due_day' => $dueDay]);
+        unitsWithFactors($community, [null]);
+        RecurringCharge::factory()->for($community)->create();
+
+        runBilling($community, '2027-02');
+
+        expect(Invoice::withoutGlobalScopes()->sole()->due_on->toDateString())->toBe($expected);
+    })->with([
+        'the 31st becomes the 28th' => [31, '2027-02-28'],
+        'the 28th stays' => [28, '2027-02-28'],
+        'day 0 becomes the 1st' => [0, '2027-02-01'],
+        'the 2nd stays' => [2, '2027-02-02'],
+    ]);
+
+    it('names the month on the invoice', function () {
+        $community = Community::factory()->create();
+        unitsWithFactors($community, [null]);
+        RecurringCharge::factory()->for($community)->create();
+
+        runBilling($community, '2026-12');
+
+        expect(Invoice::withoutGlobalScopes()->sole()->memo)->toBe('December 2026 charges');
+    });
+
+    it('treats a zero unit factor as no factor', function () {
+        $community = Community::factory()->create();
+        [$zero, $full] = unitsWithFactors($community, ['0.000000', '100']);
+        RecurringCharge::factory()->for($community)->byUnitFactor(50000)->create();
+
+        $result = runBilling($community);
+
+        expect($result->unitsWithoutFactor)->toBe(1)
+            ->and(billedCents($zero))->toBe(0)
+            ->and(billedCents($full))->toBe(50000);
+    });
+
+    it('skips a single-unit charge whose unit is gone without dropping the charges after it', function () {
+        $community = Community::factory()->create();
+        [$unit, $gone] = unitsWithFactors($community, [null, null]);
+        RecurringCharge::factory()->for($community)->create(['unit_id' => $gone->id, 'amount_cents' => 7500]);
+        RecurringCharge::factory()->for($community)->create(['amount_cents' => 40000]);
+        $gone->delete();
+
+        runBilling($community);
+
+        expect(billedCents($unit))->toBe(40000)->and(billedCents($gone))->toBe(0);
+    });
+});
+
+it('does not bill a deleted community', function () {
+    $community = Community::factory()->create();
+    unitsWithFactors($community, [null]);
+    RecurringCharge::factory()->for($community)->create();
+    $community->delete();
+
+    artisan('finance:run-billing')->expectsOutputToContain('Issued 0 invoice(s).')->assertSuccessful();
+
+    expect(Invoice::withoutGlobalScopes()->count())->toBe(0);
+});

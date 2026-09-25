@@ -6,6 +6,10 @@ use App\Actions\Amenities\CreateAmenityBooking;
 use App\Actions\Announcements\PublishAnnouncement;
 use App\Actions\ArchitecturalRequests\DecideArchitecturalRequest;
 use App\Actions\ArchitecturalRequests\SubmitArchitecturalRequest;
+use App\Actions\Engagement\ForumActions;
+use App\Actions\Engagement\SaveSurvey;
+use App\Actions\Engagement\SignConsentForm;
+use App\Actions\Engagement\SubmitSurveyResponse;
 use App\Actions\Finance\AssessLateFees;
 use App\Actions\Finance\CompleteReconciliation;
 use App\Actions\Finance\DecideVendorBill;
@@ -37,9 +41,11 @@ use App\Enums\ArchitecturalRequestStatus;
 use App\Enums\AssetCategory;
 use App\Enums\Assignee;
 use App\Enums\AttendanceMode;
+use App\Enums\Audience;
 use App\Enums\CompanyRole;
 use App\Enums\ContactCategory;
 use App\Enums\DocumentVisibility;
+use App\Enums\ForumTopicKind;
 use App\Enums\IncidentSeverity;
 use App\Enums\PackageStatus;
 use App\Enums\PaymentMethod;
@@ -61,6 +67,7 @@ use App\Models\Building;
 use App\Models\ChargeType;
 use App\Models\Community;
 use App\Models\Company;
+use App\Models\ConsentForm;
 use App\Models\Contact;
 use App\Models\Document;
 use App\Models\DocumentFolder;
@@ -94,6 +101,7 @@ use App\Models\WorkOrder;
 use App\Support\Finance\ChartOfAccounts;
 use App\Support\Finance\FiscalYears;
 use App\Support\Finance\Money;
+use App\Support\Governance\AudienceCheck;
 use App\Support\Governance\VotingRoll;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
@@ -127,6 +135,7 @@ class DemoSeeder extends Seeder
         $this->seedFinance($condo);
         $this->seedGovernance($condo);
         $this->seedViolationsAndRenovations($condo);
+        $this->seedEngagement($condo);
     }
 
     /**
@@ -752,6 +761,62 @@ class DemoSeeder extends Seeder
             $decide->startReview($approved, $board);
             $decide->decide($approved->refresh(), ArchitecturalRequestStatus::ApprovedWithConditions, "Frosted glass only; matching the approved sample in the management office.\nNo fixings into the exterior wall.", null, $board);
         }
+    }
+
+    /**
+     * A poll with answers, an open survey, an owners' consent form, and a lively community board.
+     */
+    private function seedEngagement(Community $condo): void
+    {
+        $manager = User::where('email', 'manager@propertyflow.test')->sole();
+        $voters = User::query()->whereHas('resident.residencies', fn ($query) => $query->where('community_id', $condo->id)->active())->orderBy('id')->limit(30)->get();
+        $demoResident = User::where('email', 'resident@propertyflow.test')->sole();
+        $others = $voters->reject(fn (User $user) => $user->is($demoResident))->values();
+        $saveSurvey = app(SaveSurvey::class);
+
+        $poll = $saveSurvey->handle($condo, null, ['title' => 'New lobby paint colour', 'description' => 'The lobby is being repainted in November.', 'is_poll' => true, 'audience' => 'residents', 'is_anonymous' => false, 'closes_at' => CarbonImmutable::now()->addWeeks(2)->toDateTimeString()],
+            [['kind' => 'single_choice', 'title' => 'Which colour do you prefer?', 'is_required' => true, 'options' => ['Warm grey', 'Sage green', 'Navy accent wall']]], $manager);
+        $saveSurvey->publish($poll);
+        $question = $poll->questions()->with('options')->sole();
+
+        foreach ($others->take(18) as $index => $user) {
+            $label = ['Warm grey', 'Sage green', 'Sage green', 'Navy accent wall'][$index % 4];
+            app(SubmitSurveyResponse::class)->handle($poll, $user, [$question->id => $question->options->firstWhere('label', $label)?->id]);
+        }
+
+        $survey = $saveSurvey->handle($condo, null, ['title' => 'Amenities satisfaction survey', 'description' => 'Help the board plan next year\'s amenity budget.', 'is_poll' => false, 'audience' => 'residents', 'is_anonymous' => true, 'closes_at' => null], [
+            ['kind' => 'rating', 'title' => 'How satisfied are you with the gym?', 'is_required' => true, 'options' => []],
+            ['kind' => 'multiple_choice', 'title' => 'Which amenities do you use?', 'is_required' => false, 'options' => ['Gym', 'Party room', 'Guest suite', 'Rooftop terrace']],
+            ['kind' => 'text', 'title' => 'What would you add or change?', 'is_required' => false, 'options' => []],
+        ], $manager);
+        $saveSurvey->publish($survey);
+
+        $form = new ConsentForm(['title' => 'Consent to electronic delivery of notices', 'audience' => Audience::Owners, 'closes_at' => null,
+            'body' => "I consent to receiving notices, meeting materials and statements from the corporation by email and through this portal instead of by mail.\n\nI can withdraw this consent at any time by writing to management."]);
+        $form->forceFill(['company_id' => $condo->company_id, 'community_id' => $condo->id, 'created_by_id' => $manager->id, 'published_at' => now()])->save();
+
+        $image = imagecreatetruecolor(220, 60);
+        imagefill($image, 0, 0, (int) imagecolorallocate($image, 255, 255, 255));
+        imageline($image, 10, 40, 210, 20, (int) imagecolorallocate($image, 24, 24, 27));
+        ob_start();
+        imagepng($image);
+        $signature = 'data:image/png;base64,'.base64_encode((string) ob_get_clean());
+        $audience = app(AudienceCheck::class);
+
+        foreach ($others->filter(fn (User $user) => $audience->includes($user, $condo->id, Audience::Owners))->take(8) as $owner) {
+            app(SignConsentForm::class)->handle($form, $owner, $owner->name, $signature, '127.0.0.1', 'Demo');
+        }
+
+        $forum = app(ForumActions::class);
+        $neighbour = fn (int $index): User => $others->get($index) ?? throw new LogicException("Not enough residents with logins for neighbour #{$index}.");
+        $bikeRoom = $forum->postTopic($condo, $neighbour(0), ForumTopicKind::Discussion, 'Bike room is full again', 'Is anyone else struggling to find a spot in the P1 bike room? Maybe we could ask the board about more racks.', null);
+        $forum->reply($bikeRoom, $neighbour(1), 'Yes! Every evening. There are a few that look abandoned too.');
+        $forum->reply($bikeRoom, $manager, 'Thanks all — we will tag abandoned bikes next week and look at adding racks.');
+        $forum->setPinned($forum->postTopic($condo, $manager, ForumTopicKind::Discussion, 'Welcome to the community board', 'Share news, ask neighbours, and post things to sell or give away. Please keep it friendly.', null), true);
+        $forum->postTopic($condo, $neighbour(2), ForumTopicKind::ForSale, 'IKEA sofa, grey', 'Three-seater, two years old, pet-free home. Pick up from North Tower.', 18000);
+        $forum->postTopic($condo, $neighbour(3), ForumTopicKind::Free, 'Moving boxes', 'About 20 boxes, free to anyone who needs them.', null);
+        $spam = $forum->postTopic($condo, $neighbour(4), ForumTopicKind::Service, 'Crypto investment opportunity!!!', 'Guaranteed returns, DM me.', null);
+        $forum->report($spam, $neighbour(5), 'Looks like a scam');
     }
 
     /**

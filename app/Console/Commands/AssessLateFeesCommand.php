@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Actions\Finance\AssessLateFees;
 use App\Models\Community;
 use App\Models\LateFeeRule;
+use App\Support\Tenancy\CompanyScope;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
@@ -23,7 +24,7 @@ class AssessLateFeesCommand extends Command
         $communityIds = LateFeeRule::query()->withoutGlobalScopes()->where('is_active', true)->pluck('community_id');
         $charged = 0;
 
-        Community::query()->withoutGlobalScopes()->whereIn('id', $communityIds)->orderBy('id')->each(function (Community $community) use ($assessLateFees, &$charged): void {
+        Community::query()->withoutGlobalScope(CompanyScope::class)->whereIn('id', $communityIds)->orderBy('id')->each(function (Community $community) use ($assessLateFees, &$charged): void {
             $charged += $assessLateFees->handle($community, CarbonImmutable::now($community->timezone));
         });
 

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Actions\Finance\SendOverdueReminders;
 use App\Models\Community;
 use App\Models\Invoice;
+use App\Support\Tenancy\CompanyScope;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
@@ -22,7 +23,7 @@ class SendOverdueRemindersCommand extends Command
         $communityIds = Invoice::query()->withoutGlobalScopes()->whereNull('voided_at')->whereDate('due_on', '<', now()->toDateString())->distinct()->pluck('community_id');
         $reminded = 0;
 
-        Community::query()->withoutGlobalScopes()->whereIn('id', $communityIds)->orderBy('id')->each(function (Community $community) use ($sendOverdueReminders, &$reminded): void {
+        Community::query()->withoutGlobalScope(CompanyScope::class)->whereIn('id', $communityIds)->orderBy('id')->each(function (Community $community) use ($sendOverdueReminders, &$reminded): void {
             $reminded += $sendOverdueReminders->handle($community, CarbonImmutable::now());
         });
 

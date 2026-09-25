@@ -26,6 +26,7 @@ class EscalateViolationsCommand extends Command
             ->where('status', ViolationStatus::Open)
             ->whereNotNull('next_action_on')
             ->whereDate('next_action_on', '<=', now()->addDay()->toDateString())
+            ->whereHas('community')
             ->with('community')
             ->each(function (Violation $violation) use ($escalateViolation, &$escalated): void {
                 if ($escalateViolation->handle($violation, CarbonImmutable::now($violation->community->timezone)->startOfDay()) !== null) {
