@@ -6,6 +6,8 @@ use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Models\Residency;
 use App\Models\Unit;
+use App\Support\Finance\Money;
+use App\Support\Finance\UnitLedger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -58,6 +60,24 @@ class Dashboard extends Component
         }
 
         return $resident->residencies()->active()->with(['unit.building', 'community'])->get();
+    }
+
+    /**
+     * What each of the resident's units owes (or has in credit), keyed by unit id.
+     *
+     * @return array<int, Money>
+     */
+    #[Computed]
+    public function homeBalances(): array
+    {
+        $unitLedger = app(UnitLedger::class);
+        $balances = [];
+
+        foreach ($this->myHomes() as $residency) {
+            $balances[$residency->unit_id] = $unitLedger->balance($residency->unit);
+        }
+
+        return $balances;
     }
 
     public function render(): View

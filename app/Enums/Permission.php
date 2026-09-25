@@ -51,6 +51,10 @@ enum Permission: string
     case ManagePatrols = 'patrols.manage';
     case ViewShiftLog = 'shift-log.view';
     case ManageShiftLog = 'shift-log.manage';
+    case ViewFinance = 'finance.view';
+    case ManageFinance = 'finance.manage';
+    case ApproveBills = 'finance.approve-bills';
+    case ApproveLargeBills = 'finance.approve-large-bills';
 
     public function label(): string
     {
@@ -102,6 +106,10 @@ enum Permission: string
             self::ManagePatrols => __('Manage patrol routes and checkpoints'),
             self::ViewShiftLog => __('View the shift log'),
             self::ManageShiftLog => __('Post to the shift log'),
+            self::ViewFinance => __('View finances, ledgers and reports'),
+            self::ManageFinance => __('Post charges, record payments and run billing'),
+            self::ApproveBills => __('Approve vendor bills up to the manager limit'),
+            self::ApproveLargeBills => __('Approve vendor bills above the manager limit'),
         };
     }
 
@@ -129,6 +137,7 @@ enum Permission: string
             self::ViewEntryAuthorizations, self::ManageEntryAuthorizations => __('Entry authorizations'),
             self::ViewPatrols, self::ManagePatrols => __('Patrols'),
             self::ViewShiftLog, self::ManageShiftLog => __('Shift log'),
+            self::ViewFinance, self::ManageFinance, self::ApproveBills, self::ApproveLargeBills => __('Finance'),
         };
     }
 

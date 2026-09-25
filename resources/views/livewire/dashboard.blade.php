@@ -58,10 +58,17 @@
                                 · {{ __('since :date', ['date' => $residency->moved_in_on->toFormattedDateString()]) }}
                             @endif
                         </flux:text>
+                        @php($balance = $this->homeBalances[$residency->unit_id])
+                        <div class="mt-4 flex items-end justify-between gap-3 border-t border-zinc-200 pt-3 dark:border-zinc-700" data-test="home-balance">
+                            <div>
+                                <flux:text size="sm">{{ $balance->isNegative() ? __('Credit on account') : __('Balance owing') }}</flux:text>
+                                <flux:heading size="lg">{{ $balance->isNegative() ? $balance->negate()->format() : $balance->format() }}</flux:heading>
+                            </div>
+                            <flux:link :href="route('communities.units.account', [$residency->community, $residency->unit])" wire:navigate>{{ __('View account') }}</flux:link>
+                        </div>
                     </div>
                 @endforeach
             </div>
-            <flux:text class="text-sm">{{ __('More resident services (requests, bookings, payments) are coming soon.') }}</flux:text>
         </div>
     @elseif ($this->totals === null)
         <div class="rounded-xl border border-dashed border-zinc-300 p-10 text-center dark:border-zinc-600" data-test="no-access">

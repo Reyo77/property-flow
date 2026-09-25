@@ -14,4 +14,13 @@ trait ChecksResidentAccess
         return $user->resident !== null
             && $user->resident->residencies()->where('community_id', $communityId)->active()->exists();
     }
+
+    /**
+     * Whether the user currently lives in (or owns) the unit.
+     */
+    protected function isCurrentResidentOfUnit(User $user, int $unitId): bool
+    {
+        return $user->resident !== null
+            && $user->resident->residencies()->where('unit_id', $unitId)->active()->exists();
+    }
 }

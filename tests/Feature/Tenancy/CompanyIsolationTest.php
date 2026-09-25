@@ -5,12 +5,14 @@ use App\Livewire\CommunitySwitcher;
 use App\Livewire\Units\Index as UnitsIndex;
 use App\Models\AccessKey;
 use App\Models\AccessKeySignout;
+use App\Models\Account;
 use App\Models\Amenity;
 use App\Models\AmenityBlackout;
 use App\Models\AmenityBooking;
 use App\Models\Announcement;
 use App\Models\Asset;
 use App\Models\Building;
+use App\Models\ChargeType;
 use App\Models\Community;
 use App\Models\Company;
 use App\Models\Contact;
@@ -20,15 +22,22 @@ use App\Models\EmergencyContact;
 use App\Models\EntryAuthorization;
 use App\Models\Event;
 use App\Models\EventRsvp;
+use App\Models\FiscalYear;
 use App\Models\GuestPass;
 use App\Models\IncidentReport;
 use App\Models\Invitation;
+use App\Models\Invoice;
+use App\Models\InvoiceLine;
+use App\Models\JournalEntry;
+use App\Models\LedgerEntry;
 use App\Models\MaintenanceSchedule;
 use App\Models\Package;
 use App\Models\ParkingPermit;
 use App\Models\PatrolCheckpoint;
 use App\Models\PatrolRoute;
 use App\Models\PatrolScan;
+use App\Models\Payment;
+use App\Models\PaymentAllocation;
 use App\Models\Pet;
 use App\Models\Residency;
 use App\Models\Resident;
@@ -85,6 +94,15 @@ dataset('tenant models', [
     'patrol checkpoints' => fn () => PatrolCheckpoint::factory(),
     'patrol scans' => fn () => PatrolScan::factory(),
     'shift log entries' => fn () => ShiftLogEntry::factory(),
+    'accounts' => fn () => Account::factory(),
+    'fiscal years' => fn () => FiscalYear::factory(),
+    'journal entries' => fn () => JournalEntry::factory(),
+    'ledger entries' => fn () => LedgerEntry::factory(),
+    'charge types' => fn () => ChargeType::factory(),
+    'invoices' => fn () => Invoice::factory(),
+    'invoice lines' => fn () => InvoiceLine::factory(),
+    'payments' => fn () => Payment::factory(),
+    'payment allocations' => fn () => PaymentAllocation::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {
@@ -131,6 +149,10 @@ it('returns 404 for pages of another company\'s community', function (string $ro
     'buildings' => 'communities.buildings.index',
     'units' => 'communities.units.index',
     'unit import' => 'communities.units.import',
+    'finance overview' => 'communities.finance.overview',
+    'invoices' => 'communities.finance.invoices',
+    'payments' => 'communities.finance.payments',
+    'accounts & charges' => 'communities.finance.setup',
 ]);
 
 it('refuses to edit a unit of another company', function () {

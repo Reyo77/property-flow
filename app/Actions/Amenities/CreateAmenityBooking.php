@@ -3,6 +3,7 @@
 namespace App\Actions\Amenities;
 
 use App\Actions\Amenities\Concerns\NotifiesBookingResident;
+use App\Actions\Finance\ChargeAmenityBooking;
 use App\Enums\AmenityBookingStatus;
 use App\Models\Amenity;
 use App\Models\AmenityBooking;
@@ -14,6 +15,8 @@ use Illuminate\Validation\ValidationException;
 class CreateAmenityBooking
 {
     use NotifiesBookingResident;
+
+    public function __construct(private readonly ChargeAmenityBooking $chargeAmenityBooking) {}
 
     /**
      * Locks the amenity's own row for the duration of the transaction, so every rule below
@@ -74,6 +77,7 @@ class CreateAmenityBooking
             ])->save();
 
             if (! $amenity->needs_approval) {
+                $this->chargeAmenityBooking->handle($booking);
                 $this->notifyResident($booking);
             }
 

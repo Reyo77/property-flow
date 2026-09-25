@@ -8,6 +8,7 @@ use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /*
@@ -24,6 +25,10 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
+
+// The ledger invariant: after anything a finance test does, every journal entry balances and
+// so does each community's ledger as a whole.
+pest()->afterEach(fn () => expectLedgerBalanced())->in('Feature/Finance');
 
 /*
 |--------------------------------------------------------------------------
@@ -99,4 +104,33 @@ function residentOf(Community $community, array $residencyAttributes = []): Resi
     Residency::factory()->for(Unit::factory()->for($community))->for($resident)->create($residencyAttributes);
 
     return $resident;
+}
+
+/**
+ * Assert total debits equal total credits for every journal entry and every community.
+ */
+function expectLedgerBalanced(): void
+{
+    $unbalancedEntries = DB::table('ledger_entries')
+        ->select('journal_entry_id')
+        ->groupBy('journal_entry_id')
+        ->havingRaw('SUM(debit_cents) <> SUM(credit_cents)')
+        ->pluck('journal_entry_id');
+
+    expect($unbalancedEntries->all())->toBe([], 'Every journal entry must balance.');
+
+    $unbalancedCommunities = DB::table('ledger_entries')
+        ->select('community_id')
+        ->groupBy('community_id')
+        ->havingRaw('SUM(debit_cents) <> SUM(credit_cents)')
+        ->pluck('community_id');
+
+    expect($unbalancedCommunities->all())->toBe([], 'Every community ledger must balance.');
+
+    $emptyEntries = DB::table('journal_entries')
+        ->leftJoin('ledger_entries', 'ledger_entries.journal_entry_id', '=', 'journal_entries.id')
+        ->whereNull('ledger_entries.id')
+        ->pluck('journal_entries.id');
+
+    expect($emptyEntries->all())->toBe([], 'Every journal entry must have lines.');
 }

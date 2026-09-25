@@ -74,6 +74,14 @@ class Unit extends Model implements BelongsToOneCommunity
         return $this->hasMany(Residency::class);
     }
 
+    /**
+     * "Tower A · 1204", or just the number when the unit isn't in a building.
+     */
+    public function label(): string
+    {
+        return $this->building !== null ? "{$this->building->name} · {$this->number}" : $this->number;
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logFillable()->logOnlyDirty();

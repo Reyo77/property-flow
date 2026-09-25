@@ -3,15 +3,19 @@
 namespace App\Actions\Amenities;
 
 use App\Actions\Amenities\Concerns\NotifiesBookingResident;
+use App\Actions\Finance\ReleaseAmenityBookingCharges;
 use App\Enums\AmenityBookingStatus;
 use App\Enums\Permission;
 use App\Models\AmenityBooking;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class CancelAmenityBooking
 {
     use NotifiesBookingResident;
+
+    public function __construct(private readonly ReleaseAmenityBookingCharges $releaseAmenityBookingCharges) {}
 
     /**
      * A manager may cancel any booking at any time; the resident who booked it is bound by the
@@ -32,12 +36,16 @@ class CancelAmenityBooking
             ]);
         }
 
-        $booking->transitionTo(AmenityBookingStatus::Cancelled);
-        $booking->forceFill([
-            'cancelled_by_id' => $canceller->id,
-            'cancelled_at' => now(),
-            'decision_notes' => $reason,
-        ])->save();
+        DB::transaction(function () use ($booking, $canceller, $reason): void {
+            $booking->transitionTo(AmenityBookingStatus::Cancelled);
+            $booking->forceFill([
+                'cancelled_by_id' => $canceller->id,
+                'cancelled_at' => now(),
+                'decision_notes' => $reason,
+            ])->save();
+
+            $this->releaseAmenityBookingCharges->handle($booking);
+        });
 
         if ($canceller->id !== $booking->booked_by_id) {
             $this->notifyResident($booking);

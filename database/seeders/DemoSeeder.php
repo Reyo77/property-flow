@@ -4,6 +4,9 @@ namespace Database\Seeders;
 
 use App\Actions\Amenities\CreateAmenityBooking;
 use App\Actions\Announcements\PublishAnnouncement;
+use App\Actions\Finance\IssueInvoice;
+use App\Actions\Finance\RecordPayment;
+use App\Actions\Finance\ReversePayment;
 use App\Actions\FrontDesk\CreateIncidentReport;
 use App\Actions\FrontDesk\IssueParkingPermit;
 use App\Actions\FrontDesk\LogPackage;
@@ -17,17 +20,21 @@ use App\Enums\ContactCategory;
 use App\Enums\DocumentVisibility;
 use App\Enums\IncidentSeverity;
 use App\Enums\PackageStatus;
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentReversalReason;
 use App\Enums\ResidencyType;
 use App\Enums\RsvpStatus;
 use App\Enums\ServiceRequestCategory;
 use App\Enums\ServiceRequestPriority;
 use App\Enums\ServiceRequestStatus;
+use App\Enums\SystemAccount;
 use App\Models\AccessKey;
 use App\Models\AccessKeySignout;
 use App\Models\Amenity;
 use App\Models\Announcement;
 use App\Models\Asset;
 use App\Models\Building;
+use App\Models\ChargeType;
 use App\Models\Community;
 use App\Models\Company;
 use App\Models\Contact;
@@ -55,8 +62,13 @@ use App\Models\Vehicle;
 use App\Models\Vendor;
 use App\Models\Visitor;
 use App\Models\WorkOrder;
+use App\Support\Finance\ChartOfAccounts;
+use App\Support\Finance\InvoiceLineData;
+use App\Support\Finance\Money;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
+use LogicException;
 
 /**
  * A realistic company for trying the app. Every demo login uses the password "password":
@@ -80,6 +92,7 @@ class DemoSeeder extends Seeder
         $this->seedMaintenance($condo);
         $this->seedAmenities($condo);
         $this->seedFrontDesk($condo);
+        $this->seedFinance($condo);
     }
 
     /**
@@ -393,6 +406,80 @@ class DemoSeeder extends Seeder
         ]);
         $guestSuiteSlot = $guestSuite->availableSlots($guestSuite->minBookableDate()->addDays(10))[0]['starts_at'];
         $createBooking->handle($guestSuite, $residentUser, $guestSuiteSlot, $residentUnit->id, 'My parents are visiting next month.', false);
+    }
+
+    /**
+     * Three months of common expense fees split by unit factor, with realistic payment behaviour:
+     * most units pay in full, some pay late or partially, one prepays, and one cheque bounces.
+     * The demo resident is paid up except for this month.
+     */
+    private function seedFinance(Community $condo): void
+    {
+        $chartOfAccounts = app(ChartOfAccounts::class);
+        $issueInvoice = app(IssueInvoice::class);
+        $recordPayment = app(RecordPayment::class);
+        $manager = User::where('email', 'manager@propertyflow.test')->sole();
+        $residentUnitId = Residency::where('resident_id', Resident::where('email', 'resident@propertyflow.test')->sole()->id)->active()->firstOrFail()->unit_id;
+
+        $assessments = $chartOfAccounts->account($condo, SystemAccount::Assessments);
+        $monthlyFees = ChargeType::factory()->for($condo)->create(['name' => 'Common expense fees', 'account_id' => $assessments->id, 'default_amount_cents' => null]);
+        ChargeType::factory()->for($condo)->create(['name' => 'Move-in fee', 'account_id' => $chartOfAccounts->account($condo, SystemAccount::OtherIncome)->id, 'default_amount_cents' => 25000]);
+
+        $units = Unit::query()->where('community_id', $condo->id)->with('community')->orderBy('id')->get()->keyBy('id');
+        $shares = Money::of(2_700_000, $condo->currency)->allocate($units->map(fn (Unit $unit) => (string) $unit->unit_factor)->all());
+        $thisMonth = CarbonImmutable::now($condo->timezone)->startOfMonth();
+
+        foreach ([2, 1, 0] as $monthsAgo) {
+            $month = $thisMonth->subMonths($monthsAgo);
+
+            foreach ($units as $unit) {
+                $issueInvoice->handle(
+                    $unit,
+                    $month->subDays(10),
+                    $month,
+                    [InvoiceLineData::forChargeType($monthlyFees, $shares[$unit->id], __('Common expense fees, :month', ['month' => $month->format('F Y')]))],
+                    issuedBy: $manager,
+                    billingKey: "demo-fees:{$unit->id}:{$month->format('Y-m')}",
+                );
+            }
+
+            if ($monthsAgo === 0) {
+                continue;
+            }
+
+            foreach ($units->values() as $index => $unit) {
+                $share = $shares[$unit->id];
+                $amount = match (true) {
+                    $index % 11 === 3 => null,
+                    $index % 13 === 5 => $share->allocate([1, 1])[0],
+                    $index === 7 && $monthsAgo === 1 => $share->times(3),
+                    default => $share,
+                };
+
+                if ($amount === null) {
+                    continue;
+                }
+
+                $recordPayment->handle(
+                    $unit,
+                    $index % 2 === 0 ? PaymentMethod::BankTransfer : PaymentMethod::Cheque,
+                    $amount,
+                    $month->addDays($index % 9),
+                    $index % 2 === 0 ? 'EFT-'.(10000 + $index) : 'CHQ '.(300 + $index),
+                    recordedBy: $manager,
+                );
+            }
+        }
+
+        foreach ($units->values() as $index => $unit) {
+            if ($unit->id !== $residentUnitId && $index % 4 === 0 && $index % 11 !== 3) {
+                $recordPayment->handle($unit, PaymentMethod::BankTransfer, $shares[$unit->id], $thisMonth->addDays(min(3, $thisMonth->diffInDays(CarbonImmutable::now($condo->timezone)))), 'EFT-'.(20000 + $index), recordedBy: $manager);
+            }
+        }
+
+        $bouncingUnit = $units->values()->get(9) ?? throw new LogicException('The demo condo needs at least ten units.');
+        $bounced = $recordPayment->handle($bouncingUnit, PaymentMethod::Cheque, $shares[$bouncingUnit->id], $thisMonth, 'CHQ 999', recordedBy: $manager);
+        app(ReversePayment::class)->handle($bounced, PaymentReversalReason::Nsf, $thisMonth->addDays(2), $manager);
     }
 
     /**

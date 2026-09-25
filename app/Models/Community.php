@@ -32,6 +32,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string $country
  * @property string $timezone
  * @property string $currency
+ * @property int $fiscal_year_start_month
  * @property AreaUnit $area_unit
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -39,7 +40,7 @@ use Spatie\Activitylog\Support\LogOptions;
  */
 #[Fillable([
     'name', 'type', 'address_line_1', 'address_line_2', 'city', 'region',
-    'postal_code', 'country', 'timezone', 'currency', 'area_unit',
+    'postal_code', 'country', 'timezone', 'currency', 'area_unit', 'fiscal_year_start_month',
 ])]
 class Community extends Model
 {
@@ -54,6 +55,7 @@ class Community extends Model
         return [
             'type' => CommunityType::class,
             'area_unit' => AreaUnit::class,
+            'fiscal_year_start_month' => 'integer',
         ];
     }
 
@@ -250,6 +252,38 @@ class Community extends Model
     public function shiftLogEntries(): HasMany
     {
         return $this->hasMany(ShiftLogEntry::class);
+    }
+
+    /**
+     * @return HasMany<Account, $this>
+     */
+    public function accounts(): HasMany
+    {
+        return $this->hasMany(Account::class);
+    }
+
+    /**
+     * @return HasMany<ChargeType, $this>
+     */
+    public function chargeTypes(): HasMany
+    {
+        return $this->hasMany(ChargeType::class);
+    }
+
+    /**
+     * @return HasMany<Invoice, $this>
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 
     /**

@@ -103,6 +103,23 @@
                         @endcan
                     </flux:sidebar.group>
 
+                    @can('viewAny', [App\Models\Invoice::class, $currentCommunity])
+                        <flux:sidebar.group :heading="__('Finance')" class="grid">
+                            <flux:sidebar.item icon="chart-pie" :href="route('communities.finance.overview', $currentCommunity)" :current="request()->routeIs('communities.finance.overview', 'communities.units.account')" wire:navigate>
+                                {{ __('Overview') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="document-text" :href="route('communities.finance.invoices', $currentCommunity)" :current="request()->routeIs('communities.finance.invoices')" wire:navigate>
+                                {{ __('Invoices') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="banknotes" :href="route('communities.finance.payments', $currentCommunity)" :current="request()->routeIs('communities.finance.payments')" wire:navigate>
+                                {{ __('Payments') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="book-open" :href="route('communities.finance.setup', $currentCommunity)" :current="request()->routeIs('communities.finance.setup')" wire:navigate>
+                                {{ __('Accounts & charges') }}
+                            </flux:sidebar.item>
+                        </flux:sidebar.group>
+                    @endcan
+
                     <flux:sidebar.group :heading="__('Front desk')" class="grid">
                         @can('viewAny', [App\Models\Package::class, $currentCommunity])
                             <flux:sidebar.item icon="bolt" :href="route('communities.front-desk.mode', $currentCommunity)" :current="request()->routeIs('communities.front-desk.*')" wire:navigate>

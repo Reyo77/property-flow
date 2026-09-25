@@ -56,6 +56,7 @@ enum CompanyRole: string
                 Permission::ViewEntryAuthorizations, Permission::ManageEntryAuthorizations,
                 Permission::ViewPatrols, Permission::ManagePatrols,
                 Permission::ViewShiftLog, Permission::ManageShiftLog,
+                Permission::ViewFinance, Permission::ManageFinance, Permission::ApproveBills,
             ],
             self::BoardMember => [
                 Permission::ViewCommunities,
@@ -73,6 +74,7 @@ enum CompanyRole: string
                 Permission::ViewAmenities,
                 Permission::ViewIncidents,
                 Permission::ViewPatrols,
+                Permission::ViewFinance, Permission::ApproveBills, Permission::ApproveLargeBills,
             ],
             self::Staff => [
                 Permission::ViewCommunities,

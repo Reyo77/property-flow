@@ -3,14 +3,18 @@
 namespace App\Actions\Amenities;
 
 use App\Actions\Amenities\Concerns\NotifiesBookingResident;
+use App\Actions\Finance\ChargeAmenityBooking;
 use App\Enums\AmenityBookingStatus;
 use App\Models\AmenityBooking;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use LogicException;
 
 class DecideAmenityBooking
 {
     use NotifiesBookingResident;
+
+    public function __construct(private readonly ChargeAmenityBooking $chargeAmenityBooking) {}
 
     /**
      * @throws LogicException
@@ -21,12 +25,18 @@ class DecideAmenityBooking
             throw new LogicException('A booking decision must be either confirmed or rejected.');
         }
 
-        $booking->transitionTo($decision);
-        $booking->forceFill([
-            'decided_by_id' => $decider->id,
-            'decided_at' => now(),
-            'decision_notes' => $notes,
-        ])->save();
+        DB::transaction(function () use ($booking, $decider, $decision, $notes): void {
+            $booking->transitionTo($decision);
+            $booking->forceFill([
+                'decided_by_id' => $decider->id,
+                'decided_at' => now(),
+                'decision_notes' => $notes,
+            ])->save();
+
+            if ($decision === AmenityBookingStatus::Confirmed) {
+                $this->chargeAmenityBooking->handle($booking);
+            }
+        });
 
         $this->notifyResident($booking);
     }
