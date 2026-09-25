@@ -8,11 +8,14 @@ use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentReversalReason;
 use App\Enums\SystemAccount;
+use App\Models\ChargeType;
 use App\Models\Community;
 use App\Models\Invoice;
+use App\Models\InvoiceLine;
 use App\Models\JournalEntry;
 use App\Models\LedgerEntry;
 use App\Models\Payment;
+use App\Models\PaymentAllocation;
 use App\Models\Unit;
 use App\Support\Finance\ChartOfAccounts;
 use App\Support\Finance\InvoiceLineData;
@@ -350,4 +353,98 @@ it('builds a statement with a running balance', function () {
 
     expect($march)->toHaveCount(1)->and($march->first()['balance']->cents)->toBe(16000);
     expect(app(UnitLedger::class)->balance($unit, CarbonImmutable::parse('2026-02-15'))->cents)->toBe(6000);
+});
+
+describe('what gets recorded', function () {
+    it('records every detail of an invoice and a readable ledger memo', function () {
+        $unit = financeUnit();
+        $admin = companyAdmin($unit->community->company);
+        $chargeType = ChargeType::factory()->for($unit->community)->create();
+
+        $invoice = app(IssueInvoice::class)->handle(
+            $unit,
+            CarbonImmutable::parse('2026-02-15'),
+            CarbonImmutable::parse('2026-03-01'),
+            [InvoiceLineData::forChargeType($chargeType, Money::of(45000), 'March fees')],
+            'Monthly billing',
+            $admin,
+            $unit,
+            'custom-key-1',
+        );
+
+        $line = InvoiceLine::withoutGlobalScopes()->where('invoice_id', $invoice->id)->sole();
+        $entry = JournalEntry::withoutGlobalScopes()->findOrFail($invoice->journal_entry_id);
+
+        expect($invoice->fresh())
+            ->issued_on->toDateString()->toBe('2026-02-15')
+            ->due_on->toDateString()->toBe('2026-03-01')
+            ->memo->toBe('Monthly billing')
+            ->created_by_id->toBe($admin->id)
+            ->source_type->toBe($unit->getMorphClass())
+            ->source_id->toBe($unit->id)
+            ->billing_key->toBe('custom-key-1')
+            ->and($line)->charge_type_id->toBe($chargeType->id)->account_id->toBe($chargeType->account_id)->description->toBe('March fees')->amount_cents->toBe(45000)
+            ->and($entry->memo)->toBe("Invoice INV-000001 · Unit {$unit->number}")
+            ->and($entry->posted_on->toDateString())->toBe('2026-02-15')
+            ->and($entry->created_by_id)->toBe($admin->id);
+    });
+
+    it('records every detail of a payment and a readable ledger memo', function () {
+        $unit = financeUnit();
+        $admin = companyAdmin($unit->community->company);
+
+        $payment = app(RecordPayment::class)->handle($unit, PaymentMethod::BankTransfer, Money::of(12345), CarbonImmutable::parse('2026-03-05'), 'EFT-99', 'Paid early', $admin);
+
+        $entry = JournalEntry::withoutGlobalScopes()->findOrFail($payment->journal_entry_id);
+
+        expect($payment->fresh())
+            ->method->toBe(PaymentMethod::BankTransfer)->reference->toBe('EFT-99')->memo->toBe('Paid early')
+            ->received_on->toDateString()->toBe('2026-03-05')->recorded_by_id->toBe($admin->id)->amount_cents->toBe(12345)
+            ->and($entry->memo)->toBe("Payment RCT-000001 · Unit {$unit->number} (Bank transfer)")
+            ->and($entry->posted_on->toDateString())->toBe('2026-03-05');
+    });
+
+    it('records who reversed a payment, with which entry, and says why in the ledger', function () {
+        $unit = financeUnit();
+        $admin = companyAdmin($unit->community->company);
+        $payment = pay($unit, 5000);
+
+        app(ReversePayment::class)->handle($payment, PaymentReversalReason::Nsf, CarbonImmutable::parse('2026-03-09'), $admin);
+
+        $payment->refresh();
+        $reversal = JournalEntry::withoutGlobalScopes()->findOrFail($payment->reversal_journal_entry_id);
+
+        expect($payment)->reversed_by_id->toBe($admin->id)->reversal_reason->toBe(PaymentReversalReason::Nsf)
+            ->and($reversal->reverses_id)->toBe($payment->journal_entry_id)
+            ->and($reversal->memo)->toBe('RCT-000001 Returned (NSF)')
+            ->and($reversal->posted_on->toDateString())->toBe('2026-03-09');
+    });
+
+    it('says which invoice was voided and why in the ledger', function () {
+        $invoice = issue(financeUnit(), 1000);
+
+        app(VoidInvoice::class)->handle($invoice, CarbonImmutable::parse('2026-02-20'), 'Billed to the wrong unit');
+
+        expect(JournalEntry::withoutGlobalScopes()->findOrFail($invoice->fresh()?->void_journal_entry_id)->memo)
+            ->toBe('Void INV-000001: Billed to the wrong unit');
+    });
+});
+
+it('applies several waiting credits to a new invoice exactly, oldest first, with no empty allocations', function () {
+    $unit = financeUnit();
+    $first = pay($unit, 3000, '2026-02-01');
+    $second = pay($unit, 5000, '2026-02-10');
+
+    $invoice = issue($unit, 6000);
+
+    $allocations = PaymentAllocation::withoutGlobalScopes()->orderBy('id')->get(['payment_id', 'invoice_id', 'amount_cents']);
+
+    expect($allocations->map(fn ($a) => [$a->payment_id, $a->amount_cents])->all())->toBe([[$first->id, 3000], [$second->id, 3000]])
+        ->and($invoice->fresh()?->balanceCents())->toBe(0)
+        ->and($second->fresh()?->unallocatedCents())->toBe(2000);
+
+    $next = issue($unit, 2500, '2026-04-01');
+
+    expect(PaymentAllocation::withoutGlobalScopes()->where('invoice_id', $next->id)->pluck('amount_cents', 'payment_id')->all())->toBe([$second->id => 2000])
+        ->and(PaymentAllocation::withoutGlobalScopes()->where('amount_cents', '<=', 0)->count())->toBe(0);
 });

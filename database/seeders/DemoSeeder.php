@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Actions\Amenities\CreateAmenityBooking;
 use App\Actions\Announcements\PublishAnnouncement;
+use App\Actions\ArchitecturalRequests\DecideArchitecturalRequest;
+use App\Actions\ArchitecturalRequests\SubmitArchitecturalRequest;
 use App\Actions\Finance\AssessLateFees;
 use App\Actions\Finance\CompleteReconciliation;
 use App\Actions\Finance\DecideVendorBill;
@@ -28,7 +30,10 @@ use App\Actions\Governance\RecordAttendance;
 use App\Actions\Governance\SaveBallot;
 use App\Actions\Governance\SaveMeeting;
 use App\Actions\Maintenance\GenerateDueMaintenanceWorkOrders;
+use App\Actions\Violations\EscalateViolation;
+use App\Actions\Violations\ReportViolation;
 use App\Enums\AnnouncementAudience;
+use App\Enums\ArchitecturalRequestStatus;
 use App\Enums\AssetCategory;
 use App\Enums\Assignee;
 use App\Enums\AttendanceMode;
@@ -82,6 +87,8 @@ use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\Vendor;
+use App\Models\Violation;
+use App\Models\ViolationRule;
 use App\Models\Visitor;
 use App\Models\WorkOrder;
 use App\Support\Finance\ChartOfAccounts;
@@ -119,6 +126,7 @@ class DemoSeeder extends Seeder
         $this->seedFrontDesk($condo);
         $this->seedFinance($condo);
         $this->seedGovernance($condo);
+        $this->seedViolationsAndRenovations($condo);
     }
 
     /**
@@ -692,6 +700,57 @@ class DemoSeeder extends Seeder
             }
 
             $castVote->handle($budget, $unit, $owner, $this->answers($budget, [$index % 6 === 0 ? 'No' : 'Yes', $index % 4 === 0 ? 'Against' : 'For']));
+        }
+    }
+
+    /**
+     * A small rule library; one violation already fined (reported six weeks ago and escalated
+     * on schedule), one fresh courtesy notice; the demo resident's renovation request awaiting
+     * the board, and a neighbour's approved with conditions.
+     */
+    private function seedViolationsAndRenovations(Community $condo): void
+    {
+        $manager = User::where('email', 'manager@propertyflow.test')->sole();
+        $board = User::where('email', 'board@propertyflow.test')->sole();
+        $rule = fn (string $title, string $reference, int $cureDays, ?int $fineCents) => ViolationRule::factory()->for($condo)->create([
+            'title' => $title, 'reference' => $reference, 'cure_days' => $cureDays, 'fine_cents' => $fineCents, 'max_fines' => 3,
+        ]);
+
+        $balcony = $rule('Items stored on balcony', 'Rules, s. 12', 14, 10000);
+        $noise = $rule('Noise after 11pm', 'Rules, s. 4', 7, 15000);
+        $rule('Pet off leash in common areas', 'Rules, s. 21', 7, 5000);
+        $rule('Unapproved alterations', 'Declaration, art. 9', 30, null);
+
+        $units = Unit::query()->where('community_id', $condo->id)->orderBy('id')->get()->values();
+        $unitAt = fn (int $index): Unit => $units->get($index) ?? throw new LogicException("The demo condo has no unit #{$index}.");
+        $now = CarbonImmutable::now($condo->timezone)->startOfDay();
+        $balconyUnit = $unitAt(13);
+
+        $this->travelTo($now->subWeeks(6), function () use ($balcony, $balconyUnit, $manager): void {
+            app(ReportViolation::class)->handle($balcony, $balconyUnit, CarbonImmutable::now(), 'Bicycles, boxes and a barbecue tank stored on the balcony.', 'Balcony, facing the courtyard', [], $manager);
+        });
+        $fined = Violation::query()->where('unit_id', $balconyUnit->id)->sole();
+
+        // Each step falls due the day after its cure period ends: a warning, then the first fine.
+        foreach ([$now->subWeeks(4)->addDay(), $now->subWeeks(2)->addDays(2)] as $day) {
+            $this->travelTo($day, fn () => app(EscalateViolation::class)->handle($fined, $day, null));
+        }
+
+        app(ReportViolation::class)->handle($noise, $unitAt(30), $now->subDay()->setTime(23, 40), 'Loud music reported by two neighbours after 11pm.', null, [], $manager);
+
+        $resident = Resident::where('email', 'resident@propertyflow.test')->sole();
+        $residentUnit = Residency::where('resident_id', $resident->id)->active()->firstOrFail()->unit;
+        $submit = app(SubmitArchitecturalRequest::class);
+
+        $submit->handle($residentUnit, $resident->user ?? throw new LogicException('Demo resident has no login.'), 'Replace carpet with engineered hardwood', "Living room and hallway, about 45 m².\nInstaller: Northern Floors. Work on weekdays 9am–5pm only.", 'Northern Floors Ltd.', $now->addWeeks(3), []);
+
+        $neighbourUnit = $unitAt(5);
+        $neighbourOwner = Residency::query()->where('unit_id', $neighbourUnit->id)->where('type', ResidencyType::Owner)->active()->firstOrFail()->resident;
+        if ($neighbourOwner->user !== null) {
+            $approved = $submit->handle($neighbourUnit, $neighbourOwner->user, 'Install balcony privacy screen', 'Frosted glass screen on the east side of the balcony.', null, null, []);
+            $decide = app(DecideArchitecturalRequest::class);
+            $decide->startReview($approved, $board);
+            $decide->decide($approved->refresh(), ArchitecturalRequestStatus::ApprovedWithConditions, "Frosted glass only; matching the approved sample in the management office.\nNo fixings into the exterior wall.", null, $board);
         }
     }
 

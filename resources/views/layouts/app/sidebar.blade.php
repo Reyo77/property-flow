@@ -111,6 +111,14 @@
                             <flux:sidebar.item icon="users" :href="route('communities.meetings.index', $currentCommunity)" :current="request()->routeIs('communities.meetings.*')" wire:navigate>
                                 {{ __('Meetings') }}
                             </flux:sidebar.item>
+                            <flux:sidebar.item icon="home-modern" :href="route('communities.architectural-requests.index', $currentCommunity)" :current="request()->routeIs('communities.architectural-requests.*')" wire:navigate>
+                                {{ __('Renovation requests') }}
+                            </flux:sidebar.item>
+                            @can('viewAny', [App\Models\ViolationRule::class, $currentCommunity])
+                                <flux:sidebar.item icon="shield-exclamation" :href="route('communities.violations.index', $currentCommunity)" :current="request()->routeIs('communities.violations.*')" wire:navigate>
+                                    {{ __('Violations') }}
+                                </flux:sidebar.item>
+                            @endcan
                         </flux:sidebar.group>
                     @endcan
 

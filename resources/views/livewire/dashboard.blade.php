@@ -70,6 +70,10 @@
                             <flux:button size="sm" icon="calendar-date-range" :href="route('communities.amenities.index', $residency->community)" wire:navigate>{{ __('Amenities') }}</flux:button>
                             <flux:button size="sm" icon="check-badge" :href="route('communities.ballots.index', $residency->community)" wire:navigate>{{ __('Ballots') }}</flux:button>
                             <flux:button size="sm" icon="users" :href="route('communities.meetings.index', $residency->community)" wire:navigate>{{ __('Meetings') }}</flux:button>
+                            @if ($residency->type === App\Enums\ResidencyType::Owner)
+                                <flux:button size="sm" icon="home-modern" :href="route('communities.architectural-requests.index', $residency->community)" wire:navigate>{{ __('Renovations') }}</flux:button>
+                                <flux:button size="sm" icon="shield-exclamation" :href="route('communities.violations.index', $residency->community)" wire:navigate>{{ __('Bylaw notices') }}</flux:button>
+                            @endif
                         </div>
                     </div>
                 @endforeach

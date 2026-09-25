@@ -58,6 +58,7 @@ enum CompanyRole: string
                 Permission::ViewShiftLog, Permission::ManageShiftLog,
                 Permission::ViewFinance, Permission::ManageFinance, Permission::ApproveBills,
                 Permission::ViewGovernance, Permission::ManageGovernance,
+                Permission::ViewViolations, Permission::ReportViolations, Permission::ManageViolations,
             ],
             self::BoardMember => [
                 Permission::ViewCommunities,
@@ -77,6 +78,7 @@ enum CompanyRole: string
                 Permission::ViewPatrols,
                 Permission::ViewFinance, Permission::ApproveBills, Permission::ApproveLargeBills,
                 Permission::ViewGovernance, Permission::ManageGovernance,
+                Permission::ViewViolations, Permission::ReportViolations, Permission::ManageViolations,
             ],
             self::Staff => [
                 Permission::ViewCommunities,
@@ -101,6 +103,7 @@ enum CompanyRole: string
                 Permission::ViewPatrols, Permission::ManagePatrols,
                 Permission::ViewShiftLog, Permission::ManageShiftLog,
                 Permission::ViewGovernance,
+                Permission::ViewViolations, Permission::ReportViolations,
             ],
             self::Vendor => [],
         };

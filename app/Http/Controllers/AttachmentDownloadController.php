@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ArchitecturalRequest;
 use App\Models\Attachment;
 use App\Models\Community;
 use App\Models\IncidentReport;
 use App\Models\ServiceRequest;
+use App\Models\Violation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -22,7 +24,7 @@ class AttachmentDownloadController extends Controller
     {
         $attachable = $attachment->attachable;
 
-        abort_unless($attachable instanceof ServiceRequest || $attachable instanceof IncidentReport, 404);
+        abort_unless($attachable instanceof ServiceRequest || $attachable instanceof IncidentReport || $attachable instanceof Violation || $attachable instanceof ArchitecturalRequest, 404);
 
         $this->authorize('view', $attachable);
 

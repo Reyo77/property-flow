@@ -319,6 +319,30 @@ class Community extends Model
     }
 
     /**
+     * @return HasMany<ViolationRule, $this>
+     */
+    public function violationRules(): HasMany
+    {
+        return $this->hasMany(ViolationRule::class);
+    }
+
+    /**
+     * @return HasMany<Violation, $this>
+     */
+    public function violations(): HasMany
+    {
+        return $this->hasMany(Violation::class);
+    }
+
+    /**
+     * @return HasMany<ArchitecturalRequest, $this>
+     */
+    public function architecturalRequests(): HasMany
+    {
+        return $this->hasMany(ArchitecturalRequest::class);
+    }
+
+    /**
      * @return HasMany<Ballot, $this>
      */
     public function ballots(): HasMany

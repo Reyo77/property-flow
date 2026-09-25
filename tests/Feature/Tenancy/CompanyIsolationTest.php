@@ -10,6 +10,7 @@ use App\Models\Amenity;
 use App\Models\AmenityBlackout;
 use App\Models\AmenityBooking;
 use App\Models\Announcement;
+use App\Models\ArchitecturalRequest;
 use App\Models\Asset;
 use App\Models\Ballot;
 use App\Models\BallotAnswer;
@@ -63,6 +64,9 @@ use App\Models\Unit;
 use App\Models\Vehicle;
 use App\Models\Vendor;
 use App\Models\VendorBill;
+use App\Models\Violation;
+use App\Models\ViolationNotice;
+use App\Models\ViolationRule;
 use App\Models\Visitor;
 use App\Models\WorkOrder;
 use App\Support\Tenancy\CurrentCompany;
@@ -133,6 +137,10 @@ dataset('tenant models', [
     'meetings' => fn () => Meeting::factory(),
     'meeting agenda items' => fn () => MeetingAgendaItem::factory(),
     'meeting attendances' => fn () => MeetingAttendance::factory(),
+    'violation rules' => fn () => ViolationRule::factory(),
+    'violations' => fn () => Violation::factory(),
+    'violation notices' => fn () => ViolationNotice::factory(),
+    'architectural requests' => fn () => ArchitecturalRequest::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {
@@ -191,6 +199,8 @@ it('returns 404 for pages of another company\'s community', function (string $ro
     'ballots' => 'communities.ballots.index',
     'new ballot' => 'communities.ballots.create',
     'meetings' => 'communities.meetings.index',
+    'violations' => 'communities.violations.index',
+    'renovation requests' => 'communities.architectural-requests.index',
 ]);
 
 it('refuses to edit a unit of another company', function () {

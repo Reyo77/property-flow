@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArchitecturalDecisionLetterController;
 use App\Http\Controllers\AttachmentDownloadController;
 use App\Http\Controllers\DocumentDownloadController;
 use App\Http\Controllers\DocumentVersionDownloadController;
@@ -12,10 +13,12 @@ use App\Http\Controllers\PaymentReceiptController;
 use App\Http\Controllers\StartOnlinePaymentController;
 use App\Http\Controllers\TestCheckoutController;
 use App\Http\Controllers\UnitStatementController;
+use App\Http\Controllers\ViolationNoticeLetterController;
 use App\Http\Middleware\RememberCurrentCommunity;
 use App\Livewire\AccessKeys;
 use App\Livewire\Amenities;
 use App\Livewire\Announcements;
+use App\Livewire\ArchitecturalRequests;
 use App\Livewire\Assets;
 use App\Livewire\Buildings;
 use App\Livewire\Communities;
@@ -41,6 +44,7 @@ use App\Livewire\Tasks;
 use App\Livewire\Team;
 use App\Livewire\Units;
 use App\Livewire\Vendors;
+use App\Livewire\Violations;
 use App\Livewire\Visitors;
 use App\Livewire\WorkOrders;
 use Illuminate\Support\Facades\Route;
@@ -114,6 +118,12 @@ Route::middleware('auth')->group(function () {
             Route::livewire('ballots/{ballot}', Governance\BallotShow::class)->name('ballots.show');
             Route::livewire('ballots/{ballot}/edit', Governance\BallotForm::class)->name('ballots.edit');
             Route::livewire('meetings', Governance\Meetings::class)->name('meetings.index');
+            Route::livewire('violations', Violations\Index::class)->name('violations.index');
+            Route::livewire('violations/{violation}', Violations\Show::class)->name('violations.show');
+            Route::get('violations/{violation}/notices/{notice}/letter', ViolationNoticeLetterController::class)->name('violations.notices.letter');
+            Route::livewire('renovation-requests', ArchitecturalRequests\Index::class)->name('architectural-requests.index');
+            Route::livewire('renovation-requests/{architecturalRequest}', ArchitecturalRequests\Show::class)->name('architectural-requests.show');
+            Route::get('renovation-requests/{architecturalRequest}/decision-letter', ArchitecturalDecisionLetterController::class)->name('architectural-requests.letter');
             Route::livewire('meetings/{meeting}', Governance\MeetingShow::class)->name('meetings.show');
             Route::livewire('finance', Finance\Overview::class)->name('finance.overview');
             Route::livewire('finance/invoices', Finance\Invoices::class)->name('finance.invoices');

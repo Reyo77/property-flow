@@ -57,6 +57,9 @@ enum Permission: string
     case ApproveLargeBills = 'finance.approve-large-bills';
     case ViewGovernance = 'governance.view';
     case ManageGovernance = 'governance.manage';
+    case ViewViolations = 'violations.view';
+    case ReportViolations = 'violations.report';
+    case ManageViolations = 'violations.manage';
 
     public function label(): string
     {
@@ -113,7 +116,10 @@ enum Permission: string
             self::ApproveBills => __('Approve vendor bills up to the manager limit'),
             self::ApproveLargeBills => __('Approve vendor bills above the manager limit'),
             self::ViewGovernance => __('View ballots, meetings and their results'),
-            self::ManageGovernance => __('Run ballots and meetings, record attendance and minutes'),
+            self::ManageGovernance => __('Run ballots and meetings, decide architectural requests'),
+            self::ViewViolations => __('View bylaw violations'),
+            self::ReportViolations => __('Report bylaw violations'),
+            self::ManageViolations => __('Issue notices and fines, resolve violations, manage rules'),
         };
     }
 
@@ -143,6 +149,7 @@ enum Permission: string
             self::ViewShiftLog, self::ManageShiftLog => __('Shift log'),
             self::ViewFinance, self::ManageFinance, self::ApproveBills, self::ApproveLargeBills => __('Finance'),
             self::ViewGovernance, self::ManageGovernance => __('Governance'),
+            self::ViewViolations, self::ReportViolations, self::ManageViolations => __('Violations'),
         };
     }
 
