@@ -5,8 +5,11 @@ namespace Database\Seeders;
 use App\Actions\Amenities\CreateAmenityBooking;
 use App\Actions\Announcements\PublishAnnouncement;
 use App\Actions\Finance\AssessLateFees;
+use App\Actions\Finance\CompleteReconciliation;
 use App\Actions\Finance\DecideVendorBill;
+use App\Actions\Finance\ImportBankStatement;
 use App\Actions\Finance\PayVendorBill;
+use App\Actions\Finance\RecordBankLine;
 use App\Actions\Finance\RecordPayment;
 use App\Actions\Finance\ReversePayment;
 use App\Actions\Finance\RunBilling;
@@ -37,6 +40,7 @@ use App\Models\AccessKeySignout;
 use App\Models\Amenity;
 use App\Models\Announcement;
 use App\Models\Asset;
+use App\Models\BudgetLine;
 use App\Models\Building;
 use App\Models\ChargeType;
 use App\Models\Community;
@@ -51,6 +55,7 @@ use App\Models\Event;
 use App\Models\EventRsvp;
 use App\Models\GuestPass;
 use App\Models\LateFeeRule;
+use App\Models\LedgerEntry;
 use App\Models\MaintenanceSchedule;
 use App\Models\PatrolCheckpoint;
 use App\Models\PatrolRoute;
@@ -69,9 +74,11 @@ use App\Models\Vendor;
 use App\Models\Visitor;
 use App\Models\WorkOrder;
 use App\Support\Finance\ChartOfAccounts;
+use App\Support\Finance\FiscalYears;
 use App\Support\Finance\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use LogicException;
 
@@ -498,6 +505,81 @@ class DemoSeeder extends Seeder
         app(AssessLateFees::class)->handle($condo, CarbonImmutable::now($condo->timezone));
 
         $this->seedVendorBills($condo, $manager);
+        $this->seedBudget($condo);
+        $this->seedReconciledMonth($condo, $manager);
+    }
+
+    /**
+     * This fiscal year's budget: the fees actually charged, and expenses a little over and under.
+     */
+    private function seedBudget(Community $condo): void
+    {
+        $year = app(FiscalYears::class)->covering($condo, CarbonImmutable::now($condo->timezone));
+        $budgets = ['4000' => 32_400_000, '4100' => 60_000, '4900' => 120_000, '5000' => 4_800_000, '5100' => 7_200_000, '5200' => 3_600_000, '5300' => 5_400_000, '5400' => 2_400_000, '5600' => 6_000_000, '5900' => 600_000];
+
+        foreach ($budgets as $code => $cents) {
+            BudgetLine::factory()->for($condo)->create([
+                'fiscal_year_id' => $year->id,
+                'account_id' => $condo->accounts()->where('code', $code)->sole()->id,
+                'annual_cents' => $cents,
+            ]);
+        }
+    }
+
+    /**
+     * Last month closed properly: the bank's statement imported and matched against the books,
+     * the bank's service charge booked, and the reconciliation signed off. Two cheques written
+     * at month end are still outstanding, as they would be in real life.
+     */
+    private function seedReconciledMonth(Community $condo, User $manager): void
+    {
+        $lastMonth = CarbonImmutable::now($condo->timezone)->subMonthNoOverflow()->startOfMonth();
+        $cash = app(ChartOfAccounts::class)->account($condo, SystemAccount::Cash);
+        $entries = LedgerEntry::query()->withoutGlobalScopes()->where('account_id', $cash->id)
+            ->whereBetween('posted_on', [$lastMonth->toDateString(), $lastMonth->endOfMonth()->toDateString()])
+            ->orderBy('posted_on')->orderBy('id')->get();
+
+        $outstanding = $entries->filter(fn (LedgerEntry $entry) => $entry->netCents() > 0)->take(-2)->pluck('id')->all();
+        $bankCharge = -1_295;
+        $rows = ['date,description,reference,amount'];
+        $clearedTotal = 0;
+
+        foreach ($entries as $entry) {
+            if (in_array($entry->id, $outstanding, true)) {
+                continue;
+            }
+
+            $clearsOn = $entry->posted_on->addDays(1)->min($lastMonth->endOfMonth());
+            $rows[] = $clearsOn->toDateString().','.($entry->netCents() > 0 ? 'DEPOSIT' : 'CHEQUE PAID').','.$entry->memo.','.Money::of($entry->netCents())->toDecimal();
+            $clearedTotal += $entry->netCents();
+        }
+
+        $rows[] = $lastMonth->endOfMonth()->toDateString().',MONTHLY SERVICE CHARGE,,'.Money::of($bankCharge)->toDecimal();
+        $openingBalance = (int) LedgerEntry::query()->withoutGlobalScopes()->where('account_id', $cash->id)
+            ->whereDate('posted_on', '<', $lastMonth->toDateString())
+            ->toBase()->selectRaw('COALESCE(SUM(CAST(debit_cents AS SIGNED) - CAST(credit_cents AS SIGNED)), 0) as balance')->value('balance');
+
+        $filename = 'harbour-towers-'.$lastMonth->format('Y-m').'.csv';
+        $disk = Storage::disk('local');
+        $disk->put("demo/{$filename}", implode("\n", $rows)."\n");
+        $path = $disk->path("demo/{$filename}");
+
+        $statement = app(ImportBankStatement::class)->handle(
+            $condo,
+            new UploadedFile($path, $filename, 'text/csv', null, true),
+            $lastMonth,
+            $lastMonth->endOfMonth()->startOfDay(),
+            Money::of($openingBalance + $clearedTotal + $bankCharge, $condo->currency),
+            $manager,
+        );
+        $disk->delete("demo/{$filename}");
+
+        app(RecordBankLine::class)->handle(
+            $statement->lines()->where('description', 'MONTHLY SERVICE CHARGE')->sole(),
+            $condo->accounts()->where('code', '5900')->sole(),
+            $manager,
+        );
+        app(CompleteReconciliation::class)->handle($statement, $manager);
     }
 
     /**

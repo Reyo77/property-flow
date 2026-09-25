@@ -25,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property int $number
  * @property PaymentMethod $method
  * @property string|null $reference
+ * @property string|null $gateway_reference
  * @property int $amount_cents
  * @property Carbon $received_on
  * @property string|null $memo

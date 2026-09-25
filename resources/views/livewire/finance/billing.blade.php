@@ -47,7 +47,7 @@
                             <flux:table.cell>{{ $charge->unit ? __('Unit :unit', ['unit' => $charge->unit->label()]) : $charge->method->label() }}</flux:table.cell>
                             <flux:table.cell align="end">
                                 {{ App\Support\Finance\Money::of($charge->amount_cents)->format() }}
-                                <flux:text size="sm">{{ $charge->unit === null && $charge->method === App\Enums\RecurringChargeMethod::UnitFactor ? __('total') : __('per unit') }}</flux:text>
+                                <flux:text size="sm">{{ match (true) { $charge->unit !== null => __('per month'), $charge->method === App\Enums\RecurringChargeMethod::UnitFactor => __('total'), default => __('per unit') } }}</flux:text>
                             </flux:table.cell>
                             <flux:table.cell>
                                 {{ $charge->starts_on->toFormattedDateString() }} &ndash; {{ $charge->ends_on?->toFormattedDateString() ?? __('ongoing') }}

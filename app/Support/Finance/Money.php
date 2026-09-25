@@ -130,11 +130,10 @@ final readonly class Money implements JsonSerializable, Stringable
 
         $leftover = abs($this->cents) - $allocated;
 
-        // Hand out the leftover cents one at a time to the largest remainders; ties go to the
-        // earliest key so the result is deterministic.
+        // Hand out the leftover cents one at a time to the largest remainders. usort is stable
+        // (PHP 8+), so ties keep their original order and go to the earliest key.
         $order = array_keys($remainders);
-        usort($order, fn (int|string $a, int|string $b): int => bccomp($remainders[$b], $remainders[$a], $scale)
-            ?: array_search($a, array_keys($ratios), true) <=> array_search($b, array_keys($ratios), true));
+        usort($order, fn (int|string $a, int|string $b): int => bccomp($remainders[$b], $remainders[$a], $scale));
 
         for ($i = 0; $i < $leftover; $i++) {
             $parts[$order[$i]]++;

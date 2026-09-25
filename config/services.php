@@ -3,6 +3,14 @@
 return [
 
     /*
+    | Online payments. Only the "local" test-mode gateway exists for now; a Stripe driver will
+    | implement the same App\Support\Payments\PaymentGateway interface.
+    */
+    'payments' => [
+        'gateway' => env('PAYMENT_GATEWAY', 'local'),
+    ],
+
+    /*
     |--------------------------------------------------------------------------
     | Third Party Services
     |--------------------------------------------------------------------------

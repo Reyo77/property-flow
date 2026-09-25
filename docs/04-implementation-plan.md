@@ -225,7 +225,7 @@ Tasks
   - A booking is exactly one grid slot; there's no multi-slot ("book 2 hours") or multi-day booking. A guest suite books a whole day as one long slot instead
 - [x] Availability + booking (resident) and a bookings-to-manage list + blackout management (manager), on one amenity page — a date picker plus a slot-button grid rather than a calendar-grid UI, the same reasonable scope cut Phase 3 made for events
 - [x] Book, cancel, approve, reject; terms acceptance required when an amenity has terms text
-- [x] Fees/deposits are snapshotted onto the booking at creation time (so a later price change doesn't rewrite history) but no Charge record is created yet — Phase 7 doesn't have a billing model to create one against. Revisit then
+- [x] Fees/deposits are snapshotted onto the booking at creation time (so a later price change doesn't rewrite history). Since Phase 7 they are billed to the unit when the booking is confirmed
 
 Tests
 - No double-booking: the amenity's own row is locked (`lockForUpdate`) for the duration of the booking transaction, so capacity and the per-unit limit are checked and the row inserted atomically — 31 tests total for Phase 5, including capacity-at-the-limit and per-unit-limit cases
@@ -265,32 +265,35 @@ Tests
 ### Phase 7 — Finance *(manual payments; strictest tests)*
 **Goal:** correct books for every community.
 
+Delivered in three milestones (7a ledger & receivables, 7b billing & bills, 7c reports & reconciliation).
+
 Tasks
-- [ ] Money as integer cents + `Money` value object
-- [ ] Chart of accounts (seeded templates for condo/HOA/rental), fiscal years
-- [ ] Double-entry ledger (`ledger_entries`), immutable — corrections by reversal only
-- [ ] Charge types; recurring charges (fixed or by unit factor)
-- [ ] Billing run (monthly job): generates invoices per unit, idempotent
-- [ ] Resident ledger, statement PDF, balance on resident home
-- [ ] **Manual payments** (cash/cheque/bank transfer/other) recorded by manager, allocation to oldest invoices, receipts PDF, refunds/NSF reversal
-- [ ] Late fee rules + scheduler, overdue reminders (in-app)
-- [ ] Amenity fees, violation fines post to ledger
-- [ ] Vendor bills → approval flow (manager/board thresholds) → mark paid
-- [ ] Budgets; reports: aged receivables, income statement, balance sheet, budget vs actual, general ledger
-- [ ] CSV/Excel export; bank statement CSV import + reconciliation
-- [ ] `PaymentGateway` interface ready for Stripe
+- [x] Money as integer cents + `Money` value object (`App\Support\Finance\Money`): parsing never goes through a float, `percentOf` rounds half away from zero, `allocate` splits by the largest-remainder method with bcmath so parts always sum to the whole
+- [x] Chart of accounts (per-type templates for condo/HOA/co-op/rental/mixed, provisioned on first use and never overwritten afterwards), fiscal years (configurable start month; a closed year refuses postings)
+- [x] Double-entry ledger (`journal_entries` + `ledger_entries`), immutable twice over — a model guard *and* MySQL triggers refuse updates/deletes. Corrections are reversal entries only. Year-end close is virtual: the balance sheet folds cumulative income − expenses into equity instead of posting closing entries
+- [x] Charge types; recurring charges (fixed per unit, a community total split by unit factor, or a single unit's charge such as parking)
+- [x] Billing run (`finance:run-billing`, daily): one invoice per unit per month holding every charge that applies; a unique billing key per unit+month makes re-runs and crashed runs safe
+- [x] Resident account page with running-balance statement, statement PDF (`barryvdh/laravel-dompdf`, added with approval), balance card on the resident dashboard
+- [x] **Manual payments** (cash/cheque/bank transfer/other): oldest invoice first, overpayments held as credit and applied to the next invoice automatically, receipt PDF, reversal for refund/NSF/error that reopens the invoices it paid
+- [x] Late fee rules (grace days, flat or % of the balance, minimum balance) via `finance:assess-late-fees` — at most one fee per overdue invoice, never a fee on a fee, never retroactive to invoices due before the rule existed; overdue reminders in-app (`finance:send-overdue-reminders`, weekly per invoice, new Billing notification category)
+- [x] Amenity fees and deposits post to the ledger when a booking is confirmed (deposits as a liability) and are voided if the booking is cancelled unpaid. Violation fines: the *Fines* income account exists; posting to it lands with violations in Phase 8
+- [x] Vendor bills → approve/reject → mark paid. Managers approve up to the community's limit (default $5,000), the board above it — enforced in the action itself, not just the UI. Approval posts expense/payable; payment clears the payable against the bank
+- [x] Budgets (annual per account, per fiscal year); reports: aged receivables, income statement, balance sheet, budget vs actual (year-to-date budget = the annual figure split evenly by month to the cent), general ledger. One `ReportTable` drives the page, the export and the tests
+- [x] CSV/Excel export of every report; bank statement import (CSV or XLSX; signed amount or deposit/withdrawal columns; ISO or MM/DD/YYYY dates) with auto-matching by amount, reference and date, manual match, "record in the books" for bank charges/interest, and sign-off once the difference is zero
+- [x] `PaymentGateway` interface shaped like hosted checkout (create → redirect → look up by reference, from the return link or a webhook) with a local test-mode driver; `ConfirmOnlinePayment` is idempotent on a unique gateway reference, ready for a Stripe driver
 
 Tests
-- **Ledger invariant: total debits = total credits** after every action (asserted in a global test helper)
-- Billing run twice → no duplicates
-- Unit-factor allocation rounding: sum equals total exactly
-- Partial, over- and split payments; reversals
-- Late fees with time travel
-- Reports reconcile to seeded known values
-- Approval thresholds by role
-- **Mutation testing** on finance module (score ≥ 80%)
+- **Ledger invariant** — every journal entry and every community's ledger balances — asserted after *every* test in `tests/Feature/Finance` (global `afterEach` in `tests/Pest.php`)
+- Billing run twice (and ten times) → no duplicates; an interrupted run picks up where it stopped
+- Unit-factor allocation: fixed awkward cases plus a randomised run of 12 totals over 13 random factors — the sum equals the total exactly every time
+- Partial, over- and split payments; credits; reversals of each kind; voids; a deliberately messy month that must still reconcile invoice-by-invoice
+- Late fees with time travel (grace period boundaries, idempotency, no fee on a fee, no retroactive fees)
+- Reports reconcile to a hand-computed quarter (every figure in the test's docblock), the balance sheet balances on every date, aged receivables always total the receivables account
+- Approval thresholds by role (manager at the limit / one cent over, board, admin, staff) and a stale-copy double-approval race
+- **Mutation testing** on the finance core (`composer test:mutate`, and a CI job): each core class — `Money`, the ledger posting/reversal actions, invoicing/payment/allocation, the billing run, late fees and reminders, vendor bills, the bank statement parser and reconciliation, and the reports — is mutated against *its own* test file and must score ≥ 80% (see `tests/mutate.php`). Mutating the whole module against every test that touches it was tried and abandoned: a single ledger mutant re-ran hundreds of database-backed tests, projecting to many hours. Runs sequentially — with `--parallel`, worker database set-up failures count as "killed" mutants and the score reads a meaningless 100%. Locally it loads Herd's bundled Xdebug for the run only (no global config change); CI uses pcov
+- Tenant isolation for every finance model and page, like every other module
 
-✅ **Done when:** a full month closes, statements are correct, reports balance.
+✅ **Done when:** a full month closes, statements are correct, reports balance. **Met** — the demo seed bills three months through the real billing run, takes payments (including a bounced cheque and a prepayment), charges late fees, and closes last month: bank statement imported, auto-matched, bank charge booked, reconciliation signed off with two genuinely outstanding deposits. See `tests/Feature/Finance/ReportsTest.php` and `tests/Feature/Finance/BankReconciliationTest.php`.
 
 ---
 

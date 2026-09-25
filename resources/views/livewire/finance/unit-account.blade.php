@@ -6,12 +6,24 @@
         </div>
 
         <div class="flex gap-2">
+            @if ($this->balance->isPositive() && $this->canPayOnline())
+                <form method="POST" action="{{ route('communities.units.pay-online', [$community, $unit]) }}">
+                    @csrf
+                    <flux:button type="submit" variant="primary" icon="credit-card">
+                        {{ __('Pay :amount online', ['amount' => $this->balance->format()]) }}
+                    </flux:button>
+                </form>
+            @endif
             <flux:button icon="arrow-down-tray" :href="route('communities.units.statement', [$community, $unit, 'from' => $from, 'to' => $to])">{{ __('Statement PDF') }}</flux:button>
             @if ($this->canManage())
                 <flux:button variant="primary" icon="banknotes" :href="route('communities.finance.payments', $community)" wire:navigate>{{ __('Payments') }}</flux:button>
             @endif
         </div>
     </div>
+
+    @if (session('payment_status'))
+        <flux:callout variant="success" icon="check-circle" :heading="session('payment_status')" />
+    @endif
 
     <div class="grid gap-4 sm:grid-cols-3">
         <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700">

@@ -59,4 +59,12 @@ class UnitPolicy
         return $this->allowedFor($user, $unit, Permission::ViewFinance)
             || $this->isCurrentResidentOfUnit($user, $unit->id);
     }
+
+    /**
+     * Paying online is for the unit's own residents; staff record payments they receive by hand.
+     */
+    public function payOnline(User $user, Unit $unit): bool
+    {
+        return $this->isCurrentResidentOfUnit($user, $unit->id);
+    }
 }

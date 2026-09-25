@@ -59,6 +59,7 @@ class ChargeAmenityBooking
             $today,
             $bookingDate->greaterThan($today) ? $bookingDate : $today,
             $lines,
+            __('Amenity booking: :booking', ['booking' => $label]),
             source: $booking,
             billingKey: self::billingKey($booking),
         );

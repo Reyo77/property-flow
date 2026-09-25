@@ -5,9 +5,14 @@
             <flux:subheading>{{ collect([$unit->building?->name, $community->name])->filter()->implode(' · ') }}</flux:subheading>
         </div>
 
-        @can('manageResidents', $unit)
-            <flux:button variant="primary" icon="user-plus" wire:click="openAddResident">{{ __('Add resident') }}</flux:button>
-        @endcan
+        <div class="flex gap-2">
+            @can('viewLedger', $unit)
+                <flux:button icon="banknotes" :href="route('communities.units.account', [$community, $unit])" wire:navigate>{{ __('Account') }}</flux:button>
+            @endcan
+            @can('manageResidents', $unit)
+                <flux:button variant="primary" icon="user-plus" wire:click="openAddResident">{{ __('Add resident') }}</flux:button>
+            @endcan
+        </div>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">

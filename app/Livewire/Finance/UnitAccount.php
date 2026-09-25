@@ -96,6 +96,12 @@ class UnitAccount extends Component
         return $this->currentUser()->can('create', [Payment::class, $this->community]);
     }
 
+    #[Computed]
+    public function canPayOnline(): bool
+    {
+        return $this->currentUser()->can('payOnline', $this->unit);
+    }
+
     public function render(): View
     {
         return view('livewire.finance.unit-account');

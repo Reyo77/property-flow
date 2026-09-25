@@ -37,6 +37,8 @@ it('parses user-entered amounts without floating point', function (string $input
     ['0.01', 1],
     ['0', 0],
     [' 7.00 ', 700],
+    ["\t7.00\n", 700],
+    ['1 234.50', 123450],
 ]);
 
 it('refuses to parse garbage or sub-cent precision', function (string $input) {
@@ -52,6 +54,11 @@ it('takes a percentage in basis points, rounding half away from zero', function 
     [-3335, 1000, -334],    // negative rounds away from zero too
     [100, 5000, 50],
     [0, 1234, 0],
+    [5000, 1, 1],           // exactly half a cent rounds up...
+    [4999, 1, 0],           // ...just under half rounds down
+    [-5000, 1, -1],         // and the same, mirrored, for negatives
+    [-4999, 1, 0],
+    [100_000_000, 10000, 100_000_000], // 100% is the whole amount, even for large sums
 ]);
 
 it('allocates so the parts always sum to the whole', function (int $cents, array $ratios, array $expected) {
@@ -66,6 +73,7 @@ it('allocates so the parts always sum to the whole', function (int $cents, array
     'unit factors' => [100000, ['33.333333', '33.333333', '33.333334'], [33333, 33333, 33334]],
     'zero ratio gets nothing' => [500, [1, 0, 1], [250, 0, 250]],
     'negative amounts' => [-100, [1, 1, 1], [-34, -33, -33]],
+    'a single negative cent' => [-1, [1, 1], [-1, 0]],
     'single ratio' => [777, ['0.5'], [777]],
     'zero amount' => [0, [1, 2], [0, 0]],
 ]);
@@ -135,6 +143,8 @@ it('formats for display and for export', function (int $cents, string $display, 
     [123456, '$1,234.56', '1234.56'],
     [-1200, '-$12.00', '-12.00'],
     [-7, '-$0.07', '-0.07'],
+    [-1, '-$0.01', '-0.01'],
+    [105, '$1.05', '1.05'],
 ]);
 
 it('serializes to json', function () {

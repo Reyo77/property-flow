@@ -3,10 +3,14 @@
 use App\Http\Controllers\AttachmentDownloadController;
 use App\Http\Controllers\DocumentDownloadController;
 use App\Http\Controllers\DocumentVersionDownloadController;
+use App\Http\Controllers\FinancialReportExportController;
+use App\Http\Controllers\OnlinePaymentReturnController;
 use App\Http\Controllers\PackageSignatureController;
 use App\Http\Controllers\PatrolCheckpointQrController;
 use App\Http\Controllers\PatrolScanController;
 use App\Http\Controllers\PaymentReceiptController;
+use App\Http\Controllers\StartOnlinePaymentController;
+use App\Http\Controllers\TestCheckoutController;
 use App\Http\Controllers\UnitStatementController;
 use App\Http\Middleware\RememberCurrentCommunity;
 use App\Livewire\AccessKeys;
@@ -56,6 +60,8 @@ Route::middleware('auth')->group(function () {
     Route::livewire('vendors', Vendors\Index::class)->name('vendors.index');
     Route::livewire('my-work-orders', WorkOrders\MyWorkOrders::class)->name('work-orders.mine');
     Route::get('patrol-scan/{qrToken}', PatrolScanController::class)->name('patrol-scan');
+    Route::get('payments/test-checkout/{reference}', [TestCheckoutController::class, 'show'])->name('payments.test-checkout');
+    Route::post('payments/test-checkout/{reference}', [TestCheckoutController::class, 'update'])->name('payments.test-checkout.complete');
 
     Route::livewire('communities', Communities\Index::class)->name('communities.index');
     Route::livewire('communities/create', Communities\Create::class)->name('communities.create');
@@ -108,9 +114,16 @@ Route::middleware('auth')->group(function () {
             Route::livewire('finance/setup', Finance\Setup::class)->name('finance.setup');
             Route::livewire('finance/billing', Finance\Billing::class)->name('finance.billing');
             Route::livewire('finance/bills', Finance\Bills::class)->name('finance.bills');
+            Route::livewire('finance/budget', Finance\Budgets::class)->name('finance.budget');
+            Route::livewire('finance/reports', Finance\Reports::class)->name('finance.reports');
+            Route::get('finance/reports/export', FinancialReportExportController::class)->name('finance.reports.export');
+            Route::livewire('finance/reconciliation', Finance\Reconciliation::class)->name('finance.reconciliation');
+            Route::livewire('finance/reconciliation/{bankStatement}', Finance\BankStatementShow::class)->name('finance.reconciliation.show');
             Route::get('payments/{payment}/receipt', PaymentReceiptController::class)->name('payments.receipt');
             Route::livewire('units/{unit}/account', Finance\UnitAccount::class)->name('units.account');
             Route::get('units/{unit}/statement', UnitStatementController::class)->name('units.statement');
+            Route::post('units/{unit}/pay-online', StartOnlinePaymentController::class)->name('units.pay-online');
+            Route::get('units/{unit}/payment-return', OnlinePaymentReturnController::class)->name('units.payment-return');
         });
 });
 

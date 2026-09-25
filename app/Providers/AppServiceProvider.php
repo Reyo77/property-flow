@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Policies\RolePolicy;
+use App\Support\Payments\LocalPaymentGateway;
+use App\Support\Payments\PaymentGateway;
 use App\Support\Tenancy\CurrentCommunity;
 use App\Support\Tenancy\CurrentCompany;
 use Carbon\CarbonImmutable;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use InvalidArgumentException;
 use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
@@ -26,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(CurrentCompany::class);
         $this->app->scoped(CurrentCommunity::class);
+        $this->app->singleton(PaymentGateway::class, fn ($app) => match (config('services.payments.gateway')) {
+            'local' => $app->make(LocalPaymentGateway::class),
+            default => throw new InvalidArgumentException('Unknown payment gateway ['.json_encode(config('services.payments.gateway')).'].'),
+        });
     }
 
     /**

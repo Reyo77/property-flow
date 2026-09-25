@@ -30,6 +30,9 @@ pest()->extend(TestCase::class)
 // so does each community's ledger as a whole.
 pest()->afterEach(fn () => expectLedgerBalanced())->in('Feature/Finance');
 
+// The finance suite, selectable with --group=finance (used by `composer test:mutate`).
+pest()->group('finance')->in('Unit/Finance', 'Feature/Finance');
+
 /*
 |--------------------------------------------------------------------------
 | Expectations

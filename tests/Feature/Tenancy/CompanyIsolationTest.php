@@ -11,6 +11,9 @@ use App\Models\AmenityBlackout;
 use App\Models\AmenityBooking;
 use App\Models\Announcement;
 use App\Models\Asset;
+use App\Models\BankStatement;
+use App\Models\BankStatementLine;
+use App\Models\BudgetLine;
 use App\Models\Building;
 use App\Models\ChargeType;
 use App\Models\Community;
@@ -109,6 +112,9 @@ dataset('tenant models', [
     'recurring charges' => fn () => RecurringCharge::factory(),
     'late fee rules' => fn () => LateFeeRule::factory(),
     'vendor bills' => fn () => VendorBill::factory(),
+    'budget lines' => fn () => BudgetLine::factory(),
+    'bank statements' => fn () => BankStatement::factory(),
+    'bank statement lines' => fn () => BankStatementLine::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {
@@ -161,6 +167,9 @@ it('returns 404 for pages of another company\'s community', function (string $ro
     'accounts & charges' => 'communities.finance.setup',
     'billing' => 'communities.finance.billing',
     'vendor bills' => 'communities.finance.bills',
+    'budget' => 'communities.finance.budget',
+    'reports' => 'communities.finance.reports',
+    'reconciliation' => 'communities.finance.reconciliation',
 ]);
 
 it('refuses to edit a unit of another company', function () {

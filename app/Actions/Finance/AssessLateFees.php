@@ -70,6 +70,7 @@ class AssessLateFees
                 $today,
                 $today,
                 [new InvoiceLineData(__('Late fee on :number', ['number' => $invoice->displayNumber()]), $fee, $account)],
+                __('Late fee on :number', ['number' => $invoice->displayNumber()]),
                 source: $invoice,
                 billingKey: self::billingKey($invoice),
             );

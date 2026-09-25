@@ -47,7 +47,7 @@
                         <flux:sidebar.item icon="building-office" :href="route('communities.buildings.index', $currentCommunity)" :current="request()->routeIs('communities.buildings.*')" wire:navigate>
                             {{ __('Buildings') }}
                         </flux:sidebar.item>
-                        <flux:sidebar.item icon="home-modern" :href="route('communities.units.index', $currentCommunity)" :current="request()->routeIs('communities.units.*')" wire:navigate>
+                        <flux:sidebar.item icon="home-modern" :href="route('communities.units.index', $currentCommunity)" :current="request()->routeIs('communities.units.*') && ! request()->routeIs('communities.units.account')" wire:navigate>
                             {{ __('Units') }}
                         </flux:sidebar.item>
                         @can('viewAny', [App\Models\Resident::class, $currentCommunity])
@@ -119,6 +119,12 @@
                             </flux:sidebar.item>
                             <flux:sidebar.item icon="arrow-path" :href="route('communities.finance.billing', $currentCommunity)" :current="request()->routeIs('communities.finance.billing')" wire:navigate>
                                 {{ __('Billing') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="presentation-chart-line" :href="route('communities.finance.reports', $currentCommunity)" :current="request()->routeIs('communities.finance.reports', 'communities.finance.budget')" wire:navigate>
+                                {{ __('Reports & budget') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="scale" :href="route('communities.finance.reconciliation', $currentCommunity)" :current="request()->routeIs('communities.finance.reconciliation*')" wire:navigate>
+                                {{ __('Reconciliation') }}
                             </flux:sidebar.item>
                             <flux:sidebar.item icon="book-open" :href="route('communities.finance.setup', $currentCommunity)" :current="request()->routeIs('communities.finance.setup')" wire:navigate>
                                 {{ __('Accounts & charges') }}

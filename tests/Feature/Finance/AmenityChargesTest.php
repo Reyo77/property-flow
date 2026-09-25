@@ -54,6 +54,7 @@ it('bills the fee as amenity income and the deposit as a liability when a bookin
         ->unit_id->toBe($unit->id)
         ->total_cents->toBe(25000)
         ->billing_key->toBe(ChargeAmenityBooking::billingKey($booking))
+        ->memo->toStartWith('Amenity booking: '.$amenity->name)
         ->and($invoice->source->is($booking))->toBeTrue()
         ->and($invoice->due_on->toDateString())->toBe($booking->starts_at->setTimezone($community->timezone)->toDateString())
         ->and($credited(SystemAccount::AmenityFees))->toBe(5000)

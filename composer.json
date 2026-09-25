@@ -77,6 +77,10 @@
         "types:check": [
             "phpstan analyse --memory-limit=1G"
         ],
+        "test:mutate": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php tests/mutate.php"
+        ],
         "test": [
             "Composer\\Config::disableProcessTimeout",
             "@php artisan config:clear --ansi",

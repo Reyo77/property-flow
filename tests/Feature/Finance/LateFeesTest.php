@@ -82,7 +82,7 @@ describe('late fees', function () {
         assessOn($community, '2026-09-12');
 
         $fee = lateFees($invoice)->sole();
-        expect($fee)->unit_id->toBe($unit->id)->total_cents->toBe(2500)
+        expect($fee)->unit_id->toBe($unit->id)->total_cents->toBe(2500)->memo->toBe("Late fee on {$invoice->displayNumber()}")
             ->and($fee->source->is($invoice))->toBeTrue()
             ->and($fee->issued_on->toDateString())->toBe('2026-09-12')
             ->and(app(AccountBalances::class)->of($community, SystemAccount::LateFees)->cents)->toBe(2500);

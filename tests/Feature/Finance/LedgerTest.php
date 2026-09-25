@@ -10,6 +10,7 @@ use App\Models\Community;
 use App\Models\FiscalYear;
 use App\Models\JournalEntry;
 use App\Models\LedgerEntry;
+use App\Models\Unit;
 use App\Support\Finance\ChartOfAccounts;
 use App\Support\Finance\FiscalYears;
 use App\Support\Finance\JournalLine;
@@ -145,7 +146,7 @@ describe('fiscal years', function () {
         FiscalYear::factory()->for($community)->closed()->create(['starts_on' => '2025-01-01', 'ends_on' => '2025-12-31']);
 
         postCashReceipt($community, 100, '2025-06-01');
-    })->throws(LogicException::class, 'closed');
+    })->throws(LogicException::class, 'The 2025 fiscal year is closed');
 });
 
 describe('posting', function () {
@@ -202,9 +203,26 @@ describe('posting', function () {
         ]);
     })->throws(InvalidArgumentException::class, 'at least two lines');
 
-    it('refuses a zero or negative line amount', function (int $cents) {
-        JournalLine::debit(Account::factory()->make(), Money::of($cents));
-    })->with([0, -5])->throws(InvalidArgumentException::class);
+    it('refuses a zero or negative line amount on either side', function (string $side, int $cents) {
+        JournalLine::{$side}(Account::factory()->make(), Money::of($cents));
+    })->with(['debit', 'credit'])->with([0, -1])->throws(InvalidArgumentException::class);
+
+    it('posts the smallest possible amount, one cent', function () {
+        expect(postCashReceipt(Community::factory()->create(), 1)->lines->sum('debit_cents'))->toBe(1);
+    });
+
+    it('stores each line\'s unit and memo', function () {
+        $community = Community::factory()->create();
+        $unit = Unit::factory()->for($community)->create();
+
+        $entry = app(PostJournalEntry::class)->handle($community, now(), 'Fees', [
+            JournalLine::debit(account($community, SystemAccount::Receivables), Money::of(500), $unit, 'INV-000009'),
+            JournalLine::credit(account($community, SystemAccount::Assessments), Money::of(500), memo: 'Monthly fees'),
+        ]);
+
+        expect($entry->lines->firstWhere('debit_cents', 500))->unit_id->toBe($unit->id)->memo->toBe('INV-000009')
+            ->and($entry->lines->firstWhere('credit_cents', 500))->unit_id->toBeNull()->memo->toBe('Monthly fees');
+    });
 
     it('refuses a line that is both a debit and a credit', function () {
         $community = Community::factory()->create();
@@ -216,14 +234,16 @@ describe('posting', function () {
         ]);
     })->throws(InvalidArgumentException::class, 'either a positive debit or a positive credit');
 
-    it('refuses a negative stored amount', function () {
+    it('refuses a negative stored amount, down to a single cent, on either side', function (int $debit, int $credit) {
         $community = Community::factory()->create();
 
+        // A negative on one side paired with a positive on the other would slip past a naive
+        // "exactly one side is positive" check, so the sign is checked separately.
         app(PostJournalEntry::class)->handle($community, now(), 'Negative', [
-            JournalLine::fromStored(account($community, SystemAccount::Cash), -100, 0, null, null),
-            JournalLine::fromStored(account($community, SystemAccount::OtherIncome), 0, -100, null, null),
+            JournalLine::fromStored(account($community, SystemAccount::Cash), $debit, $credit, null, null),
+            JournalLine::fromStored(account($community, SystemAccount::OtherIncome), $credit === 1 ? 0 : 1, $credit === 1 ? 1 : 0, null, null),
         ]);
-    })->throws(InvalidArgumentException::class);
+    })->with([[1, -1], [-1, 1]])->throws(InvalidArgumentException::class, 'either a positive debit or a positive credit');
 
     it('refuses an account from another community', function () {
         $community = Community::factory()->create();
@@ -307,6 +327,16 @@ describe('reversal', function () {
         $reversal = app(ReverseJournalEntry::class)->handle($entry, now(), 'Undo');
 
         expect($reversal->source_id)->toBe($community->id);
+    });
+
+    it('records a different source on the reversal when one is given', function () {
+        $community = Community::factory()->create();
+        $entry = postCashReceipt($community, 100);
+        $unit = Unit::factory()->for($community)->create();
+
+        $reversal = app(ReverseJournalEntry::class)->handle($entry, now(), 'Undo', source: $unit);
+
+        expect($reversal->source_type)->toBe($unit->getMorphClass())->and($reversal->source_id)->toBe($unit->id);
     });
 
     it('can only reverse an entry once', function () {

@@ -19,9 +19,12 @@ class AccountBalances
     public function __construct(private readonly ChartOfAccounts $chartOfAccounts) {}
 
     /**
+     * Balances as of a date (everything posted up to and including it), or the movement within a
+     * period when $from is given too.
+     *
      * @return Collection<int, Money> keyed by account id
      */
-    public function forCommunity(Community $community, ?CarbonInterface $asOf = null): Collection
+    public function forCommunity(Community $community, ?CarbonInterface $asOf = null, ?CarbonInterface $from = null): Collection
     {
         $query = LedgerEntry::query()->withoutGlobalScopes()
             ->join('accounts', 'accounts.id', '=', 'ledger_entries.account_id')
@@ -31,6 +34,10 @@ class AccountBalances
 
         if ($asOf !== null) {
             $query->whereDate('ledger_entries.posted_on', '<=', $asOf->toDateString());
+        }
+
+        if ($from !== null) {
+            $query->whereDate('ledger_entries.posted_on', '>=', $from->toDateString());
         }
 
         $totals = $query->toBase()->get()->keyBy('account_id');
