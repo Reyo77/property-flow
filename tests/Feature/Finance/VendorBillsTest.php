@@ -202,3 +202,40 @@ describe('workflow rules', function () {
             ->and(submitBill($second, 100)->number)->toBe(1);
     });
 });
+
+it('records every detail of a bill through its life, with readable ledger memos', function () {
+    $community = Community::factory()->create();
+    $admin = companyAdmin($community->company);
+    $bill = submitBill($community, 64000, $admin);
+
+    expect($bill->fresh())
+        ->vendor_reference->toBe('ACE-4471')->description->toBe('Replace riser valve')
+        ->billed_on->toDateString()->toBe('2026-09-10')->due_on->toDateString()->toBe('2026-10-10')
+        ->submitted_by_id->toBe($admin->id)->account_id->toBe(repairsAccount($community)->id);
+
+    app(DecideVendorBill::class)->approve($bill, $admin, 'Matches the quote');
+    $bill->refresh();
+    $approval = JournalEntry::withoutGlobalScopes()->findOrFail($bill->approval_journal_entry_id);
+
+    expect($bill)->decided_by_id->toBe($admin->id)->decision_notes->toBe('Matches the quote')->decided_at->not->toBeNull()
+        ->and($approval->memo)->toBe('BILL-000001 · Ace Plumbing: Replace riser valve');
+
+    app(PayVendorBill::class)->handle($bill, PaymentMethod::Cheque, CarbonImmutable::parse('2026-09-20'), 'CHQ 1041', $admin);
+    $bill->refresh();
+    $payment = JournalEntry::withoutGlobalScopes()->findOrFail($bill->payment_journal_entry_id);
+
+    expect($bill)->paid_on?->toDateString()->toBe('2026-09-20')
+        ->and($bill)->payment_method->toBe(PaymentMethod::Cheque)->paid_by_id->toBe($admin->id)
+        ->and($payment->memo)->toBe('Paid BILL-000001 · Ace Plumbing (Cheque)')
+        ->and($payment->posted_on->toDateString())->toBe('2026-09-20');
+});
+
+it('records who rejected a bill and when', function () {
+    $community = Community::factory()->create();
+    $admin = companyAdmin($community->company);
+    $bill = submitBill($community, 1000);
+
+    app(DecideVendorBill::class)->reject($bill, $admin, 'Duplicate');
+
+    expect($bill->fresh())->decided_by_id->toBe($admin->id)->decided_at->not->toBeNull()->decision_notes->toBe('Duplicate');
+});
