@@ -114,6 +114,12 @@
                             <flux:sidebar.item icon="banknotes" :href="route('communities.finance.payments', $currentCommunity)" :current="request()->routeIs('communities.finance.payments')" wire:navigate>
                                 {{ __('Payments') }}
                             </flux:sidebar.item>
+                            <flux:sidebar.item icon="receipt-percent" :href="route('communities.finance.bills', $currentCommunity)" :current="request()->routeIs('communities.finance.bills')" wire:navigate>
+                                {{ __('Vendor bills') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="arrow-path" :href="route('communities.finance.billing', $currentCommunity)" :current="request()->routeIs('communities.finance.billing')" wire:navigate>
+                                {{ __('Billing') }}
+                            </flux:sidebar.item>
                             <flux:sidebar.item icon="book-open" :href="route('communities.finance.setup', $currentCommunity)" :current="request()->routeIs('communities.finance.setup')" wire:navigate>
                                 {{ __('Accounts & charges') }}
                             </flux:sidebar.item>

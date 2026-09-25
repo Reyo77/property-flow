@@ -106,6 +106,8 @@ Route::middleware('auth')->group(function () {
             Route::livewire('finance/invoices', Finance\Invoices::class)->name('finance.invoices');
             Route::livewire('finance/payments', Finance\Payments::class)->name('finance.payments');
             Route::livewire('finance/setup', Finance\Setup::class)->name('finance.setup');
+            Route::livewire('finance/billing', Finance\Billing::class)->name('finance.billing');
+            Route::livewire('finance/bills', Finance\Bills::class)->name('finance.bills');
             Route::get('payments/{payment}/receipt', PaymentReceiptController::class)->name('payments.receipt');
             Route::livewire('units/{unit}/account', Finance\UnitAccount::class)->name('units.account');
             Route::get('units/{unit}/statement', UnitStatementController::class)->name('units.statement');

@@ -29,6 +29,7 @@ use App\Models\Invitation;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\JournalEntry;
+use App\Models\LateFeeRule;
 use App\Models\LedgerEntry;
 use App\Models\MaintenanceSchedule;
 use App\Models\Package;
@@ -39,6 +40,7 @@ use App\Models\PatrolScan;
 use App\Models\Payment;
 use App\Models\PaymentAllocation;
 use App\Models\Pet;
+use App\Models\RecurringCharge;
 use App\Models\Residency;
 use App\Models\Resident;
 use App\Models\ServiceRequest;
@@ -48,6 +50,7 @@ use App\Models\Task;
 use App\Models\Unit;
 use App\Models\Vehicle;
 use App\Models\Vendor;
+use App\Models\VendorBill;
 use App\Models\Visitor;
 use App\Models\WorkOrder;
 use App\Support\Tenancy\CurrentCompany;
@@ -103,6 +106,9 @@ dataset('tenant models', [
     'invoice lines' => fn () => InvoiceLine::factory(),
     'payments' => fn () => Payment::factory(),
     'payment allocations' => fn () => PaymentAllocation::factory(),
+    'recurring charges' => fn () => RecurringCharge::factory(),
+    'late fee rules' => fn () => LateFeeRule::factory(),
+    'vendor bills' => fn () => VendorBill::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {
@@ -153,6 +159,8 @@ it('returns 404 for pages of another company\'s community', function (string $ro
     'invoices' => 'communities.finance.invoices',
     'payments' => 'communities.finance.payments',
     'accounts & charges' => 'communities.finance.setup',
+    'billing' => 'communities.finance.billing',
+    'vendor bills' => 'communities.finance.bills',
 ]);
 
 it('refuses to edit a unit of another company', function () {

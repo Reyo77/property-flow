@@ -12,14 +12,14 @@ use LogicException;
 
 /**
  * Provisions a community's chart of accounts from a template for its type, the first time
- * finance touches it. Idempotent: once a community has any accounts, it is left alone, so a
- * company's renames and additions are never overwritten.
+ * finance touches it. Idempotent: once a community has its system accounts, it is left alone,
+ * so a company's renames and additions are never overwritten.
  */
 class ChartOfAccounts
 {
     public function ensureFor(Community $community): void
     {
-        if (Account::query()->withoutGlobalScopes()->where('community_id', $community->id)->exists()) {
+        if ($this->isProvisioned($community)) {
             return;
         }
 
@@ -27,7 +27,7 @@ class ChartOfAccounts
             // Serialize concurrent first-time provisioning for the same community.
             Community::query()->withoutGlobalScopes()->whereKey($community->id)->lockForUpdate()->first();
 
-            if (Account::query()->withoutGlobalScopes()->where('community_id', $community->id)->exists()) {
+            if ($this->isProvisioned($community)) {
                 return;
             }
 
@@ -40,6 +40,11 @@ class ChartOfAccounts
                 ])->save();
             }
         });
+    }
+
+    private function isProvisioned(Community $community): bool
+    {
+        return Account::query()->withoutGlobalScopes()->where('community_id', $community->id)->whereNotNull('system_key')->exists();
     }
 
     public function account(Community $community, SystemAccount $key): Account

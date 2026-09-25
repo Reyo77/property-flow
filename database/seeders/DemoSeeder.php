@@ -4,9 +4,13 @@ namespace Database\Seeders;
 
 use App\Actions\Amenities\CreateAmenityBooking;
 use App\Actions\Announcements\PublishAnnouncement;
-use App\Actions\Finance\IssueInvoice;
+use App\Actions\Finance\AssessLateFees;
+use App\Actions\Finance\DecideVendorBill;
+use App\Actions\Finance\PayVendorBill;
 use App\Actions\Finance\RecordPayment;
 use App\Actions\Finance\ReversePayment;
+use App\Actions\Finance\RunBilling;
+use App\Actions\Finance\SubmitVendorBill;
 use App\Actions\FrontDesk\CreateIncidentReport;
 use App\Actions\FrontDesk\IssueParkingPermit;
 use App\Actions\FrontDesk\LogPackage;
@@ -46,10 +50,12 @@ use App\Models\EntryAuthorization;
 use App\Models\Event;
 use App\Models\EventRsvp;
 use App\Models\GuestPass;
+use App\Models\LateFeeRule;
 use App\Models\MaintenanceSchedule;
 use App\Models\PatrolCheckpoint;
 use App\Models\PatrolRoute;
 use App\Models\Pet;
+use App\Models\RecurringCharge;
 use App\Models\Residency;
 use App\Models\Resident;
 use App\Models\ServiceRequest;
@@ -63,7 +69,6 @@ use App\Models\Vendor;
 use App\Models\Visitor;
 use App\Models\WorkOrder;
 use App\Support\Finance\ChartOfAccounts;
-use App\Support\Finance\InvoiceLineData;
 use App\Support\Finance\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
@@ -409,14 +414,15 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * Three months of common expense fees split by unit factor, with realistic payment behaviour:
-     * most units pay in full, some pay late or partially, one prepays, and one cheque bounces.
-     * The demo resident is paid up except for this month.
+     * Three months of common expense fees, billed by the real billing run and split by unit factor,
+     * with realistic payment behaviour: most units pay in full, some pay late or partially, one
+     * prepays, one cheque bounces, and late fees land on what is still overdue. The demo resident
+     * is paid up except for this month.
      */
     private function seedFinance(Community $condo): void
     {
         $chartOfAccounts = app(ChartOfAccounts::class);
-        $issueInvoice = app(IssueInvoice::class);
+        $runBilling = app(RunBilling::class);
         $recordPayment = app(RecordPayment::class);
         $manager = User::where('email', 'manager@propertyflow.test')->sole();
         $residentUnitId = Residency::where('resident_id', Resident::where('email', 'resident@propertyflow.test')->sole()->id)->active()->firstOrFail()->unit_id;
@@ -429,19 +435,26 @@ class DemoSeeder extends Seeder
         $shares = Money::of(2_700_000, $condo->currency)->allocate($units->map(fn (Unit $unit) => (string) $unit->unit_factor)->all());
         $thisMonth = CarbonImmutable::now($condo->timezone)->startOfMonth();
 
+        RecurringCharge::factory()->for($condo)->byUnitFactor(2_700_000)->create([
+            'charge_type_id' => $monthlyFees->id,
+            'description' => 'Common expense fees',
+            'starts_on' => $thisMonth->subMonths(2)->toDateString(),
+        ]);
+        $parking = ChargeType::factory()->for($condo)->create(['name' => 'Parking spot', 'account_id' => $chartOfAccounts->account($condo, SystemAccount::OtherIncome)->id, 'default_amount_cents' => 7500]);
+        foreach ($units->values()->slice(20, 2) as $unit) {
+            RecurringCharge::factory()->for($condo)->create([
+                'charge_type_id' => $parking->id,
+                'unit_id' => $unit->id,
+                'description' => "Parking {$unit->parking}",
+                'amount_cents' => 7500,
+                'starts_on' => $thisMonth->toDateString(),
+            ]);
+        }
+
         foreach ([2, 1, 0] as $monthsAgo) {
             $month = $thisMonth->subMonths($monthsAgo);
 
-            foreach ($units as $unit) {
-                $issueInvoice->handle(
-                    $unit,
-                    $month->subDays(10),
-                    $month,
-                    [InvoiceLineData::forChargeType($monthlyFees, $shares[$unit->id], __('Common expense fees, :month', ['month' => $month->format('F Y')]))],
-                    issuedBy: $manager,
-                    billingKey: "demo-fees:{$unit->id}:{$month->format('Y-m')}",
-                );
-            }
+            $runBilling->handle($condo, $month, $manager);
 
             if ($monthsAgo === 0) {
                 continue;
@@ -472,7 +485,7 @@ class DemoSeeder extends Seeder
         }
 
         foreach ($units->values() as $index => $unit) {
-            if ($unit->id !== $residentUnitId && $index % 4 === 0 && $index % 11 !== 3) {
+            if ($unit->id !== $residentUnitId && $index % 8 !== 1 && $index % 11 !== 3) {
                 $recordPayment->handle($unit, PaymentMethod::BankTransfer, $shares[$unit->id], $thisMonth->addDays(min(3, $thisMonth->diffInDays(CarbonImmutable::now($condo->timezone)))), 'EFT-'.(20000 + $index), recordedBy: $manager);
             }
         }
@@ -480,6 +493,46 @@ class DemoSeeder extends Seeder
         $bouncingUnit = $units->values()->get(9) ?? throw new LogicException('The demo condo needs at least ten units.');
         $bounced = $recordPayment->handle($bouncingUnit, PaymentMethod::Cheque, $shares[$bouncingUnit->id], $thisMonth, 'CHQ 999', recordedBy: $manager);
         app(ReversePayment::class)->handle($bounced, PaymentReversalReason::Nsf, $thisMonth->addDays(2), $manager);
+
+        LateFeeRule::factory()->for($condo)->create(['grace_days' => 10, 'flat_cents' => 2500, 'created_at' => $thisMonth->subMonths(3)]);
+        app(AssessLateFees::class)->handle($condo, CarbonImmutable::now($condo->timezone));
+
+        $this->seedVendorBills($condo, $manager);
+    }
+
+    /**
+     * One vendor bill in every state: a small one a manager can approve, a large one waiting for
+     * the board, an approved one waiting to be paid, and a paid one.
+     */
+    private function seedVendorBills(Community $condo, User $manager): void
+    {
+        $chartOfAccounts = app(ChartOfAccounts::class);
+        $submit = app(SubmitVendorBill::class);
+        $decide = app(DecideVendorBill::class);
+        $plumber = Vendor::where('name', 'Ace Plumbing Co.')->sole();
+        $elevators = Vendor::where('name', 'Reliable Elevator Services')->sole();
+        $landscaper = Vendor::factory()->for($condo->company)->create(['name' => 'Greenway Grounds', 'trade' => 'Landscaping']);
+        $board = User::where('email', 'board@propertyflow.test')->sole();
+        $expense = fn (string $code) => $condo->accounts()->where('code', $code)->sole();
+        $today = CarbonImmutable::now($condo->timezone)->startOfDay();
+        $chartOfAccounts->ensureFor($condo);
+
+        $bill = fn (Vendor $vendor, string $account, int $cents, int $daysAgo, string $description, string $reference) => $submit->handle(
+            $condo, $vendor, $expense($account), Money::of($cents, $condo->currency), $today->subDays($daysAgo), $today->subDays($daysAgo)->addDays(30), $description, $reference, $manager,
+        );
+
+        $paid = $bill($landscaper, '5400', 185000, 40, 'August grounds maintenance', 'GG-2208');
+        $decide->approve($paid, $manager);
+        app(PayVendorBill::class)->handle($paid, PaymentMethod::Cheque, $today->subDays(20), 'CHQ 1041', $manager);
+
+        $approved = $bill($plumber, '5000', 64000, 12, 'Replace riser valve, North Tower', 'ACE-4471');
+        $decide->approve($approved, $manager, 'Matches work order');
+
+        $bill($landscaper, '5400', 185000, 3, 'September grounds maintenance', 'GG-2209');
+        $bill($elevators, '5000', 1_240_000, 2, 'Elevator 2 controller replacement', 'RES-9913');
+
+        $rejected = $bill($plumber, '5000', 64000, 5, 'Replace riser valve, North Tower', 'ACE-4471');
+        $decide->reject($rejected, $board, 'Duplicate of the bill already approved');
     }
 
     /**

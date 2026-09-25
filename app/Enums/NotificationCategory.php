@@ -11,6 +11,7 @@ enum NotificationCategory: string
     case MaintenanceUpdates = 'maintenance_updates';
     case AmenityBookings = 'amenity_bookings';
     case Packages = 'packages';
+    case Billing = 'billing';
 
     public function label(): string
     {
@@ -19,6 +20,7 @@ enum NotificationCategory: string
             self::MaintenanceUpdates => __('Maintenance updates'),
             self::AmenityBookings => __('Amenity bookings'),
             self::Packages => __('Packages'),
+            self::Billing => __('Billing'),
         };
     }
 
@@ -29,6 +31,7 @@ enum NotificationCategory: string
             self::MaintenanceUpdates => __('Updates on service requests you reported or live with'),
             self::AmenityBookings => __('Updates on amenity bookings you made'),
             self::Packages => __('A package has arrived for you at the front desk'),
+            self::Billing => __('Reminders when a bill for your unit is overdue'),
         };
     }
 }

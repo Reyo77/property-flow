@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -33,6 +34,8 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string $timezone
  * @property string $currency
  * @property int $fiscal_year_start_month
+ * @property int $billing_due_day
+ * @property int $bill_approval_limit_cents
  * @property AreaUnit $area_unit
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -40,12 +43,23 @@ use Spatie\Activitylog\Support\LogOptions;
  */
 #[Fillable([
     'name', 'type', 'address_line_1', 'address_line_2', 'city', 'region',
-    'postal_code', 'country', 'timezone', 'currency', 'area_unit', 'fiscal_year_start_month',
+    'postal_code', 'country', 'timezone', 'currency', 'area_unit', 'fiscal_year_start_month', 'billing_due_day', 'bill_approval_limit_cents',
 ])]
 class Community extends Model
 {
     /** @use HasFactory<CommunityFactory> */
     use BelongsToCompany, HasFactory, LogsActivity, SoftDeletes;
+
+    /**
+     * Mirrors the column defaults, so a community is complete before it is re-read from the database.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'fiscal_year_start_month' => 1,
+        'billing_due_day' => 1,
+        'bill_approval_limit_cents' => 500000,
+    ];
 
     /**
      * @return array<string, string>
@@ -56,6 +70,8 @@ class Community extends Model
             'type' => CommunityType::class,
             'area_unit' => AreaUnit::class,
             'fiscal_year_start_month' => 'integer',
+            'billing_due_day' => 'integer',
+            'bill_approval_limit_cents' => 'integer',
         ];
     }
 
@@ -276,6 +292,30 @@ class Community extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * @return HasMany<RecurringCharge, $this>
+     */
+    public function recurringCharges(): HasMany
+    {
+        return $this->hasMany(RecurringCharge::class);
+    }
+
+    /**
+     * @return HasOne<LateFeeRule, $this>
+     */
+    public function lateFeeRule(): HasOne
+    {
+        return $this->hasOne(LateFeeRule::class);
+    }
+
+    /**
+     * @return HasMany<VendorBill, $this>
+     */
+    public function vendorBills(): HasMany
+    {
+        return $this->hasMany(VendorBill::class);
     }
 
     /**

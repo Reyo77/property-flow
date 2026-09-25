@@ -35,6 +35,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $billing_key
  * @property int|null $journal_entry_id
  * @property Carbon|null $voided_at
+ * @property Carbon|null $overdue_notified_at
  * @property int|null $void_journal_entry_id
  * @property int|null $created_by_id
  * @property int|null $paid_cents Only present when loaded with the withPaid scope.
@@ -58,6 +59,7 @@ class Invoice extends Model implements BelongsToOneCommunity
             'issued_on' => 'date',
             'due_on' => 'date',
             'voided_at' => 'datetime',
+            'overdue_notified_at' => 'datetime',
             'total_cents' => 'integer',
             'number' => 'integer',
         ];

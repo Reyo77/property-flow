@@ -87,6 +87,17 @@ describe('chart of accounts', function () {
 
         expect($cash->refresh()->name)->toBe('Main chequing');
     });
+
+    it('still provisions the system accounts when a custom account was added first', function () {
+        $community = Community::factory()->create();
+        $custom = Account::factory()->for($community)->create(['code' => '6100']);
+
+        $payables = account($community, SystemAccount::Payables);
+
+        expect($payables->code)->toBe('2000')
+            ->and(Account::withoutGlobalScopes()->where('community_id', $community->id)->whereNotNull('system_key')->count())->toBe(count(SystemAccount::cases()))
+            ->and($custom->refresh()->code)->toBe('6100');
+    });
 });
 
 describe('fiscal years', function () {

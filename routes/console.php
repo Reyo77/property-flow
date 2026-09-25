@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 Schedule::command('announcements:publish-due')->everyMinute();
 Schedule::command('maintenance:generate-due-work-orders')->daily();
 Schedule::command('packages:remind-uncollected')->daily();
+Schedule::command('finance:run-billing')->dailyAt('01:00');
+Schedule::command('finance:assess-late-fees')->dailyAt('02:00');
+Schedule::command('finance:send-overdue-reminders')->dailyAt('09:00');
