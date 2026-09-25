@@ -8,6 +8,7 @@ use App\Enums\SurveyQuestionKind;
 use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Models\Survey;
+use App\Models\SurveyQuestion;
 use App\Support\Governance\LocalTime;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
@@ -21,6 +22,8 @@ class SurveyForm extends Component
     use InteractsWithCurrentUser;
 
     public Community $community;
+
+    public ?Survey $survey = null;
 
     public string $title = '';
 
@@ -41,10 +44,30 @@ class SurveyForm extends Component
 
     public function mount(): void
     {
-        $this->authorize('create', [Survey::class, $this->community]);
+        if ($this->survey === null) {
+            $this->authorize('create', [Survey::class, $this->community]);
 
-        $this->closes_at = now($this->community->timezone)->addWeeks(2)->setTime(17, 0)->format('Y-m-d\TH:i');
-        $this->addQuestion();
+            $this->closes_at = now($this->community->timezone)->addWeeks(2)->setTime(17, 0)->format('Y-m-d\TH:i');
+            $this->addQuestion();
+
+            return;
+        }
+
+        $this->authorize('manage', $this->survey);
+        abort_if($this->survey->published_at !== null, 404);
+
+        $this->title = $this->survey->title;
+        $this->description = (string) $this->survey->description;
+        $this->is_poll = $this->survey->is_poll;
+        $this->audience = $this->survey->audience->value;
+        $this->is_anonymous = $this->survey->is_anonymous;
+        $this->closes_at = $this->survey->closes_at === null ? '' : LocalTime::forInput($this->survey->closes_at, $this->community);
+        $this->questions = array_values($this->survey->questions()->with('options')->get()->map(fn (SurveyQuestion $question) => [
+            'kind' => $question->kind->value,
+            'title' => $question->title,
+            'is_required' => $question->is_required,
+            'options' => array_values($question->options->pluck('label')->all()),
+        ])->all());
     }
 
     public function addQuestion(): void
@@ -66,7 +89,11 @@ class SurveyForm extends Component
 
     public function save(SaveSurvey $saveSurvey): void
     {
-        $this->authorize('create', [Survey::class, $this->community]);
+        if ($this->survey === null) {
+            $this->authorize('create', [Survey::class, $this->community]);
+        } else {
+            $this->authorize('manage', $this->survey);
+        }
 
         $validated = $this->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -91,7 +118,7 @@ class SurveyForm extends Component
         ], $validated['questions']));
 
         try {
-            $survey = $saveSurvey->handle($this->community, null, [
+            $survey = $saveSurvey->handle($this->community, $this->survey, [
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?: null,
                 'is_poll' => (bool) $validated['is_poll'],

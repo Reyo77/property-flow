@@ -21,6 +21,7 @@ use App\Models\ForumTopic;
 use App\Models\Residency;
 use App\Models\Resident;
 use App\Models\Survey;
+use App\Models\SurveyQuestion;
 use App\Models\SurveyResponse;
 use App\Models\Unit;
 use App\Models\User;
@@ -93,6 +94,28 @@ describe('surveys', function () {
         Livewire::test(SurveyShow::class, ['community' => $community, 'survey' => $survey])->assertDontSee('data-test="results"', false);
         get(route('communities.surveys.show', [$community, $draft]))->assertForbidden();
         get(route('communities.surveys.create', $community))->assertForbidden();
+        get(route('communities.surveys.edit', [$community, $draft]))->assertForbidden();
+    });
+
+    it('edits a draft, and refuses to edit once published', function () {
+        $admin = companyAdmin();
+        $community = Community::factory()->for($admin->company)->create();
+        $draft = Survey::factory()->for($community)->create(['published_at' => null, 'title' => 'Gym hours']);
+        SurveyQuestion::factory()->for($draft)->create(['position' => 1, 'kind' => 'text', 'title' => 'Anything else?', 'is_required' => false]);
+        actingAs($admin);
+
+        Livewire::test(SurveyForm::class, ['community' => $community, 'survey' => $draft])
+            ->assertSet('title', 'Gym hours')
+            ->assertSet('questions.0.title', 'Anything else?')
+            ->set('title', 'Gym opening hours')
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('communities.surveys.show', [$community, $draft]));
+
+        expect(Survey::sole()->title)->toBe('Gym opening hours')->and($draft->questions()->sole()->title)->toBe('Anything else?');
+
+        $draft->forceFill(['published_at' => now()])->save();
+        get(route('communities.surveys.edit', [$community, $draft]))->assertNotFound();
     });
 });
 
@@ -205,6 +228,9 @@ describe('community board', function () {
 
             get(route($route, [$foreign->community_id, $foreign->id]))->assertNotFound();
         }
+
+        $foreignDraft = Survey::factory()->create(['published_at' => null]);
+        get(route('communities.surveys.edit', [$foreignDraft->community_id, $foreignDraft->id]))->assertNotFound();
     });
 });
 

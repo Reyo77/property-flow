@@ -4,6 +4,7 @@ namespace App\Livewire\Governance;
 
 use App\Actions\Governance\SaveBallot;
 use App\Concerns\GovernanceValidationRules;
+use App\Enums\MeetingKind;
 use App\Enums\VotingWeighting;
 use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Ballot;
@@ -84,7 +85,7 @@ class BallotForm extends Component
     #[Computed]
     public function meetings(): Collection
     {
-        return $this->community->meetings()->whereNull('closed_at')->orderBy('starts_at')->get();
+        return $this->community->meetings()->whereNull('closed_at')->whereIn('kind', [MeetingKind::Agm, MeetingKind::Special])->orderBy('starts_at')->get();
     }
 
     public function addQuestion(): void

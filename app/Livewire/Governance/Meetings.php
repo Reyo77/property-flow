@@ -72,9 +72,22 @@ class Meetings extends Component
         $this->weighting = VotingWeighting::UnitFactor->value;
         $this->quorum_percent = 25;
         $this->starts_at = now($this->community->timezone)->addWeeks(3)->setTime(19, 0)->format('Y-m-d\TH:i');
-        $this->agenda = implode("\n", [__('Call to order and quorum'), __('Approval of last year\'s minutes'), __('Financial statements'), __('Election of directors'), __('New business'), __('Adjournment')]);
+        $this->agenda = implode("\n", MeetingKind::Agm->defaultAgenda());
 
         Flux::modal('meeting-form')->show();
+    }
+
+    /**
+     * Swaps in the new type's standard agenda, unless the agenda has been edited.
+     */
+    public function updatingKind(string $kind): void
+    {
+        $previous = MeetingKind::tryFrom($this->kind);
+        $next = MeetingKind::tryFrom($kind);
+
+        if ($next !== null && ($previous === null || self::agendaLines($this->agenda) === $previous->defaultAgenda())) {
+            $this->agenda = implode("\n", $next->defaultAgenda());
+        }
     }
 
     public function save(SaveMeeting $saveMeeting): void

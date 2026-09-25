@@ -23,6 +23,10 @@ class RecordAttendance
             throw ValidationException::withMessages(['unit_id' => __('This meeting is closed.')]);
         }
 
+        if (! $meeting->kind->isOwnersMeeting()) {
+            throw ValidationException::withMessages(['unit_id' => __('Owner attendance is only taken at owners\' meetings.')]);
+        }
+
         if ($unit->community_id !== $meeting->community_id) {
             throw ValidationException::withMessages(['unit_id' => __('That unit is not in this community.')]);
         }

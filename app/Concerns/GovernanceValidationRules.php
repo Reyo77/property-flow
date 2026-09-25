@@ -22,7 +22,7 @@ trait GovernanceValidationRules
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
-            'meeting_id' => ['nullable', 'integer', Rule::exists(Meeting::class, 'id')->where('community_id', $community->id)],
+            'meeting_id' => ['nullable', 'integer', Rule::exists(Meeting::class, 'id')->where('community_id', $community->id)->whereIn('kind', [MeetingKind::Agm->value, MeetingKind::Special->value])],
             'weighting' => ['required', Rule::enum(VotingWeighting::class)],
             'quorum_percent' => ['required', 'integer', 'between:0,100'],
             'opens_at' => ['required', 'date_format:Y-m-d\TH:i'],

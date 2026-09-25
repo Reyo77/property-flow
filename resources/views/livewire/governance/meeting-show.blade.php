@@ -8,8 +8,12 @@
             @if ($meeting->isClosed())
                 <flux:badge>{{ __('Closed') }}</flux:badge>
             @elseif ($this->canManage())
-                <flux:button size="sm" icon="plus" :href="route('communities.ballots.create', [$community, 'meeting' => $meeting->id])" wire:navigate>{{ __('Add ballot') }}</flux:button>
-                <flux:button size="sm" variant="primary" wire:click="close" wire:confirm="{{ __('Close the meeting? Attendance becomes final.') }}">{{ __('Close meeting') }}</flux:button>
+                @if ($meeting->kind->isOwnersMeeting())
+                    <flux:button size="sm" icon="plus" :href="route('communities.ballots.create', [$community, 'meeting' => $meeting->id])" wire:navigate>{{ __('Add ballot') }}</flux:button>
+                    <flux:button size="sm" variant="primary" wire:click="close" wire:confirm="{{ __('Close the meeting? Attendance becomes final.') }}">{{ __('Close meeting') }}</flux:button>
+                @else
+                    <flux:button size="sm" variant="primary" wire:click="close" wire:confirm="{{ __('Close the meeting?') }}">{{ __('Close meeting') }}</flux:button>
+                @endif
             @endif
         </div>
     </div>
@@ -18,7 +22,7 @@
         <flux:text class="whitespace-pre-line">{{ $meeting->description }}</flux:text>
     @endif
 
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div @class(['grid gap-4', 'sm:grid-cols-2' => $meeting->kind->isOwnersMeeting()])>
         <div class="space-y-2 rounded-xl border border-zinc-200 p-5 dark:border-zinc-700">
             <flux:heading>{{ __('Agenda') }}</flux:heading>
             <ol class="list-decimal space-y-1 ps-5 text-sm">
@@ -27,6 +31,7 @@
                 @endforeach
             </ol>
         </div>
+        @if ($meeting->kind->isOwnersMeeting())
         <div @class(['space-y-1 rounded-xl border p-5', 'border-green-300 dark:border-green-700' => $this->quorum['met'], 'border-zinc-200 dark:border-zinc-700' => ! $this->quorum['met']]) data-test="quorum">
             <flux:heading>{{ __('Quorum') }}</flux:heading>
             <flux:heading size="xl">{{ $this->quorum['percent'] }}%</flux:heading>
@@ -35,6 +40,7 @@
             </flux:text>
             <flux:badge :color="$this->quorum['met'] ? 'green' : 'amber'">{{ $this->quorum['met'] ? __('Quorum present') : __('No quorum yet') }}</flux:badge>
         </div>
+        @endif
     </div>
 
     @if ($this->ballots->isNotEmpty())
@@ -51,6 +57,7 @@
     @endif
 
     @if ($this->canManage())
+        @if ($meeting->kind->isOwnersMeeting())
         <div class="space-y-3">
             <flux:heading size="lg">{{ __('Attendance') }}</flux:heading>
             @unless ($meeting->isClosed())
@@ -98,6 +105,7 @@
                 </flux:table>
             @endif
         </div>
+        @endif
 
         <div class="space-y-3">
             <flux:heading size="lg">{{ __('Minutes') }}</flux:heading>

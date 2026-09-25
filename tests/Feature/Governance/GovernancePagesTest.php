@@ -267,6 +267,47 @@ describe('meeting page', function () {
         $page->set('attendance_unit_id', (string) $first->id)->call('checkIn')->assertHasErrors('attendance_unit_id');
     });
 
+    it('runs a board meeting without owner attendance, quorum or ballots', function () {
+        $admin = companyAdmin();
+        $community = Community::factory()->for($admin->company)->create();
+        [$unit] = ownerOf($community);
+        actingAs($admin);
+
+        Livewire::test(Meetings::class, ['community' => $community])
+            ->call('create')
+            ->set('title', 'October board meeting')
+            ->set('kind', MeetingKind::Board->value)
+            ->assertSet('agenda', implode("\n", MeetingKind::Board->defaultAgenda()))
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $meeting = Meeting::sole();
+        expect($meeting->agendaItems()->pluck('title')->all())->toBe(MeetingKind::Board->defaultAgenda());
+
+        Livewire::test(MeetingShow::class, ['community' => $community, 'meeting' => $meeting])
+            ->assertDontSee('Quorum')
+            ->assertDontSee('Attendance')
+            ->assertDontSee('Add ballot')
+            ->set('attendance_unit_id', (string) $unit->id)
+            ->call('checkIn')
+            ->assertHasErrors('attendance_unit_id');
+
+        Livewire::test(BallotForm::class, ['community' => $community])
+            ->set('meeting_id', (string) $meeting->id)
+            ->call('save')
+            ->assertHasErrors('meeting_id');
+    });
+
+    it('keeps an edited agenda when the meeting type changes', function () {
+        actingAs($admin = companyAdmin());
+
+        Livewire::test(Meetings::class, ['community' => Community::factory()->for($admin->company)->create()])
+            ->call('create')
+            ->set('agenda', "Budget\nOther business")
+            ->set('kind', MeetingKind::Special->value)
+            ->assertSet('agenda', "Budget\nOther business");
+    });
+
     it('shows residents published minutes only', function () {
         $community = Community::factory()->create();
         [, $owner] = ownerOf($community);

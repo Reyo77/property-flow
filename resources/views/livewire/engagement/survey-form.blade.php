@@ -1,6 +1,6 @@
 <section class="w-full max-w-3xl space-y-6">
     <div>
-        <flux:heading size="xl" level="1">{{ __('New survey or poll') }}</flux:heading>
+        <flux:heading size="xl" level="1">{{ $survey ? __('Edit draft') : __('New survey or poll') }}</flux:heading>
         <flux:subheading>{{ $community->name }}</flux:subheading>
     </div>
 
@@ -56,7 +56,7 @@
         </div>
 
         <div class="flex justify-end gap-2">
-            <flux:button :href="route('communities.surveys.index', $community)" wire:navigate>{{ __('Cancel') }}</flux:button>
+            <flux:button :href="$survey ? route('communities.surveys.show', [$community, $survey]) : route('communities.surveys.index', $community)" wire:navigate>{{ __('Cancel') }}</flux:button>
             <flux:button type="submit" variant="primary">{{ __('Save draft') }}</flux:button>
         </div>
     </form>

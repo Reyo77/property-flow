@@ -124,6 +124,7 @@ Route::middleware('auth')->group(function () {
             Route::livewire('surveys', Engagement\Surveys::class)->name('surveys.index');
             Route::livewire('surveys/create', Engagement\SurveyForm::class)->name('surveys.create');
             Route::livewire('surveys/{survey}', Engagement\SurveyShow::class)->name('surveys.show');
+            Route::livewire('surveys/{survey}/edit', Engagement\SurveyForm::class)->name('surveys.edit');
             Route::livewire('forms', Engagement\ConsentForms::class)->name('consent-forms.index');
             Route::livewire('forms/{consentForm}', Engagement\ConsentFormShow::class)->name('consent-forms.show');
             Route::get('forms/{consentForm}/signatures/{signature}', ConsentSignatureImageController::class)->name('consent-forms.signature');

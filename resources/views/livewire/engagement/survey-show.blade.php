@@ -9,15 +9,23 @@
                 @endif
             </flux:subheading>
         </div>
-        @can('manage', $survey)
-            <div class="flex gap-2">
+        <div class="flex items-center gap-2">
+            @if ($survey->published_at === null)
+                <flux:badge size="sm">{{ __('Draft') }}</flux:badge>
+            @elseif ($survey->isOpen())
+                <flux:badge size="sm" color="blue">{{ __('Open') }}</flux:badge>
+            @else
+                <flux:badge size="sm">{{ __('Closed') }}</flux:badge>
+            @endif
+            @can('manage', $survey)
                 @if ($survey->published_at === null)
-                    <flux:button size="sm" variant="primary" wire:click="publish">{{ __('Publish') }}</flux:button>
+                    <flux:button size="sm" icon="pencil" :href="route('communities.surveys.edit', [$community, $survey])" wire:navigate>{{ __('Edit') }}</flux:button>
+                    <flux:button size="sm" variant="primary" wire:click="publish" wire:confirm="{{ __('Publish to residents? The questions can\'t be changed afterwards.') }}">{{ __('Publish') }}</flux:button>
                 @elseif ($survey->isOpen())
                     <flux:button size="sm" wire:click="closeNow" wire:confirm="{{ __('Close this survey now?') }}">{{ __('Close now') }}</flux:button>
                 @endif
-            </div>
-        @endcan
+            @endcan
+        </div>
     </div>
 
     @if ($survey->description)

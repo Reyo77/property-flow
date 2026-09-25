@@ -48,7 +48,7 @@
             <flux:heading size="lg">{{ __('Schedule meeting') }}</flux:heading>
             <flux:input wire:model="title" :label="__('Title')" :placeholder="__('e.g. 2026 Annual General Meeting')" required />
             <div class="grid grid-cols-2 gap-4">
-                <flux:select wire:model="kind" :label="__('Type')">
+                <flux:select wire:model.live="kind" :label="__('Type')">
                     @foreach (App\Enums\MeetingKind::cases() as $option)
                         <flux:select.option :value="$option->value">{{ $option->label() }}</flux:select.option>
                     @endforeach
@@ -56,16 +56,18 @@
                 <flux:input wire:model="starts_at" type="datetime-local" :label="__('Starts')" required />
             </div>
             <flux:input wire:model="location" :label="__('Location or link')" />
-            <div class="grid grid-cols-2 gap-4">
-                <flux:select wire:model="weighting" :label="__('Quorum counted')">
-                    @foreach (App\Enums\VotingWeighting::cases() as $option)
-                        <flux:select.option :value="$option->value">{{ $option->label() }}</flux:select.option>
-                    @endforeach
-                </flux:select>
-                <flux:input wire:model="quorum_percent" type="number" min="0" max="100" :label="__('Quorum %')" required />
-            </div>
+            @if (App\Enums\MeetingKind::tryFrom($kind)?->isOwnersMeeting())
+                <div class="grid grid-cols-2 gap-4">
+                    <flux:select wire:model="weighting" :label="__('Quorum counted')">
+                        @foreach (App\Enums\VotingWeighting::cases() as $option)
+                            <flux:select.option :value="$option->value">{{ $option->label() }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+                    <flux:input wire:model="quorum_percent" type="number" min="0" max="100" :label="__('Quorum %')" required />
+                </div>
+            @endif
             <flux:textarea wire:model="agenda" :label="__('Agenda (one item per line)')" rows="6" />
-            <flux:textarea wire:model="description" :label="__('Notice to owners (optional)')" rows="2" />
+            <flux:textarea wire:model="description" :label="__('Notice (optional)')" rows="2" />
             <div class="flex justify-end gap-2">
                 <flux:modal.close><flux:button variant="filled">{{ __('Cancel') }}</flux:button></flux:modal.close>
                 <flux:button type="submit" variant="primary">{{ __('Schedule') }}</flux:button>

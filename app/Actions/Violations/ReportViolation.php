@@ -44,7 +44,7 @@ class ReportViolation
                 'violation_rule_id' => $rule->id,
                 'unit_id' => $unit->id,
                 'reported_by_id' => $reportedBy->id,
-                'observed_at' => $observedAt,
+                'observed_at' => $observedAt->utc(),
                 'location' => $location,
                 'description' => $description,
                 'status' => ViolationStatus::Open,

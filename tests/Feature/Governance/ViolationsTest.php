@@ -96,6 +96,14 @@ describe('reporting', function () {
         Notification::assertNothingSent();
     });
 
+    it('stores the moment observed, whatever timezone it is given in', function () {
+        [$community, $unit, , $rule] = violationSetup();
+
+        $violation = app(ReportViolation::class)->handle($rule, $unit, CarbonImmutable::parse('2026-09-30 23:40', 'America/Toronto'), 'Loud music', null, [], companyAdmin($community->company));
+
+        expect($violation->observed_at->utc()->toDateTimeString())->toBe('2026-10-01 03:40:00');
+    });
+
     it('refuses an inactive rule or a unit from another community', function (string $case) {
         [$community, $unit, , $rule] = violationSetup();
 
