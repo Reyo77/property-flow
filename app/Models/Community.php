@@ -319,6 +319,22 @@ class Community extends Model
     }
 
     /**
+     * @return HasMany<Ballot, $this>
+     */
+    public function ballots(): HasMany
+    {
+        return $this->hasMany(Ballot::class);
+    }
+
+    /**
+     * @return HasMany<Meeting, $this>
+     */
+    public function meetings(): HasMany
+    {
+        return $this->hasMany(Meeting::class);
+    }
+
+    /**
      * @return HasMany<BankStatement, $this>
      */
     public function bankStatements(): HasMany

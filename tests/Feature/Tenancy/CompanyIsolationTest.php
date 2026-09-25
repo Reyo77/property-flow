@@ -11,6 +11,12 @@ use App\Models\AmenityBlackout;
 use App\Models\AmenityBooking;
 use App\Models\Announcement;
 use App\Models\Asset;
+use App\Models\Ballot;
+use App\Models\BallotAnswer;
+use App\Models\BallotOption;
+use App\Models\BallotProxy;
+use App\Models\BallotQuestion;
+use App\Models\BallotVote;
 use App\Models\BankStatement;
 use App\Models\BankStatementLine;
 use App\Models\BudgetLine;
@@ -35,6 +41,9 @@ use App\Models\JournalEntry;
 use App\Models\LateFeeRule;
 use App\Models\LedgerEntry;
 use App\Models\MaintenanceSchedule;
+use App\Models\Meeting;
+use App\Models\MeetingAgendaItem;
+use App\Models\MeetingAttendance;
 use App\Models\Package;
 use App\Models\ParkingPermit;
 use App\Models\PatrolCheckpoint;
@@ -115,6 +124,15 @@ dataset('tenant models', [
     'budget lines' => fn () => BudgetLine::factory(),
     'bank statements' => fn () => BankStatement::factory(),
     'bank statement lines' => fn () => BankStatementLine::factory(),
+    'ballots' => fn () => Ballot::factory(),
+    'ballot questions' => fn () => BallotQuestion::factory(),
+    'ballot options' => fn () => BallotOption::factory(),
+    'ballot proxies' => fn () => BallotProxy::factory(),
+    'ballot votes' => fn () => BallotVote::factory(),
+    'ballot answers' => fn () => BallotAnswer::factory(),
+    'meetings' => fn () => Meeting::factory(),
+    'meeting agenda items' => fn () => MeetingAgendaItem::factory(),
+    'meeting attendances' => fn () => MeetingAttendance::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {
@@ -170,6 +188,9 @@ it('returns 404 for pages of another company\'s community', function (string $ro
     'budget' => 'communities.finance.budget',
     'reports' => 'communities.finance.reports',
     'reconciliation' => 'communities.finance.reconciliation',
+    'ballots' => 'communities.ballots.index',
+    'new ballot' => 'communities.ballots.create',
+    'meetings' => 'communities.meetings.index',
 ]);
 
 it('refuses to edit a unit of another company', function () {

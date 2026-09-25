@@ -18,10 +18,20 @@ use App\Actions\FrontDesk\CreateIncidentReport;
 use App\Actions\FrontDesk\IssueParkingPermit;
 use App\Actions\FrontDesk\LogPackage;
 use App\Actions\FrontDesk\ScanPatrolCheckpoint;
+use App\Actions\Governance\CastVote;
+use App\Actions\Governance\CloseBallot;
+use App\Actions\Governance\CloseMeeting;
+use App\Actions\Governance\GrantProxy;
+use App\Actions\Governance\PublishBallot;
+use App\Actions\Governance\PublishMinutes;
+use App\Actions\Governance\RecordAttendance;
+use App\Actions\Governance\SaveBallot;
+use App\Actions\Governance\SaveMeeting;
 use App\Actions\Maintenance\GenerateDueMaintenanceWorkOrders;
 use App\Enums\AnnouncementAudience;
 use App\Enums\AssetCategory;
 use App\Enums\Assignee;
+use App\Enums\AttendanceMode;
 use App\Enums\CompanyRole;
 use App\Enums\ContactCategory;
 use App\Enums\DocumentVisibility;
@@ -40,6 +50,7 @@ use App\Models\AccessKeySignout;
 use App\Models\Amenity;
 use App\Models\Announcement;
 use App\Models\Asset;
+use App\Models\Ballot;
 use App\Models\BudgetLine;
 use App\Models\Building;
 use App\Models\ChargeType;
@@ -76,9 +87,11 @@ use App\Models\WorkOrder;
 use App\Support\Finance\ChartOfAccounts;
 use App\Support\Finance\FiscalYears;
 use App\Support\Finance\Money;
+use App\Support\Governance\VotingRoll;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
 use LogicException;
 
@@ -105,6 +118,7 @@ class DemoSeeder extends Seeder
         $this->seedAmenities($condo);
         $this->seedFrontDesk($condo);
         $this->seedFinance($condo);
+        $this->seedGovernance($condo);
     }
 
     /**
@@ -580,6 +594,136 @@ class DemoSeeder extends Seeder
             $manager,
         );
         app(CompleteReconciliation::class)->handle($statement, $manager);
+    }
+
+    /**
+     * Last year's AGM (held, minutes published, its ballot closed with results), this year's AGM
+     * coming up, and an open budget vote linked to it with some owners already voted — one of
+     * them by proxy. The demo resident owns a unit, so they can vote too.
+     */
+    private function seedGovernance(Community $condo): void
+    {
+        $board = User::where('email', 'board@propertyflow.test')->sole();
+        $saveMeeting = app(SaveMeeting::class);
+        $saveBallot = app(SaveBallot::class);
+        $castVote = app(CastVote::class);
+        $roll = app(VotingRoll::class);
+        $owners = $roll->eligibleUnits($condo)->values();
+        $ownerOf = fn (Unit $unit) => Residency::query()->where('unit_id', $unit->id)->where('type', ResidencyType::Owner)->active()->firstOrFail()->resident;
+        // Owners need a login to vote; give the first sixty owner households one.
+        foreach ($owners->take(60) as $unit) {
+            $owner = $ownerOf($unit);
+
+            if ($owner->user_id === null && $owner->email !== null) {
+                $user = User::factory()->for($condo->company)->create(['name' => $owner->name, 'email' => $owner->email]);
+                $owner->forceFill(['user_id' => $user->id])->save();
+            }
+        }
+
+        $votingOwners = $owners->filter(fn (Unit $unit) => $ownerOf($unit)->user !== null)->values();
+        $now = CarbonImmutable::now($condo->timezone);
+        $agenda = ['Call to order and quorum', "Approval of last year's minutes", 'Financial statements', 'Election of directors', 'New business', 'Adjournment'];
+
+        // Last year's AGM, run from the past: open the ballot, let owners vote, then close.
+        $lastYear = $saveMeeting->handle($condo, null, [
+            'title' => 'Annual General Meeting '.($now->year - 1), 'kind' => 'agm',
+            'starts_at' => $now->subYear()->setTime(19, 0)->utc()->toDateTimeString(), 'location' => 'Party Room',
+            'description' => null, 'weighting' => 'unit_factor', 'quorum_percent' => 25,
+        ], $agenda, $board);
+
+        $reserve = $saveBallot->handle($condo, null, [
+            'meeting_id' => $lastYear->id, 'title' => 'Reserve fund top-up', 'description' => 'Special assessment of $400 per unit factor point to restore the reserve fund.',
+            'weighting' => 'unit_factor', 'quorum_percent' => 25,
+            'opens_at' => $now->subYear()->subWeeks(2)->utc()->toDateTimeString(), 'closes_at' => $now->subYear()->setTime(21, 0)->utc()->toDateTimeString(),
+        ], [['title' => 'Do you approve the reserve fund top-up?', 'options' => ['Yes', 'No', 'Abstain']]], $board);
+        $reserve->forceFill(['published_at' => $now->subYear()->subWeeks(3)])->save();
+
+        $this->travelTo($now->subYear()->subWeek(), function () use ($reserve, $votingOwners, $ownerOf, $castVote): void {
+            foreach ($votingOwners->take(60) as $index => $unit) {
+                $label = match (true) {
+                    $index % 7 === 0 => 'No', $index % 11 === 0 => 'Abstain', default => 'Yes'
+                };
+                $owner = $ownerOf($unit)->user ?? throw new LogicException('Voting owner has no login.');
+                $castVote->handle($reserve, $unit, $owner, $this->answers($reserve, [$label]));
+            }
+        });
+
+        foreach ($owners->take(55) as $index => $unit) {
+            app(RecordAttendance::class)->handle($lastYear, $unit, $index % 5 === 0 ? AttendanceMode::Proxy : AttendanceMode::InPerson, null, $board);
+        }
+
+        app(CloseBallot::class)->handle($reserve, $board);
+        app(PublishMinutes::class)->handle($lastYear, "Meeting called to order at 7:02pm; quorum confirmed (55 units represented).\n\n1. Minutes of the previous AGM approved.\n2. Financial statements presented by the treasurer and accepted.\n3. Reserve fund top-up approved by ballot (see results).\n4. Directors elected by acclamation.\n\nAdjourned at 8:40pm.", true, $board);
+        app(CloseMeeting::class)->handle($lastYear, $board);
+
+        // This year's AGM, three weeks out, with the budget ballot already open.
+        $agm = $saveMeeting->handle($condo, null, [
+            'title' => 'Annual General Meeting '.$now->year, 'kind' => 'agm',
+            'starts_at' => $now->addWeeks(3)->setTime(19, 0)->utc()->toDateTimeString(), 'location' => 'Party Room',
+            'description' => 'All owners are invited. If you cannot attend, appoint a proxy on the ballot page.',
+            'weighting' => 'unit_factor', 'quorum_percent' => 25,
+        ], $agenda, $board);
+
+        $budget = $saveBallot->handle($condo, null, [
+            'meeting_id' => $agm->id, 'title' => 'Approve the '.($now->year + 1).' operating budget', 'description' => 'The proposed budget keeps common expense fees flat and increases the reserve contribution by 3%.',
+            'weighting' => 'unit_factor', 'quorum_percent' => 25,
+            'opens_at' => $now->subDays(3)->utc()->toDateTimeString(), 'closes_at' => $now->addWeeks(3)->setTime(21, 0)->utc()->toDateTimeString(),
+        ], [
+            ['title' => 'Do you approve the proposed operating budget?', 'options' => ['Yes', 'No', 'Abstain']],
+            ['title' => 'Elect Jordan Patel to the board?', 'options' => ['For', 'Against']],
+        ], $board);
+        app(PublishBallot::class)->handle($budget, $board);
+
+        $resident = Resident::where('email', 'resident@propertyflow.test')->sole();
+
+        foreach ($votingOwners->slice(1, 24)->values() as $index => $unit) {
+            $owner = $ownerOf($unit)->user;
+
+            if ($owner === null || $owner->resident?->is($resident)) {
+                continue;
+            }
+
+            if ($index === 0) {
+                // This owner can't make it, and lets the board member vote for them.
+                app(GrantProxy::class)->handle($budget, $unit, $owner, $board);
+                $castVote->handle($budget, $unit, $board, $this->answers($budget, ['Yes', 'For']));
+
+                continue;
+            }
+
+            $castVote->handle($budget, $unit, $owner, $this->answers($budget, [$index % 6 === 0 ? 'No' : 'Yes', $index % 4 === 0 ? 'Against' : 'For']));
+        }
+    }
+
+    /**
+     * Answers for a ballot, one label per question in order, as [question id => option id].
+     *
+     * @param  list<string>  $labels
+     * @return array<int, int>
+     */
+    private function answers(Ballot $ballot, array $labels): array
+    {
+        $choices = [];
+
+        foreach ($ballot->questions()->get()->values() as $index => $question) {
+            $choices[$question->id] = (int) $question->options()->where('label', $labels[$index])->valueOrFail('id');
+        }
+
+        return $choices;
+    }
+
+    /**
+     * Runs a callback with the clock set to the given moment.
+     */
+    private function travelTo(CarbonImmutable $moment, callable $callback): void
+    {
+        Date::setTestNow($moment);
+
+        try {
+            $callback();
+        } finally {
+            Date::setTestNow();
+        }
     }
 
     /**

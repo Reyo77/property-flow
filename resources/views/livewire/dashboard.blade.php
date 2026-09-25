@@ -66,6 +66,11 @@
                             </div>
                             <flux:link :href="route('communities.units.account', [$residency->community, $residency->unit])" wire:navigate>{{ __('View account') }}</flux:link>
                         </div>
+                        <div class="mt-3 flex flex-wrap gap-2" data-test="home-links">
+                            <flux:button size="sm" icon="calendar-date-range" :href="route('communities.amenities.index', $residency->community)" wire:navigate>{{ __('Amenities') }}</flux:button>
+                            <flux:button size="sm" icon="check-badge" :href="route('communities.ballots.index', $residency->community)" wire:navigate>{{ __('Ballots') }}</flux:button>
+                            <flux:button size="sm" icon="users" :href="route('communities.meetings.index', $residency->community)" wire:navigate>{{ __('Meetings') }}</flux:button>
+                        </div>
                     </div>
                 @endforeach
             </div>

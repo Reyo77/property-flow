@@ -103,6 +103,17 @@
                         @endcan
                     </flux:sidebar.group>
 
+                    @can('viewAny', [App\Models\Ballot::class, $currentCommunity])
+                        <flux:sidebar.group :heading="__('Governance')" class="grid">
+                            <flux:sidebar.item icon="check-badge" :href="route('communities.ballots.index', $currentCommunity)" :current="request()->routeIs('communities.ballots.*')" wire:navigate>
+                                {{ __('Ballots') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="users" :href="route('communities.meetings.index', $currentCommunity)" :current="request()->routeIs('communities.meetings.*')" wire:navigate>
+                                {{ __('Meetings') }}
+                            </flux:sidebar.item>
+                        </flux:sidebar.group>
+                    @endcan
+
                     @can('viewAny', [App\Models\Invoice::class, $currentCommunity])
                         <flux:sidebar.group :heading="__('Finance')" class="grid">
                             <flux:sidebar.item icon="chart-pie" :href="route('communities.finance.overview', $currentCommunity)" :current="request()->routeIs('communities.finance.overview', 'communities.units.account')" wire:navigate>

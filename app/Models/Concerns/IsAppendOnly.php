@@ -6,20 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 use LogicException;
 
 /**
- * Refuses to update or delete a saved record. Ledger history is corrected by posting a
- * reversing entry, never by rewriting what was already posted. (The database enforces the
- * same rule with triggers; this fails earlier with a clearer message.)
+ * Refuses to update or delete a saved record: ledger lines (corrected by posting a reversal,
+ * backed by database triggers too) and ballot votes (final once cast).
  */
 trait IsAppendOnly
 {
     public static function bootIsAppendOnly(): void
     {
         static::updating(function (Model $model): void {
-            throw new LogicException(class_basename($model).' records are append-only; post a reversal instead of editing.');
+            throw new LogicException(class_basename($model).' records are append-only and cannot be edited.');
         });
 
         static::deleting(function (Model $model): void {
-            throw new LogicException(class_basename($model).' records are append-only; post a reversal instead of deleting.');
+            throw new LogicException(class_basename($model).' records are append-only and cannot be deleted.');
         });
     }
 }
