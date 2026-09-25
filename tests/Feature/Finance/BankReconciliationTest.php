@@ -268,4 +268,42 @@ describe('reconciling', function () {
 
         expect(bankLine($statement, 'DEP')->ledger_entry_id)->toBe($cashLine->id);
     });
+
+    it('reports how many lines auto-matching found, and refuses manual matching once reconciled', function () {
+        [$community, $payments] = septemberBooks();
+        $statement = importStatement($community, "date,description,amount\n2026-09-03,A,300\n2026-09-28,B,450\n2026-09-30,C,200\n", 95000);
+        $reconciliation = app(BankReconciliation::class);
+        $line = bankLine($statement, 'A');
+        $entryId = $line->ledger_entry_id;
+
+        $reconciliation->unmatch($line);
+        expect($reconciliation->autoMatch($statement))->toBe(1)
+            ->and($reconciliation->autoMatch($statement))->toBe(0);
+
+        app(CompleteReconciliation::class)->handle($statement, companyAdmin($community->company));
+
+        expect(fn () => $reconciliation->match(bankLine($statement, 'A'), LedgerEntry::withoutGlobalScopes()->findOrFail($entryId)))
+            ->toThrow(LogicException::class, 'already reconciled');
+    });
+});
+
+describe('parsing edge cases', function () {
+    it('trims stray spaces around cells and ignores cells that are not text', function () {
+        $lines = app(BankStatementParser::class)->parse([[' date ' => 'x', 'date' => ' 2026-09-02 ', 'description' => '  Deposit  ', 'reference' => ' CHQ 5 ', 'amount' => ' 12.00 ', 'extra' => ['nested']]]);
+
+        expect($lines[0]['posted_on']->toDateString())->toBe('2026-09-02')
+            ->and($lines[0]['description'])->toBe('Deposit')
+            ->and($lines[0]['reference'])->toBe('CHQ 5')
+            ->and($lines[0]['amount_cents'])->toBe(1200);
+    });
+
+    it('treats a row of only blanks and non-text cells as empty', function () {
+        expect(app(BankStatementParser::class)->parse([['date' => null, 'extra' => ['x']], ['date' => '2026-09-01', 'description' => 'x', 'amount' => '1']]))->toHaveCount(1);
+    });
+
+    it('cuts very long descriptions to 255 characters', function () {
+        $lines = app(BankStatementParser::class)->parse([['date' => '2026-09-02', 'description' => str_repeat('é', 300), 'amount' => '1']]);
+
+        expect(mb_strlen($lines[0]['description']))->toBe(255);
+    });
 });
