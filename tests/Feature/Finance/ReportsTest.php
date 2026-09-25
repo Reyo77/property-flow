@@ -3,6 +3,7 @@
 use App\Actions\Finance\DecideVendorBill;
 use App\Actions\Finance\IssueInvoice;
 use App\Actions\Finance\PayVendorBill;
+use App\Actions\Finance\PostJournalEntry;
 use App\Actions\Finance\RecordPayment;
 use App\Actions\Finance\ReversePayment;
 use App\Actions\Finance\SubmitVendorBill;
@@ -20,7 +21,9 @@ use App\Support\Finance\ChartOfAccounts;
 use App\Support\Finance\FinancialReports;
 use App\Support\Finance\FiscalYears;
 use App\Support\Finance\InvoiceLineData;
+use App\Support\Finance\JournalLine;
 use App\Support\Finance\Money;
+use App\Support\Finance\ReportTable;
 use Carbon\CarbonImmutable;
 
 use function Pest\Laravel\travelTo;
@@ -94,6 +97,103 @@ function dollars(?int $cents): ?float
 {
     return $cents === null ? null : $cents / 100;
 }
+
+/**
+ * The report's headings, then one "style · label · amounts in cents" string per row.
+ *
+ * @return list<string>
+ */
+function layout(ReportTable $table): array
+{
+    return [
+        "{$table->title} | {$table->period} | {$table->labelHeading} | ".implode(', ', $table->columns),
+        ...array_map(fn (array $row) => $row['style'].' · '.$row['label'].' · '.json_encode(array_map(fn (?Money $amount) => $amount?->cents, $row['amounts'])), $table->rows()),
+    ];
+}
+
+describe('layout', function () {
+    it('lays out the balance sheet, income statement and general ledger', function () {
+        ['community' => $community] = reportScenario();
+        $cash = app(ChartOfAccounts::class)->account($community, SystemAccount::Cash);
+
+        expect(layout(reports()->balanceSheet($community, CarbonImmutable::parse('2026-03-31'))))->toBe([
+            'Balance sheet | As of Mar 31, 2026 |  | Amount',
+            'section · Assets · []',
+            'line · 1000 · Operating bank account · [-10000]',
+            'line · 1100 · Accounts receivable · [152500]',
+            'total · Total assets · [142500]',
+            'section · Liabilities · []',
+            'line · 2000 · Accounts payable · [60000]',
+            'total · Total liabilities · [60000]',
+            'section · Equity · []',
+            'line · Accumulated surplus (deficit) · [82500]',
+            'total · Total equity · [82500]',
+            'grand · Total liabilities and equity · [142500]',
+            'total · Difference · [0]',
+        ])->and(layout(reports()->incomeStatement($community, CarbonImmutable::parse('2026-01-01'), CarbonImmutable::parse('2026-03-31'))))->toBe([
+            'Income statement | Jan 1, 2026 – Mar 31, 2026 |  | Amount',
+            'section · Income · []',
+            'line · 4000 · Common expense fees · [240000]',
+            'line · 4100 · Late fees · [2500]',
+            'total · Total income · [242500]',
+            'section · Expenses · []',
+            'line · 5000 · Repairs & maintenance · [100000]',
+            'line · 5100 · Utilities · [60000]',
+            'total · Total expenses · [160000]',
+            'grand · Net income · [82500]',
+        ])->and(layout(reports()->generalLedger($community, CarbonImmutable::parse('2026-02-01'), CarbonImmutable::parse('2026-03-31'), $cash->id)))->toBe([
+            'General ledger | Feb 1, 2026 – Mar 31, 2026 | Date · description | Debit, Credit, Balance',
+            'section · 1000 · Operating bank account · []',
+            'line · Opening balance · [null,null,-50000]',
+            'line · 2026-02-03 · Payment RCT-000003 · Unit A (Cheque) · [40000,null,-10000]',
+            'line · 2026-02-05 · Payment RCT-000004 · Unit B (Cheque) · [15000,null,5000]',
+            'line · 2026-02-08 · RCT-000004 Returned (NSF) · [null,15000,-10000]',
+            'total · Closing balance · 1000 · Operating bank account · [55000,15000,-10000]',
+        ]);
+    });
+
+    it('lays out aged receivables and budget vs actual', function () {
+        ['community' => $community] = reportScenario();
+        $year = app(FiscalYears::class)->covering($community, CarbonImmutable::parse('2026-03-31'));
+
+        expect(layout(reports()->agedReceivables($community, CarbonImmutable::parse('2026-03-31'))))->toBe([
+            'Aged receivables | As of Mar 31, 2026 | Unit | Current, 1–30 days, 31–60 days, 61–90 days, Over 90 days, Credits, Total',
+            'line · A · [null,20000,null,null,null,null,20000]',
+            'line · B · [null,50000,52500,30000,null,null,132500]',
+            'grand · Total · [0,70000,52500,30000,0,0,152500]',
+        ])->and(layout(reports()->budgetVsActual($community, $year, CarbonImmutable::parse('2026-03-31'))))->toBe([
+            'Budget vs actual | Fiscal 2026, through Mar 31, 2026 |  | Annual budget, Budget to date, Actual to date, Variance',
+            'section · Income · []',
+            'line · 4000 · Common expense fees · [0,0,240000,240000]',
+            'line · 4100 · Late fees · [0,0,2500,2500]',
+            'total · Total income · [0,0,242500,242500]',
+            'section · Expenses · []',
+            'line · 5000 · Repairs & maintenance · [0,0,100000,-100000]',
+            'line · 5100 · Utilities · [0,0,60000,-60000]',
+            'total · Total expenses · [0,0,160000,-160000]',
+            'grand · Net · [0,0,82500,82500]',
+        ]);
+    });
+
+    it('shows equity accounts that carry a balance', function () {
+        travelTo(CarbonImmutable::parse('2026-03-01 09:00'));
+        $community = Community::factory()->create();
+        $chart = app(ChartOfAccounts::class);
+        app(PostJournalEntry::class)->handle($community, CarbonImmutable::parse('2026-03-01'), 'Opening balance', [
+            JournalLine::debit($chart->account($community, SystemAccount::Cash), Money::of(100000)),
+            JournalLine::credit($chart->account($community, SystemAccount::RetainedEarnings), Money::of(100000)),
+        ]);
+
+        expect(array_slice(layout(reports()->balanceSheet($community, CarbonImmutable::parse('2026-03-31'))), 6))->toBe([
+            'section · Equity · []',
+            'line · 3000 · Operating fund balance · [100000]',
+            'line · Accumulated surplus (deficit) · [0]',
+            'total · Total equity · [100000]',
+            'grand · Total liabilities and equity · [100000]',
+            'total · Difference · [0]',
+        ]);
+    });
+});
 
 describe('income statement', function () {
     it('shows the quarter\'s income, expenses and net income', function () {
@@ -193,6 +293,30 @@ describe('aged receivables', function () {
         // Mar 1 → 75 days (61–90), Feb 1/15 → 103/89 days, Jan 1 → 134 days
         expect(array_map('dollars', $later->centsFor('B')))->toBe([null, null, null, 525.0, 800.0, null, 1325.0]);
     });
+
+    it('puts each balance in the right bucket at the edges, and leaves settled units out', function () {
+        travelTo(CarbonImmutable::parse('2026-07-01 09:00'));
+        $community = Community::factory()->create();
+        $unit = Unit::factory()->for($community)->create(['number' => 'E']);
+        $settled = Unit::factory()->for($community)->create(['number' => 'F']);
+        $fees = app(ChartOfAccounts::class)->account($community, SystemAccount::Assessments);
+        $bill = fn (Unit $unit, int $dollars, string $issued, string $due) => app(IssueInvoice::class)->handle(
+            $unit, CarbonImmutable::parse($issued), CarbonImmutable::parse($due), [new InvoiceLineData('Fees', Money::of($dollars * 100), $fees)],
+        );
+
+        // Days overdue on Jun 30: 0 and not yet due → current; 1, 30 → 1–30; 31, 60 → 31–60; 61, 90 → 61–90; 91 → over 90
+        foreach ([1 => '2026-06-30', 4 => '2026-06-29', 8 => '2026-05-31', 16 => '2026-05-30', 32 => '2026-05-01', 64 => '2026-04-30', 128 => '2026-04-01', 256 => '2026-03-31'] as $dollars => $due) {
+            $bill($unit, $dollars, $due, $due);
+        }
+        $bill($unit, 2, '2026-06-30', '2026-07-15');
+        $bill($settled, 10, '2026-06-01', '2026-06-01');
+        app(RecordPayment::class)->handle($settled, PaymentMethod::Cash, Money::of(1000), CarbonImmutable::parse('2026-06-02'));
+
+        $report = reports()->agedReceivables($community, CarbonImmutable::parse('2026-06-30'));
+
+        expect(array_map('dollars', $report->centsFor('E')))->toBe([3.0, 12.0, 48.0, 192.0, 256.0, null, 511.0])
+            ->and($report->centsFor('F'))->toBeNull();
+    });
 });
 
 describe('budget vs actual', function () {
@@ -234,7 +358,10 @@ describe('budget vs actual', function () {
 
         $toDate = fn (string $through) => reports()->budgetVsActual($community, $year, CarbonImmutable::parse($through))->centsFor('4000 · Common expense fees')[1];
 
+        // 100,001 cents over 12 months: the first five months get 8,334, the rest 8,333
         expect($toDate('2026-01-15'))->toBe(8334)
+            ->and($toDate('2026-03-31'))->toBe(25_002)
+            ->and($toDate('2026-06-01'))->toBe(50_003)
             ->and($toDate('2026-12-31'))->toBe(100_001)
             ->and($toDate('2027-06-01'))->toBe(100_001)
             ->and($toDate('2025-12-01'))->toBe(0);

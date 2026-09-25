@@ -14,16 +14,6 @@ use InvalidArgumentException;
  */
 class BankStatementParser
 {
-    private const array DATE_COLUMNS = ['date', 'posted_on', 'transaction_date', 'posting_date'];
-
-    private const array DESCRIPTION_COLUMNS = ['description', 'details', 'memo', 'payee', 'transaction'];
-
-    private const array REFERENCE_COLUMNS = ['reference', 'ref', 'cheque', 'cheque_number', 'check_number'];
-
-    private const array DEPOSIT_COLUMNS = ['deposit', 'deposits', 'credit', 'credits'];
-
-    private const array WITHDRAWAL_COLUMNS = ['withdrawal', 'withdrawals', 'debit', 'debits'];
-
     /**
      * @param  list<array<string, mixed>>  $rows
      * @return list<array{posted_on: CarbonImmutable, description: string, reference: string|null, amount_cents: int}>
@@ -42,8 +32,8 @@ class BankStatementParser
                 continue;
             }
 
-            $date = $this->first($row, self::DATE_COLUMNS);
-            $description = $this->first($row, self::DESCRIPTION_COLUMNS);
+            $date = $this->first($row, $this->headers('date'));
+            $description = $this->first($row, $this->headers('description'));
 
             if ($date === null || $description === null) {
                 $this->fail($rowNumber, __('needs a date and a description'));
@@ -52,7 +42,7 @@ class BankStatementParser
             $lines[] = [
                 'posted_on' => $this->date($date, $rowNumber),
                 'description' => mb_substr($description, 0, 255),
-                'reference' => $this->first($row, self::REFERENCE_COLUMNS),
+                'reference' => $this->first($row, $this->headers('reference')),
                 'amount_cents' => $this->amount($row, $rowNumber, $currency),
             ];
         }
@@ -70,8 +60,8 @@ class BankStatementParser
     private function amount(array $row, int $rowNumber, string $currency): int
     {
         $amount = $this->first($row, ['amount']);
-        $deposit = $this->first($row, self::DEPOSIT_COLUMNS);
-        $withdrawal = $this->first($row, self::WITHDRAWAL_COLUMNS);
+        $deposit = $this->first($row, $this->headers('deposit'));
+        $withdrawal = $this->first($row, $this->headers('withdrawal'));
 
         if ($amount === null && $deposit === null && $withdrawal === null) {
             $this->fail($rowNumber, __('has no amount'));
@@ -140,5 +130,22 @@ class BankStatementParser
     private function fail(int $rowNumber, string $problem): never
     {
         throw ValidationException::withMessages(['file' => __('Row :row :problem.', ['row' => $rowNumber, 'problem' => $problem])]);
+    }
+
+    /**
+     * The column headings banks use for a field, first match wins.
+     *
+     * @return list<string>
+     */
+    private function headers(string $field): array
+    {
+        return match ($field) {
+            'date' => ['date', 'posted_on', 'transaction_date', 'posting_date'],
+            'description' => ['description', 'details', 'memo', 'payee', 'transaction'],
+            'reference' => ['reference', 'ref', 'cheque', 'cheque_number', 'check_number'],
+            'deposit' => ['deposit', 'deposits', 'credit', 'credits'],
+            'withdrawal' => ['withdrawal', 'withdrawals', 'debit', 'debits'],
+            default => throw new InvalidArgumentException("Unknown bank statement field: {$field}"),
+        };
     }
 }

@@ -95,6 +95,23 @@ describe('parsing', function () {
         expect(app(BankStatementParser::class)->parse([['date' => '', 'amount' => ''], ['date' => '2026-09-01', 'description' => 'x', 'amount' => '1']]))->toHaveCount(1)
             ->and(fn () => app(BankStatementParser::class)->parse([['date' => '', 'amount' => '']]))->toThrow(ValidationException::class, 'no transactions');
     });
+
+    it('recognises the column names banks use', function (string $date, string $description, string $reference, string $deposit, string $withdrawal) {
+        $lines = app(BankStatementParser::class)->parse([
+            [$date => '2026-09-02', $description => 'Deposit', $reference => 'R1', $deposit => '10.00', $withdrawal => ''],
+            [$date => '2026-09-03', $description => 'Cheque', $reference => 'R2', $deposit => '', $withdrawal => '4.00'],
+        ]);
+
+        expect($lines[0])->description->toBe('Deposit')->reference->toBe('R1')->amount_cents->toBe(1000)
+            ->and($lines[1]['posted_on']->toDateString())->toBe('2026-09-03')
+            ->and($lines[1]['amount_cents'])->toBe(-400);
+    })->with([
+        ['date', 'description', 'reference', 'deposit', 'withdrawal'],
+        ['posted_on', 'details', 'ref', 'deposits', 'withdrawals'],
+        ['transaction_date', 'memo', 'cheque', 'credit', 'debit'],
+        ['posting_date', 'payee', 'cheque_number', 'credits', 'debits'],
+        ['date', 'transaction', 'check_number', 'credit', 'debit'],
+    ]);
 });
 
 describe('import and matching', function () {
@@ -117,6 +134,18 @@ describe('import and matching', function () {
             ->and(bankLine($statement, 'FIRST')->isMatched())->toBeTrue()
             ->and(bankLine($statement, 'SECOND')->isMatched())->toBeFalse()
             ->and(bankLine($statement, 'WRONG')->isMatched())->toBeFalse();
+    });
+
+    it('matches up to five days apart and no further', function () {
+        $community = Community::factory()->create();
+        $unit = Unit::factory()->for($community)->create();
+        app(RecordPayment::class)->handle($unit, PaymentMethod::Cash, Money::of(10000), CarbonImmutable::parse('2026-09-10'));
+        app(RecordPayment::class)->handle($unit, PaymentMethod::Cash, Money::of(20000), CarbonImmutable::parse('2026-09-10'));
+
+        $statement = importStatement($community, "date,description,amount\n2026-09-15,FIVE,100\n2026-09-16,SIX,200\n", 30000);
+
+        expect(bankLine($statement, 'FIVE')->isMatched())->toBeTrue()
+            ->and(bankLine($statement, 'SIX')->isMatched())->toBeFalse();
     });
 
     it('prefers the book entry with the closest date', function () {
