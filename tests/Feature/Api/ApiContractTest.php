@@ -3,15 +3,26 @@
 use App\Models\Amenity;
 use App\Models\AmenityBooking;
 use App\Models\Announcement;
+use App\Models\ArchitecturalRequest;
+use App\Models\Ballot;
 use App\Models\Building;
 use App\Models\Community;
+use App\Models\ConsentForm;
 use App\Models\Document;
 use App\Models\Event;
+use App\Models\ForumTopic;
 use App\Models\GuestPass;
 use App\Models\IncidentReport;
+use App\Models\Invoice;
+use App\Models\Meeting;
 use App\Models\Package;
+use App\Models\Payment;
 use App\Models\ServiceRequest;
+use App\Models\Survey;
 use App\Models\Unit;
+use App\Models\VendorBill;
+use App\Models\Violation;
+use App\Models\ViolationRule;
 use App\Models\WorkOrder;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
@@ -64,6 +75,28 @@ function communityEndpoints(): array
         'parking permits' => ['api.v1.communities.parking-permits.index', $none],
         'incident reports' => ['api.v1.communities.incident-reports.index', $none],
         'incident report' => ['api.v1.communities.incident-reports.show', fn (Community $c) => ['incidentReport' => IncidentReport::factory()->for($c)->create()->id]],
+        'unit account' => ['api.v1.communities.units.account.show', fn (Community $c) => ['unit' => Unit::factory()->for($c)->create()->id]],
+        'unit statement' => ['api.v1.communities.units.statement.index', fn (Community $c) => ['unit' => Unit::factory()->for($c)->create()->id]],
+        'invoices' => ['api.v1.communities.invoices.index', $none],
+        'invoice' => ['api.v1.communities.invoices.show', fn (Community $c) => ['invoice' => Invoice::factory()->for(Unit::factory()->for($c))->create()->id]],
+        'payments' => ['api.v1.communities.payments.index', $none],
+        'payment' => ['api.v1.communities.payments.show', fn (Community $c) => ['payment' => Payment::factory()->for(Unit::factory()->for($c))->create()->id]],
+        'vendor bills' => ['api.v1.communities.vendor-bills.index', $none],
+        'vendor bill' => ['api.v1.communities.vendor-bills.show', fn (Community $c) => ['vendorBill' => VendorBill::factory()->for($c)->create()->id]],
+        'ballots' => ['api.v1.communities.ballots.index', $none],
+        'ballot' => ['api.v1.communities.ballots.show', fn (Community $c) => ['ballot' => Ballot::factory()->for($c)->open()->withQuestion()->create()->id]],
+        'meetings' => ['api.v1.communities.meetings.index', $none],
+        'meeting' => ['api.v1.communities.meetings.show', fn (Community $c) => ['meeting' => Meeting::factory()->for($c)->create()->id]],
+        'violations' => ['api.v1.communities.violations.index', $none],
+        'violation' => ['api.v1.communities.violations.show', fn (Community $c) => ['violation' => Violation::factory()->for(ViolationRule::factory()->for($c), 'rule')->create()->id]],
+        'renovation requests' => ['api.v1.communities.architectural-requests.index', $none],
+        'renovation request' => ['api.v1.communities.architectural-requests.show', fn (Community $c) => ['architecturalRequest' => ArchitecturalRequest::factory()->for($c)->create()->id]],
+        'surveys' => ['api.v1.communities.surveys.index', $none],
+        'survey' => ['api.v1.communities.surveys.show', fn (Community $c) => ['survey' => Survey::factory()->for($c)->create()->id]],
+        'forms' => ['api.v1.communities.consent-forms.index', $none],
+        'form' => ['api.v1.communities.consent-forms.show', fn (Community $c) => ['consentForm' => ConsentForm::factory()->for($c)->create()->id]],
+        'board posts' => ['api.v1.communities.forum-topics.index', $none],
+        'board post' => ['api.v1.communities.forum-topics.show', fn (Community $c) => ['forumTopic' => ForumTopic::factory()->for($c)->create()->id]],
     ];
 }
 

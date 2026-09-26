@@ -16,6 +16,7 @@ use App\Models\BallotVote;
 use App\Models\Community;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\Governance\BallotParticipation;
 use App\Support\Governance\VotingRoll;
 use Flux\Flux;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -84,27 +85,7 @@ class BallotShow extends Component
     #[Computed]
     public function myUnits(): array
     {
-        $user = $this->currentUser();
-        $rows = [];
-
-        foreach (app(VotingRoll::class)->unitsOwnedBy($user, $this->community) as $unit) {
-            $rows[$unit->id] = ['unit' => $unit, 'via_proxy' => null];
-        }
-
-        $held = BallotProxy::query()->where('ballot_id', $this->ballot->id)->where('holder_id', $user->id)->active()->with('unit.building')->get();
-
-        foreach ($held as $proxy) {
-            $rows[$proxy->unit_id] ??= ['unit' => $proxy->unit, 'via_proxy' => $proxy];
-        }
-
-        $votes = BallotVote::query()->where('ballot_id', $this->ballot->id)->whereIn('unit_id', array_keys($rows))->get()->keyBy('unit_id');
-        $proxiesOut = BallotProxy::query()->where('ballot_id', $this->ballot->id)->whereIn('unit_id', array_keys($rows))->active()->with('holder')->get()->keyBy('unit_id');
-
-        return array_values(array_map(fn (array $row) => [
-            ...$row,
-            'vote' => $votes->get($row['unit']->id),
-            'proxy_out' => $row['via_proxy'] === null ? $proxiesOut->get($row['unit']->id) : null,
-        ], $rows));
+        return app(BallotParticipation::class)->units($this->ballot, $this->currentUser());
     }
 
     /**
@@ -116,15 +97,7 @@ class BallotShow extends Component
     #[Computed]
     public function proxyCandidates(): Collection
     {
-        $me = $this->currentUser()->id;
-
-        return User::query()
-            ->whereKeyNot($me)
-            ->where(fn ($query) => $query
-                ->whereHas('resident.residencies', fn ($residencies) => $residencies->where('community_id', $this->community->id)->active())
-                ->orWhereHas('communities', fn ($communities) => $communities->whereKey($this->community->id)))
-            ->orderBy('name')
-            ->get();
+        return app(BallotParticipation::class)->proxyCandidates($this->community, $this->currentUser());
     }
 
     /**

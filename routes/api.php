@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\V1;
+use App\Http\Controllers\ArchitecturalDecisionLetterController;
 use App\Http\Controllers\DocumentDownloadController;
+use App\Http\Controllers\PaymentReceiptController;
+use App\Http\Controllers\UnitStatementController;
+use App\Http\Controllers\ViolationNoticeLetterController;
 use App\Http\Middleware\PrepareApiRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -64,6 +68,36 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::post('guest-pass-redemptions', [V1\GuestPassRedemptionController::class, 'store'])->name('guest-pass-redemptions.store');
             Route::apiResource('parking-permits', V1\ParkingPermitController::class)->only(['index', 'store', 'destroy'])->parameters(['parking-permits' => 'parkingPermit']);
             Route::apiResource('incident-reports', V1\IncidentReportController::class)->only(['index', 'store', 'show'])->parameters(['incident-reports' => 'incidentReport']);
+
+            Route::get('units/{unit}/account', [V1\UnitAccountController::class, 'show'])->name('units.account.show');
+            Route::get('units/{unit}/statement', [V1\UnitStatementController::class, 'index'])->name('units.statement.index');
+            Route::get('units/{unit}/statement.pdf', UnitStatementController::class)->name('units.statement-pdf');
+            Route::post('units/{unit}/online-payments', [V1\OnlinePaymentController::class, 'store'])->name('units.online-payments.store');
+            Route::apiResource('invoices', V1\InvoiceController::class)->only(['index', 'show']);
+            Route::apiResource('payments', V1\PaymentController::class)->only(['index', 'store', 'show']);
+            Route::get('payments/{payment}/receipt', PaymentReceiptController::class)->name('payments.receipt');
+            Route::apiResource('vendor-bills', V1\VendorBillController::class)->only(['index', 'show'])->parameters(['vendor-bills' => 'vendorBill']);
+            Route::post('vendor-bills/{vendorBill}/decision', [V1\VendorBillDecisionController::class, 'store'])->name('vendor-bills.decision.store');
+
+            Route::apiResource('ballots', V1\BallotController::class)->only(['index', 'show']);
+            Route::post('ballots/{ballot}/votes', [V1\BallotVoteController::class, 'store'])->name('ballots.votes.store');
+            Route::post('ballots/{ballot}/proxies', [V1\BallotProxyController::class, 'store'])->name('ballots.proxies.store');
+            Route::delete('ballots/{ballot}/proxies/{proxy}', [V1\BallotProxyController::class, 'destroy'])->name('ballots.proxies.destroy');
+            Route::apiResource('meetings', V1\MeetingController::class)->only(['index', 'show']);
+
+            Route::apiResource('violations', V1\ViolationController::class)->only(['index', 'store', 'show']);
+            Route::get('violations/{violation}/notices/{notice}/letter', ViolationNoticeLetterController::class)->name('violations.notices.letter');
+            Route::apiResource('renovation-requests', V1\ArchitecturalRequestController::class)->only(['index', 'store', 'show'])->names('architectural-requests')->parameters(['renovation-requests' => 'architecturalRequest']);
+            Route::post('renovation-requests/{architecturalRequest}/decision', [V1\ArchitecturalRequestDecisionController::class, 'store'])->name('architectural-requests.decision.store');
+            Route::get('renovation-requests/{architecturalRequest}/decision-letter', ArchitecturalDecisionLetterController::class)->name('architectural-requests.letter');
+
+            Route::apiResource('surveys', V1\SurveyController::class)->only(['index', 'show']);
+            Route::post('surveys/{survey}/responses', [V1\SurveyResponseController::class, 'store'])->name('surveys.responses.store');
+            Route::apiResource('forms', V1\ConsentFormController::class)->only(['index', 'show'])->names('consent-forms')->parameters(['forms' => 'consentForm']);
+            Route::post('forms/{consentForm}/signatures', [V1\ConsentSignatureController::class, 'store'])->name('consent-forms.signatures.store');
+            Route::apiResource('board-posts', V1\ForumTopicController::class)->only(['index', 'store', 'show'])->names('forum-topics')->parameters(['board-posts' => 'forumTopic']);
+            Route::post('board-posts/{forumTopic}/replies', [V1\ForumPostController::class, 'store'])->name('forum-topics.replies.store');
+            Route::post('board-posts/{forumTopic}/reports', [V1\ContentReportController::class, 'store'])->name('forum-topics.reports.store');
         });
     });
 });
