@@ -26,7 +26,6 @@
             <x-signature-pad model="signature" :label="__('Draw your signature')" />
             <flux:error name="signature" />
             <flux:checkbox wire:model="agreed" :label="__('I have read this form and agree to it.')" />
-            <flux:error name="agreed" />
             <div class="flex justify-end">
                 <flux:button type="submit" variant="primary">{{ __('Sign form') }}</flux:button>
             </div>

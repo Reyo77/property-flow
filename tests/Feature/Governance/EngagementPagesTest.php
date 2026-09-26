@@ -128,6 +128,8 @@ describe('consent forms', function () {
 
         actingAs($owner);
         Livewire::test(ConsentFormShow::class, ['community' => $community, 'consentForm' => $form])
+            ->call('sign')
+            ->assertHasErrors(['signature', 'agreed'])
             ->set('signed_name', 'Rita Resident')
             ->set('signature', pngSignature())
             ->call('sign')
@@ -199,6 +201,22 @@ describe('community board', function () {
         actingAs($neighbour);
         get(route('communities.forum.show', [$community, $listing]))->assertForbidden();
         expect(Livewire::test(Forum::class, ['community' => $community])->set('tab', 'classifieds')->instance()->topics()->total())->toBe(0);
+    });
+
+    it('does not let residents report their own posts', function () {
+        $community = Community::factory()->create();
+        $author = memberOf($community);
+        $topic = ForumTopic::factory()->for($community)->create(['author_id' => $author->id]);
+        actingAs($author);
+
+        Livewire::test(ForumTopicShow::class, ['community' => $community, 'forumTopic' => $topic])
+            ->assertDontSee('wire:click="startReport"', false)
+            ->call('startReport')
+            ->set('reason', 'Testing')
+            ->call('report')
+            ->assertHasErrors('reason');
+
+        expect(ContentReport::count())->toBe(0);
     });
 
     it('keeps moderation tools from residents and the board closed to outsiders', function () {

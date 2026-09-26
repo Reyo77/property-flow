@@ -72,7 +72,6 @@
             </flux:select>
 
             <flux:input type="file" wire:model="photos" multiple :label="__('Photos (optional)')" :description="__('Up to 6 images, 8 MB each.')" accept="image/*" />
-            <flux:error name="photos" />
             <flux:error name="photos.*" />
 
             <div class="flex justify-end gap-2">

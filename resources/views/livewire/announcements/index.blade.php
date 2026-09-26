@@ -89,7 +89,6 @@
                         <flux:checkbox :value="$building->id" :label="$building->name" />
                     @endforeach
                 </flux:checkbox.group>
-                <flux:error name="building_ids" />
             @elseif ($audience_type === App\Enums\AnnouncementAudience::Units->value)
                 <div class="space-y-2">
                     <flux:input wire:model.live.debounce.300ms="unitSearch" icon="magnifying-glass" :placeholder="__('Search unit number')" />

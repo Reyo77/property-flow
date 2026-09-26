@@ -20,7 +20,7 @@
                 <flux:button size="sm" variant="ghost" wire:click="togglePinned">{{ $forumTopic->is_pinned ? __('Unpin') : __('Pin') }}</flux:button>
                 <flux:button size="sm" variant="ghost" wire:click="toggleLocked">{{ $forumTopic->isLocked() ? __('Unlock') : __('Lock') }}</flux:button>
                 <flux:button size="sm" variant="ghost" wire:click="toggleHidden">{{ $forumTopic->isHidden() ? __('Restore') : __('Hide') }}</flux:button>
-            @else
+            @elseif ($forumTopic->author_id !== auth()->id())
                 <flux:button size="sm" variant="ghost" icon="flag" wire:click="startReport">{{ __('Report') }}</flux:button>
             @endif
         </div>
@@ -35,7 +35,7 @@
                     <flux:text size="sm" variant="strong">{{ $post->author->name }} · {{ $post->created_at?->diffForHumans() }}</flux:text>
                     @if ($this->isModerator())
                         <flux:button size="xs" variant="ghost" wire:click="toggleHidden({{ $post->id }})">{{ $post->isHidden() ? __('Restore') : __('Hide') }}</flux:button>
-                    @else
+                    @elseif ($post->author_id !== auth()->id())
                         <flux:button size="xs" variant="ghost" icon="flag" wire:click="startReport({{ $post->id }})" :aria-label="__('Report')" />
                     @endif
                 </div>

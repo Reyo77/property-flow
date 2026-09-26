@@ -151,7 +151,9 @@ class User extends Authenticatable implements PasskeyUser
             return true;
         }
 
-        return $this->communities->contains($communityId);
+        return $this->relationLoaded('communities')
+            ? $this->communities->contains($communityId)
+            : $this->communities()->whereKey($communityId)->exists();
     }
 
     /**

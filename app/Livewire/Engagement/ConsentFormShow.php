@@ -83,11 +83,14 @@ class ConsentFormShow extends Component
     {
         $this->resetErrorBag();
 
-        if (! $this->agreed) {
-            $this->addError('agreed', __('Tick the box to confirm you agree.'));
-
-            return;
-        }
+        $this->validate([
+            'signed_name' => ['required', 'string', 'max:255'],
+            'signature' => ['required', 'string'],
+            'agreed' => ['accepted'],
+        ], [
+            'signature.required' => __('Draw your signature in the box.'),
+            'agreed.accepted' => __('Tick the box to confirm you agree.'),
+        ]);
 
         try {
             $signConsentForm->handle($this->consentForm, $this->currentUser(), $this->signed_name, $this->signature, request()->ip(), request()->userAgent());

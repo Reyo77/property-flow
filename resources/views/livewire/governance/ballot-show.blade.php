@@ -106,7 +106,6 @@
                                         <flux:radio :value="$option->id" :label="$option->label" />
                                     @endforeach
                                 </flux:radio.group>
-                                <flux:error name="choices.{{ $unit->id }}.{{ $question->id }}" />
                             @endforeach
                             <flux:error name="vote.{{ $unit->id }}" />
                             <div class="flex justify-end">

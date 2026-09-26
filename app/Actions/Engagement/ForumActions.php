@@ -65,6 +65,10 @@ class ForumActions
      */
     public function report(ForumTopic|ForumPost $content, User $reporter, string $reason): ContentReport
     {
+        if ($content->author_id === $reporter->id) {
+            throw ValidationException::withMessages(['reason' => __('You can\'t report your own post.')]);
+        }
+
         $communityId = $content instanceof ForumTopic ? $content->community_id : $content->topic->community_id;
 
         try {

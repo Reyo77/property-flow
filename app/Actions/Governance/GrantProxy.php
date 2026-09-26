@@ -74,6 +74,8 @@ class GrantProxy
             return true;
         }
 
+        $user->loadMissing('resident');
+
         return $user->resident !== null
             && $user->resident->residencies()->where('community_id', $ballot->community_id)->active()->exists();
     }

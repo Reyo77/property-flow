@@ -161,6 +161,23 @@ describe('voting page', function () {
         expect(BallotVote::sole())->unit_id->toBe($unit->id)->cast_by_id->toBe($neighbour->id)->ballot_proxy_id->not->toBeNull();
     });
 
+    it('lets an owner choose a board member or a resident as proxy from a full list', function (string $who) {
+        $community = Community::factory()->create();
+        [$unit, $owner] = ownerOf($community);
+        [, $neighbour] = ownerOf($community);
+        ownerOf($community);
+        $board = teamMember(CompanyRole::BoardMember, $community->company, [$community]);
+        $ballot = Ballot::factory()->for($community)->open()->withQuestion()->create();
+        $holder = $who === 'board member' ? $board : $neighbour;
+        actingAs($owner);
+
+        Livewire::test(BallotShow::class, ['community' => $community, 'ballot' => $ballot])
+            ->set("proxyHolder.{$unit->id}", (string) $holder->id)
+            ->call('appointProxy', $unit->id)
+            ->assertHasNoErrors()
+            ->assertSee("{$holder->name} is your proxy");
+    })->with(['board member', 'resident']);
+
     it('shows a tenant the ballot but gives them nothing to vote with', function () {
         $community = Community::factory()->create();
         [, $tenant] = ownerOf($community, type: ResidencyType::Tenant);

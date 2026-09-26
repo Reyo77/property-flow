@@ -41,7 +41,6 @@
         <flux:checkbox wire:model="entry_permission" :label="__('Staff or the vendor may enter the unit if nobody is home')" />
 
         <flux:input type="file" wire:model="photos" multiple :label="__('Photos (optional)')" :description="__('Up to 6 images, 8 MB each.')" accept="image/*" />
-        <flux:error name="photos" />
         <flux:error name="photos.*" />
 
         <div class="flex items-center gap-3">

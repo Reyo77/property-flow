@@ -61,7 +61,6 @@
                         @default
                             <flux:textarea wire:model="answers.{{ $question->id }}" :label="$question->title.($question->is_required ? ' *' : '')" rows="3" />
                     @endswitch
-                    <flux:error name="answers.{{ $question->id }}" />
                 </div>
             @endforeach
             <flux:error name="survey" />
