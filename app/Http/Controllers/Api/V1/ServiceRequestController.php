@@ -22,6 +22,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 use LogicException;
 
 /**
@@ -83,11 +84,8 @@ class ServiceRequestController extends Controller
      * @bodyParam unit_id integer The unit, or null for a common area. Example: 1
      * @bodyParam entry_permission boolean Staff may enter if nobody is home. Example: true
      * @bodyParam photos file[] Up to 6 images, 8 MB each.
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\ServiceRequestResource
-     *
-     * @apiResourceModel App\Models\ServiceRequest
      */
+    #[ResponseFromApiResource(ServiceRequestResource::class, ServiceRequest::class, status: 201)]
     public function store(Request $request, Community $community, CreateServiceRequest $createServiceRequest): JsonResponse
     {
         Gate::authorize('create', [ServiceRequest::class, $community]);

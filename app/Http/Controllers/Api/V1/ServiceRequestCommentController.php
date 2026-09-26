@@ -7,10 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\ServiceRequestCommentResource;
 use App\Models\Community;
 use App\Models\ServiceRequest;
+use App\Models\ServiceRequestComment;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Maintenance
@@ -24,11 +26,8 @@ class ServiceRequestCommentController extends Controller
      *
      * @bodyParam body string required Example: A plumber is booked for Thursday morning.
      * @bodyParam internal boolean Team only: hide from the resident. Example: false
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\ServiceRequestCommentResource
-     *
-     * @apiResourceModel App\Models\ServiceRequestComment with=author
      */
+    #[ResponseFromApiResource(ServiceRequestCommentResource::class, ServiceRequestComment::class, status: 201, with: ['author'])]
     public function store(Request $request, Community $community, ServiceRequest $serviceRequest, PostServiceRequestComment $postComment): JsonResponse
     {
         Gate::authorize('comment', $serviceRequest);

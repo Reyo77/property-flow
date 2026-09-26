@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Front desk
@@ -60,11 +61,8 @@ class GuestPassController extends Controller
      * @bodyParam guest_name string required Example: Sam Guest
      * @bodyParam valid_from string required Example: 2026-10-03
      * @bodyParam valid_until string required Example: 2026-10-05
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\GuestPassResource
-     *
-     * @apiResourceModel App\Models\GuestPass with=unit.building
      */
+    #[ResponseFromApiResource(GuestPassResource::class, GuestPass::class, status: 201, with: ['unit.building'])]
     public function store(Request $request, Community $community, IssueGuestPass $issueGuestPass): JsonResponse
     {
         Gate::authorize('create', [GuestPass::class, $community]);

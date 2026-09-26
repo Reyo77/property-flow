@@ -38,3 +38,6 @@ yarn-error.log
 /opencode.json
 /opencode.jsonc
 .DS_Store
+
+# Scribe's intermediate files; the published docs are in public/docs.
+/.scribe

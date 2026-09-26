@@ -18,6 +18,15 @@ class DocumentDownloadController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Download a document
+     *
+     * The document's current file, if you may see the document. Also linked from `file.download_url`.
+     *
+     * @group Documents
+     *
+     * @response 200 scenario="The file" [Binary application/octet-stream data]
+     */
     public function __invoke(Community $community, Document $document): StreamedResponse
     {
         $this->authorize('view', $document);

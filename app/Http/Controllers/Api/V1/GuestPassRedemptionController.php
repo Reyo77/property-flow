@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Front desk
@@ -25,11 +26,8 @@ class GuestPassRedemptionController extends Controller
      * code is a 422.
      *
      * @bodyParam code string required Example: K7Q2XP
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\VisitorResource
-     *
-     * @apiResourceModel App\Models\Visitor with=unit.building
      */
+    #[ResponseFromApiResource(VisitorResource::class, Visitor::class, status: 201, with: ['unit.building'])]
     public function store(Request $request, Community $community, RedeemGuestPass $redeem): JsonResponse
     {
         Gate::authorize('create', [Visitor::class, $community]);

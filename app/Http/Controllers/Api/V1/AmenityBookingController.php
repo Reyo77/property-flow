@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Amenities
@@ -71,11 +72,8 @@ class AmenityBookingController extends Controller
      * @bodyParam unit_id integer required for residents The unit the booking is for. Example: 1
      * @bodyParam notes string Example: Birthday party, around 15 guests.
      * @bodyParam terms_accepted boolean Required (true) when the amenity has terms. Example: true
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\AmenityBookingResource
-     *
-     * @apiResourceModel App\Models\AmenityBooking with=amenity,unit.building
      */
+    #[ResponseFromApiResource(AmenityBookingResource::class, AmenityBooking::class, status: 201, with: ['amenity', 'unit.building'])]
     public function store(Request $request, Community $community, CreateAmenityBooking $createBooking): JsonResponse
     {
         $validated = $request->validate([

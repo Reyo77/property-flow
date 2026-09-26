@@ -25,9 +25,7 @@ class NotificationController extends Controller
      *
      * @queryParam filter[unread] `1` for unread only. Example: 1
      *
-     * @apiResourceCollection App\Http\Resources\Api\V1\NotificationResource
-     *
-     * @apiResourceModel Illuminate\Notifications\DatabaseNotification paginate=25
+     * @response {"data": [{"id": "9b2f6c1e-2a4d-4c55-8e0f-3d7a1c2b4e51", "type": "package-arrived", "payload": {"package_id": 31, "community_id": 1, "carrier": "Canada Post"}, "read_at": null, "created_at": "2026-10-02T14:05:00+00:00"}], "links": {"first": "https://propertyflow.test/api/v1/notifications?page=1", "last": "https://propertyflow.test/api/v1/notifications?page=1", "prev": null, "next": null}, "meta": {"current_page": 1, "last_page": 1, "per_page": 25, "total": 1}}
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -46,9 +44,7 @@ class NotificationController extends Controller
     /**
      * Mark as read
      *
-     * @apiResource App\Http\Resources\Api\V1\NotificationResource
-     *
-     * @apiResourceModel Illuminate\Notifications\DatabaseNotification
+     * @response {"data": {"id": "9b2f6c1e-2a4d-4c55-8e0f-3d7a1c2b4e51", "type": "package-arrived", "payload": {"package_id": 31, "community_id": 1, "carrier": "Canada Post"}, "read_at": "2026-10-02T14:10:00+00:00", "created_at": "2026-10-02T14:05:00+00:00"}}
      */
     public function update(Request $request, string $notification): NotificationResource
     {

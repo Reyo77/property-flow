@@ -24,6 +24,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use InvalidArgumentException;
+use Knuckles\Scribe\Scribe;
 use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
@@ -50,6 +51,18 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureTenancy();
         $this->configureRateLimiting();
+        $this->configureApiDocs();
+    }
+
+    /**
+     * Document URLs exactly as they are routed (`{community}`, `{serviceRequest}`) rather than
+     * Scribe's `{community_id}` style. Scribe is a development tool, so it's absent in production.
+     */
+    protected function configureApiDocs(): void
+    {
+        if (class_exists(Scribe::class)) {
+            Scribe::normalizeEndpointUrlUsing(fn (string $url): string => $url);
+        }
     }
 
     /**

@@ -329,20 +329,27 @@ Bugs found and fixed along the way (in earlier phases' code): soft-deleted units
 ### Phase 9 — REST API & PWA
 **Goal:** everything usable by a future mobile app.
 
+Delivered in three milestones (9a API foundation and core modules, 9b the remaining modules, 9c webhooks, docs and the installable app).
+
 Tasks
-- [ ] `/api/v1` for all modules (reusing Actions), API Resources, filters/sorting/pagination
-- [ ] Sanctum tokens (mobile login, device names, revoke)
-- [ ] Rate limiting, consistent error format
-- [ ] Scribe → OpenAPI spec + Postman collection at `/docs`
-- [ ] Outgoing webhooks (company-configured URLs, signed payloads, retries)
-- [ ] PWA: manifest, service worker, install prompt, offline shell
+- [x] `/api/v1` for all modules (96 routes): communities, property, residents, communication, documents, maintenance, amenities, front desk, finance (unit account, statement, online checkout, invoices, payments, vendor-bill approval), governance (ballots, votes, proxies, meetings), violations, renovations, surveys, forms, community board, notifications. Controllers reuse the Actions, policies and validation rules; logic that lived only in Livewire (own-unit checks, internal comments, guest passes, visitor check-in, ballot participation) moved into shared actions/classes first
+- [x] API Resources; lists share `filter[..]`, `sort=-field`, `per_page` (unknown filters, sorts and enum values are a 422); mixed-audience lists run each row through the record's own `view` policy, so a list can never show what the record endpoint would refuse
+- [x] Sanctum tokens: sign in per device (deactivated accounts refused, two-factor `code` or single-use `recovery_code` enforced), list and revoke tokens, `GET /me` with role, permissions, communities and homes
+- [x] Rate limiting (120/min per user; 5 sign-in attempts/min per email and address) and one error shape: `message` + stable `code` (+ `errors` on 422); 404s never name internal classes
+- [x] Scribe → static docs, OpenAPI spec and Postman collection at `/docs` (committed in `public/docs`, so they exist in production where Scribe isn't installed; regenerate with `composer docs`)
+- [x] Outgoing webhooks: 17 events, payloads are the API resources, HMAC-SHA256 signature over timestamp + body, queued after commit, retries at 1m/5m/30m/2h/6h, no redirects followed, private/loopback/metadata addresses refused, endpoint switched off after 15 failures in a row; admin screen with test ping, delivery log, resend and secret rotation; `webhooks.manage` permission
+- [x] PWA: manifest, icons from the PropertyFlow logo, service worker (static assets and an offline page only — never signed-in pages), install button where supported
 
 Tests
-- Every endpoint: 200/201, 401, 403, 404 (other company), 422
-- Response shape snapshot / OpenAPI contract tests
-- Webhook signature + retry tests (`Http::fake`)
+- A contract matrix runs every read endpoint through 200 for the admin, 401 without a token, 404 for another company's community and record, and 403 for a resident of another community; writes have their own 201/403/422 tests
+- Every API route must appear in the published OpenAPI spec, and every field a response returns must be documented there
+- Webhook signing and verification, retries and give-up, recovery after a failure, auto-disable, rollback sends nothing, redirects and private addresses refused (`Http::fake`)
 
-✅ **Done when:** the API docs alone are enough to build a mobile client.
+✅ **Done when:** the API docs alone are enough to build a mobile client. **Met** — `/docs` covers sign-in (including two-factor), conventions, errors, every endpoint with examples built from the real resources, and webhook verification; the docs contract tests keep them in step with the code.
+
+Deploy note: run `php artisan permissions:sync-new` after `migrate` on every deploy, so existing companies get permissions added by a release (this phase adds `webhooks.manage`).
+
+Bugs found and fixed along the way (in earlier phases' code): permissions added by a release never reached existing companies; scheduled announcements, events, incident times and key due-back times were typed on the community's clock but stored as UTC (a 9am Toronto announcement published at 5am); residents could book an amenity with no unit, skipping the per-unit limit; appointing a proxy from the full list crashed on a lazy-loaded relation; only the page, not the action, stopped anyone but the appointing owner from revoking a proxy; a few actions relied on the signed-in user to set `company_id`.
 
 ---
 

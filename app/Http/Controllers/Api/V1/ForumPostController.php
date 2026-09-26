@@ -6,11 +6,13 @@ use App\Actions\Engagement\ForumActions;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\ForumPostResource;
 use App\Models\Community;
+use App\Models\ForumPost;
 use App\Models\ForumTopic;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Community engagement
@@ -23,11 +25,8 @@ class ForumPostController extends Controller
      * Not on a locked, closed or hidden post.
      *
      * @bodyParam body string required Example: Is it still available?
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\ForumPostResource
-     *
-     * @apiResourceModel App\Models\ForumPost with=author
      */
+    #[ResponseFromApiResource(ForumPostResource::class, ForumPost::class, status: 201, with: ['author'])]
     public function store(Request $request, Community $community, ForumTopic $forumTopic, ForumActions $forum): JsonResponse
     {
         Gate::authorize('reply', $forumTopic);

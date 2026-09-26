@@ -19,7 +19,7 @@ class BuildingFactory extends Factory
         return [
             'community_id' => Community::factory(),
             'company_id' => fn (array $attributes) => Community::withoutGlobalScopes()->whereKey($attributes['community_id'])->valueOrFail('company_id'),
-            'name' => 'Tower '.fake()->unique()->randomLetter(),
+            'name' => 'Tower '.fake()->randomLetter(),
             'floors' => fake()->numberBetween(3, 40),
         ];
     }

@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Violations and renovations
@@ -61,11 +62,8 @@ class ArchitecturalRequestController extends Controller
      * @bodyParam contractor string Example: Northern Floors Ltd.
      * @bodyParam planned_start_on string YYYY-MM-DD, today or later. Example: 2026-11-02
      * @bodyParam plans file[] Up to 10 PDFs or images, 20 MB each.
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\ArchitecturalRequestResource
-     *
-     * @apiResourceModel App\Models\ArchitecturalRequest with=unit.building
      */
+    #[ResponseFromApiResource(ArchitecturalRequestResource::class, ArchitecturalRequest::class, status: 201, with: ['unit.building'])]
     public function store(Request $request, Community $community, SubmitArchitecturalRequest $submit): JsonResponse
     {
         Gate::authorize('create', [ArchitecturalRequest::class, $community]);

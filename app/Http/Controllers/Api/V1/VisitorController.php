@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Front desk
@@ -53,11 +54,8 @@ class VisitorController extends Controller
      * @bodyParam unit_id integer The unit they're visiting. Example: 1
      * @bodyParam purpose string Example: Dinner
      * @bodyParam notes string Example: Parked in visitor spot 4
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\VisitorResource
-     *
-     * @apiResourceModel App\Models\Visitor with=unit.building
      */
+    #[ResponseFromApiResource(VisitorResource::class, Visitor::class, status: 201, with: ['unit.building'])]
     public function store(Request $request, Community $community, LogVisitor $logVisitor): JsonResponse
     {
         Gate::authorize('create', [Visitor::class, $community]);

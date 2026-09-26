@@ -78,9 +78,7 @@ class AccessTokenController extends Controller
      * Every device signed in to your account, most recently used first. `current` marks the
      * token making this request.
      *
-     * @apiResourceCollection App\Http\Resources\Api\V1\AccessTokenResource
-     *
-     * @apiResourceModel Laravel\Sanctum\PersonalAccessToken
+     * @response {"data": [{"id": 12, "device_name": "Rita's iPhone", "current": true, "last_used_at": "2026-10-02T14:05:00+00:00", "created_at": "2026-09-01T09:00:00+00:00"}, {"id": 7, "device_name": "Old iPad", "current": false, "last_used_at": "2026-06-11T18:30:00+00:00", "created_at": "2026-02-14T10:00:00+00:00"}]}
      */
     public function index(Request $request): AnonymousResourceCollection
     {

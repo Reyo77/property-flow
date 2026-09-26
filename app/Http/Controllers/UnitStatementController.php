@@ -17,6 +17,15 @@ class UnitStatementController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Download a unit's statement (PDF)
+     *
+     * The same statement as `GET …/units/{unit}/statement`, as a PDF to keep or print. Takes the same `from` and `to`.
+     *
+     * @group Finance
+     *
+     * @response 200 scenario="The file" [Binary application/pdf data]
+     */
     public function __invoke(Request $request, Community $community, Unit $unit, UnitLedger $unitLedger): Response
     {
         $this->authorize('viewLedger', $unit);

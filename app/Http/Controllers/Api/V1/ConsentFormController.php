@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Community engagement
@@ -42,9 +43,8 @@ class ConsentFormController extends Controller
      * Show a form
      *
      * `signed_at` is when you signed it, or null.
-     *
-     * @response {"data": {"id": 1, "title": "Consent to electronic delivery of notices", "body": "I consent to…", "audience": "owners"}, "signed_at": null}
      */
+    #[ResponseFromApiResource(ConsentFormResource::class, ConsentForm::class, additional: ['signed_at' => null])]
     public function show(Request $request, Community $community, ConsentForm $consentForm): JsonResponse
     {
         Gate::authorize('view', $consentForm);

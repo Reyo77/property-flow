@@ -19,6 +19,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Violations and renovations
@@ -69,11 +70,8 @@ class ViolationController extends Controller
      * @bodyParam location string Example: Lobby
      * @bodyParam observed_at string ISO 8601; defaults to now. Example: 2026-10-01T08:00:00-04:00
      * @bodyParam photos file[] Up to 6 images.
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\ViolationResource
-     *
-     * @apiResourceModel App\Models\Violation with=rule,unit.building,notices
      */
+    #[ResponseFromApiResource(ViolationResource::class, Violation::class, status: 201, with: ['rule', 'unit.building', 'notices'])]
     public function store(Request $request, Community $community, ReportViolation $reportViolation): JsonResponse
     {
         Gate::authorize('create', [Violation::class, $community]);

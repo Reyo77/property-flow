@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Governance
@@ -68,9 +69,8 @@ class BallotController extends Controller
      * `my_units` lists the units you can vote for — your own, and any you hold a proxy for — with
      * whether each has voted and, for your own, the proxy you appointed. `proxy_candidates` are the
      * people you may appoint while voting is open.
-     *
-     * @response {"data": {"id": 2, "title": "Approve the 2027 operating budget", "status": "open", "questions": [{"id": 3, "title": "Do you approve the proposed operating budget?", "options": [{"id": 7, "label": "Yes"}, {"id": 8, "label": "No"}]}]}, "turnout": {"eligible_units": 96, "voted_units": 24}, "my_units": [{"unit": {"id": 1, "label": "North Tower · 101"}, "as_proxy": false, "voted_at": null, "proxy": null}], "proxy_candidates": [{"id": 3, "name": "Ben Board"}]}
      */
+    #[ResponseFromApiResource(BallotResource::class, Ballot::class, with: ['meeting', 'questions.options'], additional: ['turnout' => ['eligible_units' => 96, 'voted_units' => 24], 'my_units' => [['unit' => ['id' => 1, 'label' => 'North Tower · 101'], 'as_proxy' => false, 'voted_at' => null, 'proxy' => null]], 'proxy_candidates' => [['id' => 3, 'name' => 'Ben Board']]])]
     public function show(Request $request, Community $community, Ballot $ballot, BallotParticipation $participation, VotingRoll $votingRoll): JsonResponse
     {
         Gate::authorize('view', $ballot);

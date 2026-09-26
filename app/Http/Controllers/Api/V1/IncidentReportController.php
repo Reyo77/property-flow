@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Front desk
@@ -65,11 +66,8 @@ class IncidentReportController extends Controller
      * @bodyParam unit_id integer Example: 1
      * @bodyParam location string Example: P2, near spot 41
      * @bodyParam photos file[] Up to 6 images, 8 MB each.
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\IncidentReportResource
-     *
-     * @apiResourceModel App\Models\IncidentReport with=unit.building
      */
+    #[ResponseFromApiResource(IncidentReportResource::class, IncidentReport::class, status: 201, with: ['unit.building'])]
     public function store(Request $request, Community $community, CreateIncidentReport $create): JsonResponse
     {
         Gate::authorize('create', [IncidentReport::class, $community]);

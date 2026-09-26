@@ -107,6 +107,9 @@
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ],
+        "docs": [
+            "@php artisan scribe:generate --no-interaction"
         ]
     },
     "extra": {
@@ -127,5 +130,8 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "scripts-descriptions": {
+        "docs": "Regenerate the API docs, OpenAPI spec and Postman collection in public/docs."
+    }
 }

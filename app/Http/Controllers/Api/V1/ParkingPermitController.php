@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Front desk
@@ -59,11 +60,8 @@ class ParkingPermitController extends Controller
      * @bodyParam starts_on string required Example: 2026-10-03
      * @bodyParam ends_on string required Example: 2026-10-05
      * @bodyParam notes string Example: Blue hatchback
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\ParkingPermitResource
-     *
-     * @apiResourceModel App\Models\ParkingPermit with=unit.building
      */
+    #[ResponseFromApiResource(ParkingPermitResource::class, ParkingPermit::class, status: 201, with: ['unit.building'])]
     public function store(Request $request, Community $community, IssueParkingPermit $issue): JsonResponse
     {
         Gate::authorize('create', [ParkingPermit::class, $community]);

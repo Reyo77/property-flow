@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Community engagement
@@ -62,11 +63,8 @@ class ForumTopicController extends Controller
      * @bodyParam title string required Example: Kids bike, 20 inch
      * @bodyParam body string required Example: Outgrown, good condition.
      * @bodyParam price_cents integer For `for_sale`. Example: 4500
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\ForumTopicResource
-     *
-     * @apiResourceModel App\Models\ForumTopic with=author
      */
+    #[ResponseFromApiResource(ForumTopicResource::class, ForumTopic::class, status: 201, with: ['author'])]
     public function store(Request $request, Community $community, ForumActions $forum): JsonResponse
     {
         Gate::authorize('create', [ForumTopic::class, $community]);

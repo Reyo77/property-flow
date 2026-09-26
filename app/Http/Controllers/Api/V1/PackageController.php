@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Front desk
@@ -63,11 +64,8 @@ class PackageController extends Controller
      * @bodyParam carrier string required Example: Canada Post
      * @bodyParam tracking_number string Example: 1Z999AA10123456784
      * @bodyParam shelf_location string Example: B3
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\PackageResource
-     *
-     * @apiResourceModel App\Models\Package with=unit.building,resident
      */
+    #[ResponseFromApiResource(PackageResource::class, Package::class, status: 201, with: ['unit.building', 'resident'])]
     public function store(Request $request, Community $community, LogPackage $logPackage): JsonResponse
     {
         Gate::authorize('create', [Package::class, $community]);

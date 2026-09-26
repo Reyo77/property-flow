@@ -12,6 +12,15 @@ class ArchitecturalDecisionLetterController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Download a renovation decision letter (PDF)
+     *
+     * Available once decided. Also linked from `decision_letter_url`.
+     *
+     * @group Violations and renovations
+     *
+     * @response 200 scenario="The file" [Binary application/pdf data]
+     */
     public function __invoke(Community $community, ArchitecturalRequest $architecturalRequest): Response
     {
         $this->authorize('view', $architecturalRequest);

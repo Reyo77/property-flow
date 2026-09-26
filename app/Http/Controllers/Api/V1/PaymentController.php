@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Finance
@@ -66,11 +67,8 @@ class PaymentController extends Controller
      * @bodyParam received_on string required YYYY-MM-DD, not in the future. Example: 2026-10-01
      * @bodyParam reference string Cheque number or transfer reference. Example: CHQ 204
      * @bodyParam memo string Example: October fees
-     *
-     * @apiResource 201 App\Http\Resources\Api\V1\PaymentResource
-     *
-     * @apiResourceModel App\Models\Payment with=unit.building
      */
+    #[ResponseFromApiResource(PaymentResource::class, Payment::class, status: 201, with: ['unit.building'])]
     public function store(Request $request, Community $community, RecordPayment $recordPayment): JsonResponse
     {
         Gate::authorize('create', [Payment::class, $community]);

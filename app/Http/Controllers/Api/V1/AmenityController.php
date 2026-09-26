@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Amenities
@@ -49,9 +50,8 @@ class AmenityController extends Controller
      * bookable day). Slots at capacity are included with `bookable: false`.
      *
      * @queryParam date string A local date, YYYY-MM-DD. Example: 2026-10-03
-     *
-     * @response {"data": {"id": 1, "name": "Party Room", "slot_minutes": 120, "capacity": 1}, "slots": {"date": "2026-10-03", "items": [{"starts_at": "2026-10-03T14:00:00+00:00", "ends_at": "2026-10-03T16:00:00+00:00", "remaining": 1, "bookable": true}]}}
      */
+    #[ResponseFromApiResource(AmenityResource::class, Amenity::class, additional: ['slots' => ['date' => '2026-10-03', 'items' => [['starts_at' => '2026-10-03T14:00:00+00:00', 'ends_at' => '2026-10-03T16:00:00+00:00', 'remaining' => 1, 'bookable' => true]]]])]
     public function show(Request $request, Community $community, Amenity $amenity): JsonResponse
     {
         Gate::authorize('view', $amenity);

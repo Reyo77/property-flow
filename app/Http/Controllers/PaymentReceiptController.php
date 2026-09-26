@@ -12,6 +12,15 @@ class PaymentReceiptController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Download a payment receipt (PDF)
+     *
+     * Also linked from a payment's `receipt_url`.
+     *
+     * @group Finance
+     *
+     * @response 200 scenario="The file" [Binary application/pdf data]
+     */
     public function __invoke(Community $community, Payment $payment): Response
     {
         $this->authorize('view', $payment);

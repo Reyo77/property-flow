@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 
 /**
  * @group Community engagement
@@ -50,9 +51,8 @@ class SurveyController extends Controller
      * Show a survey or poll
      *
      * `can_answer` says whether to show the questions; `results` appears when you may see them.
-     *
-     * @response {"data": {"id": 1, "title": "New lobby paint colour", "is_poll": true, "open": true, "questions": [{"id": 1, "kind": "single_choice", "title": "Which colour do you prefer?", "required": true, "options": [{"id": 1, "label": "Warm grey"}]}]}, "can_answer": false, "answered": true, "results": {"responses": 19, "questions": [{"title": "Which colour do you prefer?", "options": [{"label": "Warm grey", "count": 5, "percent": "26.3"}]}]}}
      */
+    #[ResponseFromApiResource(SurveyResource::class, Survey::class, with: ['questions.options'], additional: ['answered' => true, 'can_answer' => false, 'results' => ['responses' => 19, 'questions' => [['title' => 'Which colour do you prefer?', 'options' => [['label' => 'Warm grey', 'count' => 5, 'percent' => '26.3']]]]]])]
     public function show(Request $request, Community $community, Survey $survey, AudienceCheck $audience, SurveyResults $results): JsonResponse
     {
         Gate::authorize('view', $survey);
