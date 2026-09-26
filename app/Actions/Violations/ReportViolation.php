@@ -4,10 +4,12 @@ namespace App\Actions\Violations;
 
 use App\Enums\ViolationStage;
 use App\Enums\ViolationStatus;
+use App\Enums\WebhookEvent;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Violation;
 use App\Models\ViolationRule;
+use App\Support\Webhooks\Webhooks;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +73,10 @@ class ReportViolation
 
         $today = CarbonImmutable::now($unit->loadMissing('community')->community->timezone)->startOfDay();
         $this->issueNotice->handle($violation, ViolationStage::Courtesy, $today, $reportedBy);
+        $violation->refresh();
 
-        return $violation->refresh();
+        app(Webhooks::class)->dispatch(WebhookEvent::ViolationReported, $violation);
+
+        return $violation;
     }
 }

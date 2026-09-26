@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Http\Webhooks\ApiResourcePayloads;
 use App\Models\User;
 use App\Policies\RolePolicy;
 use App\Support\Payments\LocalPaymentGateway;
 use App\Support\Payments\PaymentGateway;
 use App\Support\Tenancy\CurrentCommunity;
 use App\Support\Tenancy\CurrentCompany;
+use App\Support\Webhooks\WebhookPayloads;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -31,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(WebhookPayloads::class, ApiResourcePayloads::class);
         $this->app->scoped(CurrentCompany::class);
         $this->app->scoped(CurrentCommunity::class);
         $this->app->singleton(PaymentGateway::class, fn ($app) => match (config('services.payments.gateway')) {

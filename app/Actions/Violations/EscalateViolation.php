@@ -3,9 +3,11 @@
 namespace App\Actions\Violations;
 
 use App\Enums\ViolationStage;
+use App\Enums\WebhookEvent;
 use App\Models\User;
 use App\Models\Violation;
 use App\Models\ViolationNotice;
+use App\Support\Webhooks\Webhooks;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -39,7 +41,12 @@ class EscalateViolation
                 ViolationStage::Warning, ViolationStage::Fine => ViolationStage::Fine,
             };
 
-            return $this->issueNotice->handle($violation, $next, $today, $by);
+            $notice = $this->issueNotice->handle($violation, $next, $today, $by);
+            $violation->refresh();
+
+            app(Webhooks::class)->dispatch(WebhookEvent::ViolationEscalated, $violation);
+
+            return $notice;
         });
     }
 }

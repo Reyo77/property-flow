@@ -48,10 +48,14 @@ use App\Livewire\Units;
 use App\Livewire\Vendors;
 use App\Livewire\Violations;
 use App\Livewire\Visitors;
+use App\Livewire\Webhooks;
 use App\Livewire\WorkOrders;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
+
+// The page the service worker shows when there's no connection; it has to work signed out.
+Route::view('offline', 'offline')->name('offline');
 
 Route::livewire('invitations/{token}', Invitations\Accept::class)
     ->middleware(['guest', 'throttle:30,1'])
@@ -65,6 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::livewire('team', Team\Index::class)->name('team.index');
     Route::livewire('team/roles', Team\Roles::class)->name('team.roles');
     Route::livewire('vendors', Vendors\Index::class)->name('vendors.index');
+    Route::livewire('webhooks', Webhooks\Index::class)->name('webhooks.index');
     Route::livewire('my-work-orders', WorkOrders\MyWorkOrders::class)->name('work-orders.mine');
     Route::get('patrol-scan/{qrToken}', PatrolScanController::class)->name('patrol-scan');
     Route::get('payments/test-checkout/{reference}', [TestCheckoutController::class, 'show'])->name('payments.test-checkout');

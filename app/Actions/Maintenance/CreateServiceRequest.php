@@ -3,9 +3,11 @@
 namespace App\Actions\Maintenance;
 
 use App\Enums\Permission;
+use App\Enums\WebhookEvent;
 use App\Models\Community;
 use App\Models\ServiceRequest;
 use App\Models\User;
+use App\Support\Webhooks\Webhooks;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -27,9 +29,10 @@ class CreateServiceRequest
             throw ValidationException::withMessages(['unit_id' => __('Choose one of your own units.')]);
         }
 
-        return DB::transaction(function () use ($community, $reportedBy, $validated, $photos): ServiceRequest {
+        $serviceRequest = DB::transaction(function () use ($community, $reportedBy, $validated, $photos): ServiceRequest {
             $serviceRequest = $community->serviceRequests()->make($validated);
             $serviceRequest->forceFill([
+                'company_id' => $community->company_id,
                 'reported_by_user_id' => $reportedBy->id,
                 'reported_by_resident_id' => $reportedBy->resident?->id,
             ])->save();
@@ -40,6 +43,10 @@ class CreateServiceRequest
 
             return $serviceRequest;
         });
+
+        app(Webhooks::class)->dispatch(WebhookEvent::ServiceRequestCreated, $serviceRequest);
+
+        return $serviceRequest;
     }
 
     private function mayReportFor(Community $community, User $user, int $unitId): bool

@@ -2,10 +2,12 @@
 
 namespace App\Actions\FrontDesk;
 
+use App\Enums\WebhookEvent;
 use App\Events\FrontDeskActivity;
 use App\Models\GuestPass;
 use App\Models\User;
 use App\Models\Visitor;
+use App\Support\Webhooks\Webhooks;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -34,6 +36,7 @@ class RedeemGuestPass
                 'purpose' => __('Guest pass'),
             ]);
             $visitor->forceFill(['company_id' => $guestPass->company_id, 'logged_by_id' => $redeemedBy->id])->save();
+            app(Webhooks::class)->dispatch(WebhookEvent::VisitorCheckedIn, $visitor);
 
             return $visitor;
         });

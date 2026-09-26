@@ -61,6 +61,7 @@ enum Permission: string
     case ReportViolations = 'violations.report';
     case ManageViolations = 'violations.manage';
     case ModerateCommunity = 'community.moderate';
+    case ManageWebhooks = 'webhooks.manage';
 
     public function label(): string
     {
@@ -122,6 +123,7 @@ enum Permission: string
             self::ReportViolations => __('Report bylaw violations'),
             self::ManageViolations => __('Issue notices and fines, resolve violations, manage rules'),
             self::ModerateCommunity => __('Moderate the forum and classifieds'),
+            self::ManageWebhooks => __('Manage webhooks that send events to other systems'),
         };
     }
 
@@ -153,6 +155,7 @@ enum Permission: string
             self::ViewGovernance, self::ManageGovernance => __('Governance'),
             self::ViewViolations, self::ReportViolations, self::ManageViolations => __('Violations'),
             self::ModerateCommunity => __('Community'),
+            self::ManageWebhooks => __('Integrations'),
         };
     }
 

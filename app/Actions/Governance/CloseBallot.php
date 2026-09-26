@@ -2,9 +2,11 @@
 
 namespace App\Actions\Governance;
 
+use App\Enums\WebhookEvent;
 use App\Models\Ballot;
 use App\Models\User;
 use App\Support\Governance\BallotTally;
+use App\Support\Webhooks\Webhooks;
 use Illuminate\Support\Facades\DB;
 use LogicException;
 
@@ -35,6 +37,8 @@ class CloseBallot
             $ballot->forceFill(['results' => $this->tally->count($ballot), 'closed_at' => now()])->save();
 
             activity('ballots')->performedOn($ballot)->causedBy($closedBy)->log('closed');
+
+            app(Webhooks::class)->dispatch(WebhookEvent::BallotClosed, $ballot);
 
             return $ballot;
         });

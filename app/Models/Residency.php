@@ -42,6 +42,7 @@ class Residency extends Model
     {
         static::creating(function (Residency $residency): void {
             $residency->community_id ??= $residency->unit->community_id;
+            $residency->company_id ??= $residency->unit->company_id;
         });
     }
 

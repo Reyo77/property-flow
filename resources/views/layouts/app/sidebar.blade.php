@@ -32,6 +32,11 @@
                             {{ __('Vendors') }}
                         </flux:sidebar.item>
                     @endcan
+                    @can('viewAny', App\Models\WebhookEndpoint::class)
+                        <flux:sidebar.item icon="bolt" :href="route('webhooks.index')" :current="request()->routeIs('webhooks.*')" wire:navigate>
+                            {{ __('Webhooks') }}
+                        </flux:sidebar.item>
+                    @endcan
                     @if (auth()->user()->vendor !== null)
                         <flux:sidebar.item icon="clipboard-document-check" :href="route('work-orders.mine')" :current="request()->routeIs('work-orders.mine')" wire:navigate>
                             {{ __('My work orders') }}
@@ -222,6 +227,12 @@
             </flux:sidebar.nav>
 
             <flux:spacer />
+
+            <div x-data="installPrompt" x-show="available" x-cloak data-test="install-app">
+                <flux:sidebar.item icon="arrow-down-tray" href="#" x-on:click.prevent="install">
+                    {{ __('Install app') }}
+                </flux:sidebar.item>
+            </div>
 
             <div class="hidden items-center gap-2 px-2 lg:flex">
                 <livewire:notification-bell />

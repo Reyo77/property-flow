@@ -4,11 +4,13 @@ namespace App\Actions\Maintenance;
 
 use App\Enums\NotificationCategory;
 use App\Enums\ServiceRequestStatus;
+use App\Enums\WebhookEvent;
 use App\Models\NotificationPreference;
 use App\Models\Residency;
 use App\Models\ServiceRequest;
 use App\Models\User;
 use App\Notifications\ServiceRequestStatusChanged;
+use App\Support\Webhooks\Webhooks;
 use Illuminate\Support\Collection;
 use LogicException;
 
@@ -27,6 +29,8 @@ class TransitionServiceRequestStatus
     public function handle(ServiceRequest $serviceRequest, ServiceRequestStatus $target): void
     {
         $serviceRequest->transitionTo($target);
+
+        app(Webhooks::class)->dispatch(WebhookEvent::ServiceRequestStatusChanged, $serviceRequest);
 
         if (in_array($target, self::NOTIFIABLE_STATUSES, true)) {
             $this->notifyRecipients($serviceRequest, $target);

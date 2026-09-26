@@ -6,9 +6,11 @@ use App\Actions\Amenities\Concerns\NotifiesBookingResident;
 use App\Actions\Finance\ChargeAmenityBooking;
 use App\Enums\AmenityBookingStatus;
 use App\Enums\Permission;
+use App\Enums\WebhookEvent;
 use App\Models\Amenity;
 use App\Models\AmenityBooking;
 use App\Models\User;
+use App\Support\Webhooks\Webhooks;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -83,6 +85,8 @@ class CreateAmenityBooking
                 $this->chargeAmenityBooking->handle($booking);
                 $this->notifyResident($booking);
             }
+
+            app(Webhooks::class)->dispatch(WebhookEvent::AmenityBookingCreated, $booking);
 
             return $booking;
         });

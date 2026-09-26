@@ -1,0 +1,18 @@
+{
+    "name": "PropertyFlow",
+    "short_name": "PropertyFlow",
+    "description": "Your building in your pocket: requests, bookings, packages, notices and payments.",
+    "id": "/dashboard",
+    "start_url": "/dashboard",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "any",
+    "background_color": "#18181b",
+    "theme_color": "#18181b",
+    "categories": ["productivity", "lifestyle"],
+    "icons": [
+        { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ]
+}

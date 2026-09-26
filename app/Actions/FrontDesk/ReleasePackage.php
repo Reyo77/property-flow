@@ -3,9 +3,11 @@
 namespace App\Actions\FrontDesk;
 
 use App\Enums\PackageStatus;
+use App\Enums\WebhookEvent;
 use App\Events\FrontDeskActivity;
 use App\Models\Package;
 use App\Models\User;
+use App\Support\Webhooks\Webhooks;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use LogicException;
@@ -33,6 +35,7 @@ class ReleasePackage
         }
 
         $package->forceFill($attributes)->save();
+        app(Webhooks::class)->dispatch(WebhookEvent::PackageReleased, $package);
 
         FrontDeskActivity::dispatch($package->community_id, 'package', __('Package released to :name.', ['name' => $releasedToName]));
     }

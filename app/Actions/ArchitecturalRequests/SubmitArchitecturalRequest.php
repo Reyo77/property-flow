@@ -3,10 +3,12 @@
 namespace App\Actions\ArchitecturalRequests;
 
 use App\Enums\ArchitecturalRequestStatus;
+use App\Enums\WebhookEvent;
 use App\Models\ArchitecturalRequest;
 use App\Models\Unit;
 use App\Models\User;
 use App\Support\Governance\VotingRoll;
+use App\Support\Webhooks\Webhooks;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
@@ -61,6 +63,8 @@ class SubmitArchitecturalRequest
                     'size_bytes' => $plan->getSize() ?: 0,
                 ])->forceFill(['company_id' => $request->company_id])->save();
             }
+
+            app(Webhooks::class)->dispatch(WebhookEvent::ArchitecturalRequestSubmitted, $request);
 
             return $request;
         });

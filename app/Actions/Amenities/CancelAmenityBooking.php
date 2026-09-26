@@ -6,8 +6,10 @@ use App\Actions\Amenities\Concerns\NotifiesBookingResident;
 use App\Actions\Finance\ReleaseAmenityBookingCharges;
 use App\Enums\AmenityBookingStatus;
 use App\Enums\Permission;
+use App\Enums\WebhookEvent;
 use App\Models\AmenityBooking;
 use App\Models\User;
+use App\Support\Webhooks\Webhooks;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -46,6 +48,8 @@ class CancelAmenityBooking
 
             $this->releaseAmenityBookingCharges->handle($booking);
         });
+
+        app(Webhooks::class)->dispatch(WebhookEvent::AmenityBookingStatusChanged, $booking);
 
         if ($canceller->id !== $booking->booked_by_id) {
             $this->notifyResident($booking);

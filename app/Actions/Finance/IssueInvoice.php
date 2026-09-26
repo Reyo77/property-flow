@@ -3,6 +3,7 @@
 namespace App\Actions\Finance;
 
 use App\Enums\SystemAccount;
+use App\Enums\WebhookEvent;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\Unit;
@@ -12,6 +13,7 @@ use App\Support\Finance\DocumentNumbers;
 use App\Support\Finance\InvoiceLineData;
 use App\Support\Finance\JournalLine;
 use App\Support\Finance\Money;
+use App\Support\Webhooks\Webhooks;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -115,6 +117,7 @@ class IssueInvoice
             $invoice->forceFill(['journal_entry_id' => $entry->id])->save();
 
             $this->allocateUnitCredits->handle($unit);
+            app(Webhooks::class)->dispatch(WebhookEvent::InvoiceIssued, $invoice);
 
             return $invoice;
         });

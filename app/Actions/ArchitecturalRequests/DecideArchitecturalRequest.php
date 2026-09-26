@@ -4,10 +4,12 @@ namespace App\Actions\ArchitecturalRequests;
 
 use App\Enums\ArchitecturalRequestStatus;
 use App\Enums\NotificationCategory;
+use App\Enums\WebhookEvent;
 use App\Models\ArchitecturalRequest;
 use App\Models\NotificationPreference;
 use App\Models\User;
 use App\Notifications\ArchitecturalRequestDecided;
+use App\Support\Webhooks\Webhooks;
 use Illuminate\Validation\ValidationException;
 use LogicException;
 
@@ -60,6 +62,8 @@ class DecideArchitecturalRequest
             'decided_by_id' => $decidedBy->id,
             'decided_at' => now(),
         ])->save();
+
+        app(Webhooks::class)->dispatch(WebhookEvent::ArchitecturalRequestDecided, $request);
 
         $submitter = $request->submittedBy;
 

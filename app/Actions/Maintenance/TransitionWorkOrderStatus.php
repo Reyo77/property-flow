@@ -3,9 +3,11 @@
 namespace App\Actions\Maintenance;
 
 use App\Enums\ServiceRequestStatus;
+use App\Enums\WebhookEvent;
 use App\Enums\WorkOrderStatus;
 use App\Models\ServiceRequest;
 use App\Models\WorkOrder;
+use App\Support\Webhooks\Webhooks;
 use LogicException;
 
 /**
@@ -26,6 +28,8 @@ class TransitionWorkOrderStatus
         if ($completionNotes !== null) {
             $workOrder->forceFill(['completion_notes' => $completionNotes])->save();
         }
+
+        app(Webhooks::class)->dispatch(WebhookEvent::WorkOrderStatusChanged, $workOrder);
 
         $serviceRequest = $workOrder->serviceRequest;
 

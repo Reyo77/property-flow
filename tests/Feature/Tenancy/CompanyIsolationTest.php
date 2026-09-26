@@ -78,6 +78,8 @@ use App\Models\Violation;
 use App\Models\ViolationNotice;
 use App\Models\ViolationRule;
 use App\Models\Visitor;
+use App\Models\WebhookDelivery;
+use App\Models\WebhookEndpoint;
 use App\Models\WorkOrder;
 use App\Support\Tenancy\CurrentCompany;
 use Livewire\Livewire;
@@ -152,6 +154,8 @@ dataset('tenant models', [
     'violation notices' => fn () => ViolationNotice::factory(),
     'architectural requests' => fn () => ArchitecturalRequest::factory(),
     'surveys' => fn () => Survey::factory(),
+    'webhook endpoints' => fn () => WebhookEndpoint::factory(),
+    'webhook deliveries' => fn () => WebhookDelivery::factory(),
     'survey questions' => fn () => SurveyQuestion::factory(),
     'survey options' => fn () => SurveyOption::factory(),
     'survey responses' => fn () => SurveyResponse::factory(),

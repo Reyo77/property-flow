@@ -5,8 +5,10 @@ namespace App\Actions\Amenities;
 use App\Actions\Amenities\Concerns\NotifiesBookingResident;
 use App\Actions\Finance\ChargeAmenityBooking;
 use App\Enums\AmenityBookingStatus;
+use App\Enums\WebhookEvent;
 use App\Models\AmenityBooking;
 use App\Models\User;
+use App\Support\Webhooks\Webhooks;
 use Illuminate\Support\Facades\DB;
 use LogicException;
 
@@ -39,5 +41,6 @@ class DecideAmenityBooking
         });
 
         $this->notifyResident($booking);
+        app(Webhooks::class)->dispatch(WebhookEvent::AmenityBookingStatusChanged, $booking);
     }
 }

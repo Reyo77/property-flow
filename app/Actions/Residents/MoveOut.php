@@ -2,7 +2,9 @@
 
 namespace App\Actions\Residents;
 
+use App\Enums\WebhookEvent;
 use App\Models\Residency;
+use App\Support\Webhooks\Webhooks;
 use Illuminate\Validation\ValidationException;
 
 class MoveOut
@@ -19,5 +21,7 @@ class MoveOut
         }
 
         $residency->update(['moved_out_on' => $movedOutOn, 'is_primary' => false]);
+
+        app(Webhooks::class)->dispatch(WebhookEvent::ResidentMovedOut, $residency);
     }
 }

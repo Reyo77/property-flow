@@ -3,12 +3,14 @@
 namespace App\Actions\FrontDesk;
 
 use App\Enums\NotificationCategory;
+use App\Enums\WebhookEvent;
 use App\Events\FrontDeskActivity;
 use App\Models\Community;
 use App\Models\NotificationPreference;
 use App\Models\Package;
 use App\Models\User;
 use App\Notifications\PackageArrived;
+use App\Support\Webhooks\Webhooks;
 
 class LogPackage
 {
@@ -21,6 +23,7 @@ class LogPackage
         $package->forceFill(['company_id' => $community->company_id, 'logged_by_id' => $loggedBy->id])->save();
 
         $this->notifyResident($package);
+        app(Webhooks::class)->dispatch(WebhookEvent::PackageLogged, $package);
 
         FrontDeskActivity::dispatch($community->id, 'package', __(':carrier package logged.', ['carrier' => $package->carrier]));
 
