@@ -11,6 +11,7 @@ use App\Models\Community;
 use App\Models\NotificationPreference;
 use App\Models\Residency;
 use App\Notifications\AnnouncementPublished;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -195,6 +196,25 @@ describe('scheduling', function () {
             ->set('publish_at', now()->subDay()->format('Y-m-d\TH:i'))
             ->call('save')
             ->assertHasErrors('publish_at');
+    });
+
+    it('schedules on the community\'s own clock, even for a time that is already past in UTC', function () {
+        // 12:30 UTC is 8:30am in Toronto; 10:00 Toronto time is still ahead (14:00 UTC).
+        Pest\Laravel\travelTo(CarbonImmutable::parse('2026-10-01 12:30', 'UTC'));
+        $admin = companyAdmin();
+        $community = Community::factory()->for($admin->company)->create(['timezone' => 'America/Toronto']);
+        actingAs($admin);
+
+        Livewire::test(Index::class, ['community' => $community])
+            ->set('title', 'Elevator maintenance')
+            ->set('body', 'x')
+            ->set('audience_type', AnnouncementAudience::Community->value)
+            ->set('scheduleForLater', true)
+            ->set('publish_at', '2026-10-01T10:00')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        expect(Announcement::sole()->publish_at?->utc()->toDateTimeString())->toBe('2026-10-01 14:00:00');
     });
 
     it('publishes and notifies once its scheduled time arrives via the scheduler command', function () {

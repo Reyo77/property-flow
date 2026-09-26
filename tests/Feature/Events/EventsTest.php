@@ -73,7 +73,7 @@ it('forbids residents from events in communities they do not live in', function 
 
 it('creates an event', function () {
     $admin = companyAdmin();
-    $community = Community::factory()->for($admin->company)->create();
+    $community = Community::factory()->for($admin->company)->create(['timezone' => 'America/Toronto']);
 
     actingAs($admin);
 
@@ -89,8 +89,9 @@ it('creates an event', function () {
         ->community_id->toBe($community->id)
         ->title->toBe('Annual BBQ')
         ->created_by_id->toBe($admin->id)
-        ->starts_at->format('Y-m-d H:i')->toBe('2026-07-01 18:00')
-        ->ends_at->format('Y-m-d H:i')->toBe('2026-07-01 20:00');
+        // Typed on the community's wall clock (Toronto, UTC−4 in July), stored in UTC.
+        ->starts_at->format('Y-m-d H:i')->toBe('2026-07-01 22:00')
+        ->ends_at->format('Y-m-d H:i')->toBe('2026-07-02 00:00');
 });
 
 it('rejects an end time before the start time', function () {

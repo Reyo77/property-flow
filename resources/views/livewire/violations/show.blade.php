@@ -2,7 +2,7 @@
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <flux:heading size="xl" level="1">{{ $violation->rule->title }}</flux:heading>
-            <flux:subheading>{{ __('Unit :unit', ['unit' => $violation->unit->label()]) }} · {{ App\Support\Governance\LocalTime::display($violation->observed_at, $community) }}</flux:subheading>
+            <flux:subheading>{{ __('Unit :unit', ['unit' => $violation->unit->label()]) }} · {{ App\Support\LocalTime::display($violation->observed_at, $community) }}</flux:subheading>
         </div>
         <div class="flex items-center gap-2">
             <flux:badge :color="$violation->status->color()">{{ $violation->status->label() }}</flux:badge>

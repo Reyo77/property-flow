@@ -185,12 +185,6 @@ class Show extends Component
         $validated = $this->validate($this->amenityBookingRules());
         $unitId = $this->unit_id === '' ? null : (int) $this->unit_id;
 
-        if ($unitId !== null && ! $this->canPickAnyUnit() && ! $this->myUnits()->contains('id', $unitId)) {
-            $this->addError('unit_id', __('Choose one of your own units.'));
-
-            return;
-        }
-
         try {
             $createAmenityBooking->handle(
                 $this->amenity,

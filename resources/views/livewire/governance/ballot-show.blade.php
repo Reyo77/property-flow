@@ -27,8 +27,8 @@
     <div class="grid gap-4 sm:grid-cols-3">
         <div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
             <flux:text size="sm">{{ __('Voting') }}</flux:text>
-            <flux:text variant="strong">{{ App\Support\Governance\LocalTime::display($ballot->opens_at, $community) }}</flux:text>
-            <flux:text variant="strong">{{ __('to :time', ['time' => App\Support\Governance\LocalTime::display($ballot->closes_at, $community)]) }}</flux:text>
+            <flux:text variant="strong">{{ App\Support\LocalTime::display($ballot->opens_at, $community) }}</flux:text>
+            <flux:text variant="strong">{{ __('to :time', ['time' => App\Support\LocalTime::display($ballot->closes_at, $community)]) }}</flux:text>
         </div>
         <div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
             <flux:text size="sm">{{ __('Counting') }}</flux:text>
@@ -89,7 +89,7 @@
                             @endif
                         </flux:heading>
                         @if ($row['vote'])
-                            <flux:badge color="green" icon="check">{{ __('Voted :date', ['date' => App\Support\Governance\LocalTime::display($row['vote']->cast_at, $community)]) }}</flux:badge>
+                            <flux:badge color="green" icon="check">{{ __('Voted :date', ['date' => App\Support\LocalTime::display($row['vote']->cast_at, $community)]) }}</flux:badge>
                         @endif
                     </div>
 
@@ -113,7 +113,7 @@
                             </div>
                         </form>
                     @elseif (! $row['vote'] && in_array($status, [App\Enums\BallotStatus::Upcoming], true))
-                        <flux:text>{{ __('Voting opens :time.', ['time' => App\Support\Governance\LocalTime::display($ballot->opens_at, $community)]) }}</flux:text>
+                        <flux:text>{{ __('Voting opens :time.', ['time' => App\Support\LocalTime::display($ballot->opens_at, $community)]) }}</flux:text>
                     @elseif (! $row['vote'])
                         <flux:text>{{ __('This unit did not vote.') }}</flux:text>
                     @endif

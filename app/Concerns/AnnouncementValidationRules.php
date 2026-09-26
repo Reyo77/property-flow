@@ -31,7 +31,7 @@ trait AnnouncementValidationRules
             'building_ids.*' => [Rule::exists(Building::class, 'id')->where('community_id', $community->id)->withoutTrashed()],
             'unit_ids' => [$audience === AnnouncementAudience::Units ? 'required' : 'array', 'array'],
             'unit_ids.*' => [Rule::exists(Unit::class, 'id')->where('community_id', $community->id)->withoutTrashed()],
-            'publish_at' => ['nullable', 'date', 'after:now'],
+            'publish_at' => ['nullable', 'date_format:Y-m-d\TH:i'],
         ];
     }
 }

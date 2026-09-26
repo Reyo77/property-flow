@@ -18,7 +18,7 @@
     <div class="rounded-xl border border-zinc-200 p-5 whitespace-pre-line dark:border-zinc-700">{{ $consentForm->body }}</div>
 
     @if ($this->mySignature)
-        <flux:callout icon="check-circle" variant="success" :heading="__('You signed this on :date as :name.', ['date' => App\Support\Governance\LocalTime::display($this->mySignature->signed_at, $community), 'name' => $this->mySignature->signed_name])" />
+        <flux:callout icon="check-circle" variant="success" :heading="__('You signed this on :date as :name.', ['date' => App\Support\LocalTime::display($this->mySignature->signed_at, $community), 'name' => $this->mySignature->signed_name])" />
     @elseif ($this->canSign)
         <form wire:submit="sign" class="space-y-4 rounded-xl border border-zinc-200 p-5 dark:border-zinc-700">
             <flux:heading>{{ __('Sign') }}</flux:heading>
@@ -48,7 +48,7 @@
                             <flux:table.row :key="$signature->id">
                                 <flux:table.cell variant="strong">{{ $signature->signed_name }}</flux:table.cell>
                                 <flux:table.cell>{{ $signature->user->email }}</flux:table.cell>
-                                <flux:table.cell>{{ App\Support\Governance\LocalTime::display($signature->signed_at, $community) }}</flux:table.cell>
+                                <flux:table.cell>{{ App\Support\LocalTime::display($signature->signed_at, $community) }}</flux:table.cell>
                                 <flux:table.cell align="end">
                                     <flux:link :href="route('communities.consent-forms.signature', [$community, $consentForm, $signature])" target="_blank">{{ __('Signature') }}</flux:link>
                                 </flux:table.cell>

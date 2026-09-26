@@ -12,6 +12,7 @@ use App\Models\AmenityBooking;
 use App\Models\Community;
 use App\Models\NotificationPreference;
 use App\Models\Residency;
+use App\Models\Unit;
 use App\Notifications\AmenityBookingStatusChanged;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Notification;
@@ -65,7 +66,7 @@ it('creates a pending booking when the amenity needs approval, then notifies on 
     $resident = residentOf($community);
     $amenity = Amenity::factory()->for($community)->needsApproval()->create();
 
-    $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity), null, null, false);
+    $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity), $resident->residencies()->value('unit_id'), null, false);
 
     expect($booking->status)->toBe(AmenityBookingStatus::Pending);
     Notification::assertNothingSentTo($resident->user);
@@ -81,7 +82,7 @@ it('rejects a pending booking', function () {
     $community = Community::factory()->create();
     $resident = residentOf($community);
     $amenity = Amenity::factory()->for($community)->needsApproval()->create();
-    $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity), null, null, false);
+    $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity), $resident->residencies()->value('unit_id'), null, false);
 
     $admin = companyAdmin($community->company);
     app(DecideAmenityBooking::class)->handle($booking, $admin, AmenityBookingStatus::Rejected, 'Room already booked for a private event.');
@@ -95,9 +96,9 @@ it('refuses a second booking for a slot already at capacity', function () {
     $amenity = Amenity::factory()->for($community)->create(['capacity' => 1]);
     $slot = nextBookableSlot($amenity);
 
-    app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, null, null, false);
+    app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, $resident->residencies()->value('unit_id'), null, false);
 
-    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, null, null, false))
+    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, $resident->residencies()->value('unit_id'), null, false))
         ->toThrow(ValidationException::class);
 
     expect(AmenityBooking::count())->toBe(1);
@@ -109,10 +110,10 @@ it('allows bookings up to capacity and no further, safe against concurrent reque
     $amenity = Amenity::factory()->for($community)->create(['capacity' => 2]);
     $slot = nextBookableSlot($amenity);
 
-    app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, null, null, false);
-    app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, null, null, false);
+    app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, $resident->residencies()->value('unit_id'), null, false);
+    app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, $resident->residencies()->value('unit_id'), null, false);
 
-    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, null, null, false))
+    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, $resident->residencies()->value('unit_id'), null, false))
         ->toThrow(ValidationException::class);
 
     expect(AmenityBooking::where('starts_at', $slot)->count())->toBe(2);
@@ -124,10 +125,10 @@ it('frees the slot once a booking is cancelled', function () {
     $amenity = Amenity::factory()->for($community)->create(['capacity' => 1]);
     $slot = nextBookableSlot($amenity);
 
-    $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, null, null, false);
+    $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, $resident->residencies()->value('unit_id'), null, false);
     app(CancelAmenityBooking::class)->handle($booking, $resident->user);
 
-    $rebooked = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, null, null, false);
+    $rebooked = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, $resident->residencies()->value('unit_id'), null, false);
 
     expect($rebooked->status)->toBe(AmenityBookingStatus::Confirmed);
 });
@@ -161,7 +162,7 @@ it('refuses a booking on a day the amenity is closed', function () {
 
     $fakeMondaySlot = CarbonImmutable::create($monday->year, $monday->month, $monday->day, 10, 0, 0, $community->timezone)->utc();
 
-    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $fakeMondaySlot, null, null, false))
+    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $fakeMondaySlot, $resident->residencies()->value('unit_id'), null, false))
         ->toThrow(ValidationException::class);
 });
 
@@ -179,7 +180,7 @@ it('refuses a booking during a blackout', function () {
 
     $blackedOutSlot = CarbonImmutable::create($blackoutDate->year, $blackoutDate->month, $blackoutDate->day, 10, 0, 0, $community->timezone)->utc();
 
-    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $blackedOutSlot, null, null, false))
+    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $blackedOutSlot, $resident->residencies()->value('unit_id'), null, false))
         ->toThrow(ValidationException::class);
 });
 
@@ -193,7 +194,7 @@ it('refuses a booking beyond the advance-booking window', function () {
 
     $tooFarSlot = CarbonImmutable::create($farDate->year, $farDate->month, $farDate->day, 10, 0, 0, $community->timezone)->utc();
 
-    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $tooFarSlot, null, null, false))
+    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $tooFarSlot, $resident->residencies()->value('unit_id'), null, false))
         ->toThrow(ValidationException::class);
 });
 
@@ -206,7 +207,7 @@ it('refuses a booking inside the minimum notice window', function () {
     $tomorrow = $amenity->minBookableDate()->addDay();
     $tooSoon = CarbonImmutable::create($tomorrow->year, $tomorrow->month, $tomorrow->day, intdiv($amenity->opens_at_minutes, 60), $amenity->opens_at_minutes % 60, 0, $community->timezone)->utc();
 
-    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $tooSoon, null, null, false))
+    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $tooSoon, $resident->residencies()->value('unit_id'), null, false))
         ->toThrow(ValidationException::class);
 });
 
@@ -216,10 +217,10 @@ it('requires accepting terms when the amenity has them', function () {
     $amenity = Amenity::factory()->for($community)->create(['terms' => 'No smoking. Clean up after use.']);
     $slot = nextBookableSlot($amenity);
 
-    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, null, null, false))
+    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, $resident->residencies()->value('unit_id'), null, false))
         ->toThrow(ValidationException::class);
 
-    $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, null, null, true);
+    $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, $slot, $resident->residencies()->value('unit_id'), null, true);
 
     expect($booking->terms_accepted_at)->not->toBeNull();
 });
@@ -229,7 +230,7 @@ it('snapshots the fee and deposit onto the booking at the time it is made', func
     $resident = residentOf($community);
     $amenity = Amenity::factory()->for($community)->create(['fee_cents' => 5000, 'deposit_cents' => 20000]);
 
-    $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity), null, null, false);
+    $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity), $resident->residencies()->value('unit_id'), null, false);
 
     $amenity->update(['fee_cents' => 9999]);
 
@@ -242,7 +243,7 @@ describe('cancellation notice window', function () {
         $resident = residentOf($community);
         // cancellation_notice_hours (10 days) comfortably exceeds how far out this booking is (1 day).
         $amenity = Amenity::factory()->for($community)->create(['cancellation_notice_hours' => 24 * 10]);
-        $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity, 1), null, null, false);
+        $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity, 1), $resident->residencies()->value('unit_id'), null, false);
 
         expect(fn () => app(CancelAmenityBooking::class)->handle($booking, $resident->user))
             ->toThrow(ValidationException::class);
@@ -254,7 +255,7 @@ describe('cancellation notice window', function () {
         $community = Community::factory()->create();
         $resident = residentOf($community);
         $amenity = Amenity::factory()->for($community)->create(['cancellation_notice_hours' => 24]);
-        $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity, 5), null, null, false);
+        $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity, 5), $resident->residencies()->value('unit_id'), null, false);
 
         app(CancelAmenityBooking::class)->handle($booking, $resident->user);
 
@@ -266,7 +267,7 @@ describe('cancellation notice window', function () {
         $resident = residentOf($community);
         $admin = companyAdmin($community->company);
         $amenity = Amenity::factory()->for($community)->create(['cancellation_notice_hours' => 24 * 10]);
-        $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity, 1), null, null, false);
+        $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity, 1), $resident->residencies()->value('unit_id'), null, false);
 
         app(CancelAmenityBooking::class)->handle($booking, $admin, 'Amenity closed for emergency repair.');
 
@@ -277,7 +278,7 @@ describe('cancellation notice window', function () {
         $community = Community::factory()->create();
         $resident = residentOf($community);
         $amenity = Amenity::factory()->for($community)->needsApproval()->create(['cancellation_notice_hours' => 24 * 10]);
-        $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity, 1), null, null, false);
+        $booking = app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity, 1), $resident->residencies()->value('unit_id'), null, false);
 
         app(CancelAmenityBooking::class)->handle($booking, $resident->user);
 
@@ -293,7 +294,7 @@ it('respects the amenity-bookings notification preference', function () {
     NotificationPreference::factory()->for($resident->user)->create(['category' => NotificationCategory::AmenityBookings, 'in_app' => false]);
     $amenity = Amenity::factory()->for($community)->create();
 
-    app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity), null, null, false);
+    app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity), $resident->residencies()->value('unit_id'), null, false);
 
     Notification::assertNotSentTo($resident->user, AmenityBookingStatusChanged::class);
 });
@@ -326,3 +327,13 @@ it('cannot decide on or cancel a booking from another company', function () {
     expect($admin->can('decide', $foreignBooking))->toBeFalse()
         ->and($admin->can('cancel', $foreignBooking))->toBeFalse();
 });
+
+it('makes residents book for one of their own units, so the per-unit limit always applies', function (string $case) {
+    $community = Community::factory()->create();
+    $resident = residentOf($community);
+    $amenity = Amenity::factory()->for($community)->create();
+    $unitId = $case === 'no unit' ? null : Unit::factory()->for($community)->create()->id;
+
+    expect(fn () => app(CreateAmenityBooking::class)->handle($amenity, $resident->user, nextBookableSlot($amenity), $unitId, null, false))
+        ->toThrow(ValidationException::class, 'Choose one of your own units.');
+})->with(['no unit', 'a neighbour\'s unit']);

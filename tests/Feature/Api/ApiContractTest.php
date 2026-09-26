@@ -1,10 +1,15 @@
 <?php
 
+use App\Models\Amenity;
+use App\Models\AmenityBooking;
 use App\Models\Announcement;
 use App\Models\Building;
 use App\Models\Community;
 use App\Models\Document;
 use App\Models\Event;
+use App\Models\GuestPass;
+use App\Models\IncidentReport;
+use App\Models\Package;
 use App\Models\ServiceRequest;
 use App\Models\Unit;
 use App\Models\WorkOrder;
@@ -47,6 +52,18 @@ function communityEndpoints(): array
         'service request' => ['api.v1.communities.service-requests.show', fn (Community $c) => ['serviceRequest' => ServiceRequest::factory()->for($c)->create()->id]],
         'work orders' => ['api.v1.communities.work-orders.index', $none],
         'work order' => ['api.v1.communities.work-orders.show', fn (Community $c) => ['workOrder' => WorkOrder::factory()->for($c)->create()->id]],
+        'amenities' => ['api.v1.communities.amenities.index', $none],
+        'amenity' => ['api.v1.communities.amenities.show', fn (Community $c) => ['amenity' => Amenity::factory()->for($c)->create()->id]],
+        'amenity bookings' => ['api.v1.communities.amenity-bookings.index', $none],
+        'amenity booking' => ['api.v1.communities.amenity-bookings.show', fn (Community $c) => ['amenityBooking' => AmenityBooking::factory()->for(Amenity::factory()->for($c))->create()->id]],
+        'packages' => ['api.v1.communities.packages.index', $none],
+        'package' => ['api.v1.communities.packages.show', fn (Community $c) => ['package' => Package::factory()->for($c)->create()->id]],
+        'visitors' => ['api.v1.communities.visitors.index', $none],
+        'guest passes' => ['api.v1.communities.guest-passes.index', $none],
+        'guest pass' => ['api.v1.communities.guest-passes.show', fn (Community $c) => ['guestPass' => GuestPass::factory()->for($c)->create()->id]],
+        'parking permits' => ['api.v1.communities.parking-permits.index', $none],
+        'incident reports' => ['api.v1.communities.incident-reports.index', $none],
+        'incident report' => ['api.v1.communities.incident-reports.show', fn (Community $c) => ['incidentReport' => IncidentReport::factory()->for($c)->create()->id]],
     ];
 }
 

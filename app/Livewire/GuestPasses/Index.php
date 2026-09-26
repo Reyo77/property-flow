@@ -2,12 +2,12 @@
 
 namespace App\Livewire\GuestPasses;
 
+use App\Actions\FrontDesk\IssueGuestPass;
 use App\Concerns\VisitorValidationRules;
 use App\Enums\Permission;
 use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Models\GuestPass;
-use App\Models\Residency;
 use App\Models\Unit;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
@@ -105,35 +105,14 @@ class Index extends Component
         Flux::modal('guest-pass-form')->show();
     }
 
-    public function save(): void
+    public function save(IssueGuestPass $issueGuestPass): void
     {
         $this->authorize('create', [GuestPass::class, $this->community]);
 
         $validated = $this->validate($this->guestPassRules($this->community));
-        $unitId = (int) $validated['unit_id'];
 
-        if (! $this->canManage() && ! $this->myUnits()->contains('id', $unitId)) {
-            $this->addError('unit_id', __('Choose one of your own units.'));
-
-            return;
-        }
-
-        $residentId = $this->currentUser()->resident?->id;
-
-        if ($residentId === null) {
-            // Staff creating on behalf of a unit: use the unit's active primary resident, if any.
-            $residentId = Residency::where('unit_id', $unitId)->active()->value('resident_id');
-        }
-
-        if ($residentId === null) {
-            $this->addError('unit_id', __('That unit has no resident to attach the pass to.'));
-
-            return;
-        }
-
-        $this->community->guestPasses()->create([
-            'unit_id' => $unitId,
-            'resident_id' => $residentId,
+        $issueGuestPass->handle($this->community, $this->currentUser(), [
+            'unit_id' => (int) $validated['unit_id'],
             'guest_name' => $validated['guest_name'],
             'valid_from' => $validated['valid_from'],
             'valid_until' => $validated['valid_until'],

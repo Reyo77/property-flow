@@ -31,7 +31,7 @@
                             <flux:link :href="route('communities.incident-reports.show', [$community, $incident])" wire:navigate>{{ $incident->title }}</flux:link>
                         </flux:table.cell>
                         <flux:table.cell>{{ $incident->location }}</flux:table.cell>
-                        <flux:table.cell>{{ $incident->occurred_at->format('M j, g:ia') }}</flux:table.cell>
+                        <flux:table.cell>{{ App\Support\LocalTime::local($incident->occurred_at, $community)->format('M j, g:ia') }}</flux:table.cell>
                         <flux:table.cell>
                             <flux:badge :color="$incident->severity->color()">{{ $incident->severity->label() }}</flux:badge>
                         </flux:table.cell>

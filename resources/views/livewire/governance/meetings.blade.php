@@ -28,7 +28,7 @@
                             <flux:link :href="route('communities.meetings.show', [$community, $meeting])" wire:navigate>{{ $meeting->title }}</flux:link>
                             <flux:text size="sm">{{ $meeting->kind->label() }}</flux:text>
                         </flux:table.cell>
-                        <flux:table.cell>{{ App\Support\Governance\LocalTime::display($meeting->starts_at, $community) }}</flux:table.cell>
+                        <flux:table.cell>{{ App\Support\LocalTime::display($meeting->starts_at, $community) }}</flux:table.cell>
                         <flux:table.cell>{{ $meeting->location }}</flux:table.cell>
                         <flux:table.cell>
                             @if ($meeting->isClosed())

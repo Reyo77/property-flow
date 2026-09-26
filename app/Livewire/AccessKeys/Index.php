@@ -8,6 +8,7 @@ use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\AccessKey;
 use App\Models\Community;
 use App\Models\Unit;
+use App\Support\LocalTime;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -111,6 +112,10 @@ class Index extends Component
 
         $validated = $this->validate($this->accessKeySignoutRules());
         $validated = array_map(fn (mixed $value) => $value === '' ? null : $value, $validated);
+
+        if (is_string($validated['due_back_at'] ?? null)) {
+            $validated['due_back_at'] = LocalTime::toUtc($validated['due_back_at'], $this->community)->toDateTimeString();
+        }
 
         $signout = $key->signouts()->make($validated);
         $signout->forceFill(['signed_out_by_id' => $this->currentUser()->id])->save();

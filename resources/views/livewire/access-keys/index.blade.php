@@ -38,7 +38,7 @@
                         <flux:text class="mt-2 text-sm">
                             {{ __('To: :name', ['name' => $currentSignout->signed_out_to]) }}
                             @if ($currentSignout->due_back_at)
-                                <br>{{ __('Due: :date', ['date' => $currentSignout->due_back_at->format('M j, g:ia')]) }}
+                                <br>{{ __('Due: :date', ['date' => App\Support\LocalTime::local($currentSignout->due_back_at, $community)->format('M j, g:ia')]) }}
                             @endif
                         </flux:text>
                         @can('update', $key)

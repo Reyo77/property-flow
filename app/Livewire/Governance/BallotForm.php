@@ -10,7 +10,7 @@ use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Ballot;
 use App\Models\Community;
 use App\Models\Meeting;
-use App\Support\Governance\LocalTime;
+use App\Support\LocalTime;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;

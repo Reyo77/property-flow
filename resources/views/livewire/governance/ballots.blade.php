@@ -28,7 +28,7 @@
                         <flux:table.cell variant="strong">
                             <flux:link :href="route('communities.ballots.show', [$community, $ballot])" wire:navigate>{{ $ballot->title }}</flux:link>
                         </flux:table.cell>
-                        <flux:table.cell>{{ App\Support\Governance\LocalTime::display($ballot->closes_at, $community) }}</flux:table.cell>
+                        <flux:table.cell>{{ App\Support\LocalTime::display($ballot->closes_at, $community) }}</flux:table.cell>
                         <flux:table.cell>{{ $ballot->votes_count }}</flux:table.cell>
                         <flux:table.cell><flux:badge size="sm" :color="$status->color()">{{ $status->label() }}</flux:badge></flux:table.cell>
                     </flux:table.row>

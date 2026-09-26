@@ -23,7 +23,7 @@
     <table class="lines">
         <tbody>
             <tr><td>{{ __('Rule') }}</td><td><strong>{{ $violation->rule->title }}</strong>{{ $violation->rule->reference ? ' ('.$violation->rule->reference.')' : '' }}</td></tr>
-            <tr><td>{{ __('Observed') }}</td><td>{{ App\Support\Governance\LocalTime::display($violation->observed_at, $community) }}{{ $violation->location ? ' · '.$violation->location : '' }}</td></tr>
+            <tr><td>{{ __('Observed') }}</td><td>{{ App\Support\LocalTime::display($violation->observed_at, $community) }}{{ $violation->location ? ' · '.$violation->location : '' }}</td></tr>
             <tr><td>{{ __('Details') }}</td><td>{{ $violation->description }}</td></tr>
             @if ($notice->invoice)
                 <tr><td>{{ __('Fine') }}</td><td><strong>{{ App\Support\Finance\Money::of($notice->invoice->total_cents)->format() }}</strong> · {{ $notice->invoice->displayNumber() }}</td></tr>

@@ -13,6 +13,7 @@ use App\Models\Building;
 use App\Models\Community;
 use App\Models\Residency;
 use App\Models\Unit;
+use App\Support\LocalTime;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -128,7 +129,7 @@ class Index extends Component
         }
 
         if ($announcement->isScheduled() && $announcement->publish_at !== null) {
-            return __('Scheduled for :date', ['date' => $announcement->publish_at->format('M j, Y g:i A')]);
+            return __('Scheduled for :date', ['date' => LocalTime::local($announcement->publish_at, $this->community)->format('M j, Y g:i A')]);
         }
 
         return __('Draft');
@@ -158,7 +159,7 @@ class Index extends Component
         $this->building_ids = array_values($announcement->buildings->pluck('id')->map(fn (mixed $id): int => (int) $id)->all());
         $this->unit_ids = array_values($announcement->units->pluck('id')->map(fn (mixed $id): int => (int) $id)->all());
         $this->scheduleForLater = $announcement->isScheduled();
-        $this->publish_at = $announcement->publish_at?->format('Y-m-d\TH:i') ?? '';
+        $this->publish_at = $announcement->publish_at === null ? '' : LocalTime::forInput($announcement->publish_at, $this->community);
         $this->editingIsPublished = $announcement->isPublished();
 
         Flux::modal('announcement-form')->show();
@@ -173,7 +174,17 @@ class Index extends Component
             : $this->authorize('update', $announcement);
 
         $validated = $this->validate($this->announcementRules($this->community, $this->audience_type));
-        $validated['publish_at'] = $this->scheduleForLater && $validated['publish_at'] !== null ? $validated['publish_at'] : null;
+        $validated['publish_at'] = $this->scheduleForLater && $validated['publish_at'] !== null
+            ? LocalTime::toUtc($validated['publish_at'], $this->community)
+            : null;
+
+        if ($validated['publish_at'] !== null && $validated['publish_at']->isPast()) {
+            $this->addError('publish_at', __('Choose a time in the future.'));
+
+            return;
+        }
+
+        $validated['publish_at'] = $validated['publish_at']?->toDateTimeString();
         $validated['building_ids'] = $validated['building_ids'] ?? [];
         $validated['unit_ids'] = $validated['unit_ids'] ?? [];
 

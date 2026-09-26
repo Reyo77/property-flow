@@ -9,6 +9,7 @@ use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Models\IncidentReport;
 use App\Models\Unit;
+use App\Support\LocalTime;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -69,7 +70,7 @@ class Index extends Component
 
         $this->resetValidation();
         $this->reset('unit_id', 'title', 'description', 'location', 'severity', 'photos');
-        $this->occurred_at = now()->format('Y-m-d\TH:i');
+        $this->occurred_at = LocalTime::forInput(now(), $this->community);
 
         Flux::modal('incident-form')->show();
     }
@@ -89,7 +90,7 @@ class Index extends Component
                 'description' => $validated['description'],
                 'location' => $validated['location'] ?: null,
                 'severity' => $validated['severity'],
-                'occurred_at' => $validated['occurred_at'],
+                'occurred_at' => LocalTime::toUtc($validated['occurred_at'], $this->community)->toDateTimeString(),
             ],
             $this->photos,
         );

@@ -56,7 +56,7 @@
         <div class="space-y-2">
             <flux:heading size="lg">{{ __('Upcoming meetings') }}</flux:heading>
             @forelse ($this->upcomingMeetings as $meeting)
-                <div><flux:link :href="route('communities.meetings.show', [$community, $meeting])" wire:navigate>{{ $meeting->title }}</flux:link> <flux:text size="sm">{{ App\Support\Governance\LocalTime::display($meeting->starts_at, $community) }}</flux:text></div>
+                <div><flux:link :href="route('communities.meetings.show', [$community, $meeting])" wire:navigate>{{ $meeting->title }}</flux:link> <flux:text size="sm">{{ App\Support\LocalTime::display($meeting->starts_at, $community) }}</flux:text></div>
             @empty
                 <flux:text size="sm">{{ __('None scheduled.') }}</flux:text>
             @endforelse

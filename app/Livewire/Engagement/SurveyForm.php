@@ -9,7 +9,7 @@ use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Models\Survey;
 use App\Models\SurveyQuestion;
-use App\Support\Governance\LocalTime;
+use App\Support\LocalTime;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;

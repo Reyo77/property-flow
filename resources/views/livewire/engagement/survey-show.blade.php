@@ -5,7 +5,7 @@
             <flux:subheading>
                 {{ $survey->is_poll ? __('Poll') : __('Survey') }} · {{ $survey->audience->label() }}{{ $survey->is_anonymous ? ' · '.__('Anonymous') : '' }}
                 @if ($survey->closes_at)
-                    · {{ __('closes :date', ['date' => App\Support\Governance\LocalTime::display($survey->closes_at, $community)]) }}
+                    · {{ __('closes :date', ['date' => App\Support\LocalTime::display($survey->closes_at, $community)]) }}
                 @endif
             </flux:subheading>
         </div>

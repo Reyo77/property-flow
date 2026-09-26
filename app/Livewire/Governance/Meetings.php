@@ -9,7 +9,7 @@ use App\Enums\VotingWeighting;
 use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Models\Meeting;
-use App\Support\Governance\LocalTime;
+use App\Support\LocalTime;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;

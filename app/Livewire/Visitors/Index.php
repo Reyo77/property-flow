@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Visitors;
 
+use App\Actions\FrontDesk\LogVisitor;
 use App\Actions\FrontDesk\RedeemGuestPass;
 use App\Concerns\VisitorValidationRules;
-use App\Events\FrontDeskActivity;
 use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Models\Unit;
@@ -67,17 +67,11 @@ class Index extends Component
         Flux::modal('visitor-form')->show();
     }
 
-    public function save(): void
+    public function save(LogVisitor $logVisitor): void
     {
         $this->authorize('create', [Visitor::class, $this->community]);
 
-        $validated = $this->validate($this->visitorRules($this->community));
-        $validated = array_map(fn (mixed $value) => $value === '' ? null : $value, $validated);
-
-        $visitor = $this->community->visitors()->make($validated);
-        $visitor->forceFill(['logged_by_id' => $this->currentUser()->id])->save();
-
-        FrontDeskActivity::dispatch($this->community->id, 'visitor', __(':name checked in.', ['name' => $visitor->visitor_name]));
+        $logVisitor->handle($this->community, $this->currentUser(), $this->validate($this->visitorRules($this->community)));
 
         Flux::modal('visitor-form')->close();
         Flux::toast(variant: 'success', text: __('Visitor logged.'));

@@ -2,7 +2,7 @@
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <flux:heading size="xl" level="1">{{ $meeting->title }}</flux:heading>
-            <flux:subheading>{{ $meeting->kind->label() }} · {{ App\Support\Governance\LocalTime::display($meeting->starts_at, $community) }}{{ $meeting->location ? ' · '.$meeting->location : '' }}</flux:subheading>
+            <flux:subheading>{{ $meeting->kind->label() }} · {{ App\Support\LocalTime::display($meeting->starts_at, $community) }}{{ $meeting->location ? ' · '.$meeting->location : '' }}</flux:subheading>
         </div>
         <div class="flex items-center gap-2">
             @if ($meeting->isClosed())
@@ -113,7 +113,7 @@
             <flux:error name="minutes" />
             <div class="flex flex-wrap items-center justify-end gap-2">
                 @if ($meeting->hasPublishedMinutes())
-                    <flux:text size="sm">{{ __('Published :date', ['date' => App\Support\Governance\LocalTime::display($meeting->minutes_published_at, $community)]) }}</flux:text>
+                    <flux:text size="sm">{{ __('Published :date', ['date' => App\Support\LocalTime::display($meeting->minutes_published_at, $community)]) }}</flux:text>
                     <flux:button wire:click="saveMinutes(false)">{{ __('Unpublish') }}</flux:button>
                 @else
                     <flux:button wire:click="saveMinutes(false)">{{ __('Save draft') }}</flux:button>

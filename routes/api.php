@@ -51,6 +51,19 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::apiResource('service-requests', V1\ServiceRequestController::class)->only(['index', 'store', 'show', 'update'])->parameters(['service-requests' => 'serviceRequest']);
             Route::post('service-requests/{serviceRequest}/comments', [V1\ServiceRequestCommentController::class, 'store'])->name('service-requests.comments.store');
             Route::apiResource('work-orders', V1\WorkOrderController::class)->only(['index', 'show', 'update'])->parameters(['work-orders' => 'workOrder']);
+
+            Route::apiResource('amenities', V1\AmenityController::class)->only(['index', 'show']);
+            Route::apiResource('amenity-bookings', V1\AmenityBookingController::class)->only(['index', 'store', 'show'])->parameters(['amenity-bookings' => 'amenityBooking']);
+            Route::post('amenity-bookings/{amenityBooking}/cancellation', [V1\AmenityBookingCancellationController::class, 'store'])->name('amenity-bookings.cancellation.store');
+            Route::post('amenity-bookings/{amenityBooking}/decision', [V1\AmenityBookingDecisionController::class, 'store'])->name('amenity-bookings.decision.store');
+
+            Route::apiResource('packages', V1\PackageController::class)->only(['index', 'store', 'show']);
+            Route::post('packages/{package}/release', [V1\PackageReleaseController::class, 'store'])->name('packages.release.store');
+            Route::apiResource('visitors', V1\VisitorController::class)->only(['index', 'store', 'update']);
+            Route::apiResource('guest-passes', V1\GuestPassController::class)->only(['index', 'store', 'show'])->parameters(['guest-passes' => 'guestPass']);
+            Route::post('guest-pass-redemptions', [V1\GuestPassRedemptionController::class, 'store'])->name('guest-pass-redemptions.store');
+            Route::apiResource('parking-permits', V1\ParkingPermitController::class)->only(['index', 'store', 'destroy'])->parameters(['parking-permits' => 'parkingPermit']);
+            Route::apiResource('incident-reports', V1\IncidentReportController::class)->only(['index', 'store', 'show'])->parameters(['incident-reports' => 'incidentReport']);
         });
     });
 });

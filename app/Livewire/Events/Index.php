@@ -7,6 +7,7 @@ use App\Enums\RsvpStatus;
 use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Models\Event;
+use App\Support\LocalTime;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -111,8 +112,8 @@ class Index extends Component
         $this->title = $event->title;
         $this->description = (string) $event->description;
         $this->location = (string) $event->location;
-        $this->starts_at = $event->starts_at->format('Y-m-d\TH:i');
-        $this->ends_at = $event->ends_at->format('Y-m-d\TH:i');
+        $this->starts_at = LocalTime::forInput($event->starts_at, $this->community);
+        $this->ends_at = LocalTime::forInput($event->ends_at, $this->community);
 
         Flux::modal('event-form')->show();
     }
@@ -128,6 +129,8 @@ class Index extends Component
         $validated = $this->validate($this->eventRules());
         $validated['description'] = $validated['description'] === '' ? null : $validated['description'];
         $validated['location'] = $validated['location'] === '' ? null : $validated['location'];
+        $validated['starts_at'] = LocalTime::toUtc($validated['starts_at'], $this->community)->toDateTimeString();
+        $validated['ends_at'] = LocalTime::toUtc($validated['ends_at'], $this->community)->toDateTimeString();
 
         if ($event === null) {
             $validated['created_by_id'] = $this->currentUser()->id;

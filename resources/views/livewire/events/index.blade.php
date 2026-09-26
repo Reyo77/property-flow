@@ -29,7 +29,7 @@
                         <div>
                             <flux:heading size="lg">{{ $event->title }}</flux:heading>
                             <flux:text class="mt-1">
-                                {{ $event->starts_at->toFormattedDateString() }}, {{ $event->starts_at->format('g:i A') }} – {{ $event->ends_at->format('g:i A') }}
+                                {{ App\Support\LocalTime::local($event->starts_at, $community)->toFormattedDateString() }}, {{ App\Support\LocalTime::local($event->starts_at, $community)->format('g:i A') }} – {{ App\Support\LocalTime::local($event->ends_at, $community)->format('g:i A') }}
                             </flux:text>
                             @if ($event->location)
                                 <flux:text>{{ $event->location }}</flux:text>

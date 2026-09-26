@@ -75,8 +75,9 @@ it('does not bill free amenities or bookings made without a unit', function () {
     [$free, $resident, $unit] = chargeableAmenity(['fee_cents' => null, 'deposit_cents' => null]);
     app(CreateAmenityBooking::class)->handle($free, $resident->user, chargeableSlot($free), $unit->id, null, true);
 
-    [$paid, $resident] = chargeableAmenity();
-    app(CreateAmenityBooking::class)->handle($paid, $resident->user, chargeableSlot($paid), null, null, true);
+    // Only the team books without a unit (for the building's own use).
+    [$paid] = chargeableAmenity();
+    app(CreateAmenityBooking::class)->handle($paid, companyAdmin($paid->community->company), chargeableSlot($paid), null, null, true);
 
     expect(Invoice::withoutGlobalScopes()->count())->toBe(0);
 });

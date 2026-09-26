@@ -9,7 +9,7 @@
                 </flux:badge>
             </div>
             <flux:subheading>
-                {{ $incidentReport->occurred_at->format('M j, Y g:ia') }}
+                {{ App\Support\LocalTime::local($incidentReport->occurred_at, $community)->format('M j, Y g:ia') }}
                 @if ($incidentReport->location)
                     · {{ $incidentReport->location }}
                 @endif

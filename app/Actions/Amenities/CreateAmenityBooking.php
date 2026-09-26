@@ -5,6 +5,7 @@ namespace App\Actions\Amenities;
 use App\Actions\Amenities\Concerns\NotifiesBookingResident;
 use App\Actions\Finance\ChargeAmenityBooking;
 use App\Enums\AmenityBookingStatus;
+use App\Enums\Permission;
 use App\Models\Amenity;
 use App\Models\AmenityBooking;
 use App\Models\User;
@@ -27,6 +28,8 @@ class CreateAmenityBooking
      */
     public function handle(Amenity $amenity, User $bookedBy, CarbonInterface $startsAt, ?int $unitId, ?string $notes, bool $termsAccepted): AmenityBooking
     {
+        $this->ensureMayBookFor($amenity, $bookedBy, $unitId);
+
         return DB::transaction(function () use ($amenity, $bookedBy, $startsAt, $unitId, $notes, $termsAccepted): AmenityBooking {
             $amenity = Amenity::query()->whereKey($amenity->id)->lockForUpdate()->firstOrFail();
 
@@ -83,5 +86,28 @@ class CreateAmenityBooking
 
             return $booking;
         });
+    }
+
+    /**
+     * The team may book for any unit (or none); a resident books for one of their own units, so
+     * the per-unit limit always applies to them.
+     *
+     * @throws ValidationException
+     */
+    private function ensureMayBookFor(Amenity $amenity, User $bookedBy, ?int $unitId): void
+    {
+        $amenity->loadMissing('community');
+
+        if ($bookedBy->canAccessCommunity($amenity->community) && $bookedBy->hasCompanyPermission(Permission::ManageAmenities)) {
+            return;
+        }
+
+        $bookedBy->loadMissing('resident');
+        $ownsUnit = $unitId !== null && $bookedBy->resident !== null
+            && $bookedBy->resident->residencies()->where('community_id', $amenity->community_id)->where('unit_id', $unitId)->active()->exists();
+
+        if (! $ownsUnit) {
+            throw ValidationException::withMessages(['unit_id' => __('Choose one of your own units.')]);
+        }
     }
 }

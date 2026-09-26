@@ -37,7 +37,7 @@
                             <flux:link :href="route('communities.violations.show', [$community, $violation])" wire:navigate>{{ $violation->rule->title }}</flux:link>
                         </flux:table.cell>
                         <flux:table.cell>{{ $violation->unit->label() }}</flux:table.cell>
-                        <flux:table.cell>{{ App\Support\Governance\LocalTime::display($violation->observed_at, $community) }}</flux:table.cell>
+                        <flux:table.cell>{{ App\Support\LocalTime::display($violation->observed_at, $community) }}</flux:table.cell>
                         <flux:table.cell>
                             {{ $violation->stage?->label() }}
                             @if ($violation->fines_issued > 0)

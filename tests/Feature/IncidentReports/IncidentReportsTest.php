@@ -17,6 +17,23 @@ beforeEach(function () {
     Storage::fake('local');
 });
 
+it('records when it happened on the community\'s own clock', function () {
+    $admin = companyAdmin();
+    $community = Community::factory()->for($admin->company)->create(['timezone' => 'America/Toronto']);
+    actingAs($admin);
+
+    Livewire::test(Index::class, ['community' => $community])
+        ->call('create')
+        ->set('title', 'Water leak')
+        ->set('description', 'P2 ceiling')
+        ->set('severity', IncidentSeverity::Medium->value)
+        ->set('occurred_at', '2026-10-01T22:15')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(IncidentReport::sole()->occurred_at->utc()->toDateTimeString())->toBe('2026-10-02 02:15:00');
+});
+
 it('files an incident report with photos', function () {
     $admin = companyAdmin();
     $community = Community::factory()->for($admin->company)->create();
