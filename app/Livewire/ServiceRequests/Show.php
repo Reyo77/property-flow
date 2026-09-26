@@ -3,6 +3,7 @@
 namespace App\Livewire\ServiceRequests;
 
 use App\Actions\Maintenance\CreateWorkOrder;
+use App\Actions\Maintenance\PostServiceRequestComment;
 use App\Actions\Maintenance\TransitionServiceRequestStatus;
 use App\Actions\Maintenance\TransitionWorkOrderStatus;
 use App\Concerns\ServiceRequestValidationRules;
@@ -108,23 +109,13 @@ class Show extends Component
         return Vendor::query()->orderBy('name')->get();
     }
 
-    public function postComment(): void
+    public function postComment(PostServiceRequestComment $postComment): void
     {
         $this->authorize('comment', $this->serviceRequest);
 
         $validated = $this->validate($this->serviceRequestCommentRules());
 
-        $isInternal = $this->commentIsInternal && $this->canAddInternalComment();
-
-        if ($isInternal) {
-            $this->authorize('addInternalComment', $this->serviceRequest);
-        }
-
-        $this->serviceRequest->comments()->create([
-            'author_id' => $this->currentUser()->id,
-            'body' => $validated['body'],
-            'visible_to_resident' => ! $isInternal,
-        ]);
+        $postComment->handle($this->serviceRequest, $this->currentUser(), $validated['body'], $this->commentIsInternal && $this->canAddInternalComment());
 
         $this->reset('body', 'commentIsInternal');
         unset($this->comments);

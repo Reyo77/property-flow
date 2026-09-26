@@ -129,6 +129,8 @@ class WorkOrder extends Model implements BelongsToOneCommunity
 
     public function isAssignedToVendorUser(User $user): bool
     {
+        $user->loadMissing('vendor');
+
         return $this->assignee_type === Assignee::Vendor
             && $user->vendor !== null
             && $this->assigned_vendor_id === $user->vendor->id;

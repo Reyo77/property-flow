@@ -98,12 +98,6 @@ class Create extends Component
         $validated = $this->validate($this->serviceRequestRules($this->community));
         $unitId = $validated['unit_id'] === '' || $validated['unit_id'] === null ? null : (int) $validated['unit_id'];
 
-        if ($unitId !== null && ! $this->canPickAnyUnit() && ! $this->myUnits()->contains('id', $unitId)) {
-            $this->addError('unit_id', __('Choose one of your own units.'));
-
-            return;
-        }
-
         $serviceRequest = $createServiceRequest->handle(
             $this->community,
             $this->currentUser(),

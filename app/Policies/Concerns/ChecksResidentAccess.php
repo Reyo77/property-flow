@@ -11,6 +11,8 @@ trait ChecksResidentAccess
      */
     protected function isCurrentResidentOf(User $user, int $communityId): bool
     {
+        $user->loadMissing('resident');
+
         return $user->resident !== null
             && $user->resident->residencies()->where('community_id', $communityId)->active()->exists();
     }
@@ -20,6 +22,8 @@ trait ChecksResidentAccess
      */
     protected function isCurrentResidentOfUnit(User $user, int $unitId): bool
     {
+        $user->loadMissing('resident');
+
         return $user->resident !== null
             && $user->resident->residencies()->where('unit_id', $unitId)->active()->exists();
     }

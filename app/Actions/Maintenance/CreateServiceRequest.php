@@ -2,21 +2,31 @@
 
 namespace App\Actions\Maintenance;
 
+use App\Enums\Permission;
 use App\Models\Community;
 use App\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CreateServiceRequest
 {
     /**
+     * Residents may only report against a unit they live in or own; the team may choose any unit.
+     *
      * @param  array{title: string, description: string, category: string, priority: string, unit_id: int|null, entry_permission: bool}  $validated
      * @param  list<UploadedFile>  $photos
+     *
+     * @throws ValidationException
      */
     public function handle(Community $community, User $reportedBy, array $validated, array $photos = []): ServiceRequest
     {
+        if ($validated['unit_id'] !== null && ! $this->mayReportFor($community, $reportedBy, $validated['unit_id'])) {
+            throw ValidationException::withMessages(['unit_id' => __('Choose one of your own units.')]);
+        }
+
         return DB::transaction(function () use ($community, $reportedBy, $validated, $photos): ServiceRequest {
             $serviceRequest = $community->serviceRequests()->make($validated);
             $serviceRequest->forceFill([
@@ -30,6 +40,18 @@ class CreateServiceRequest
 
             return $serviceRequest;
         });
+    }
+
+    private function mayReportFor(Community $community, User $user, int $unitId): bool
+    {
+        if ($user->canAccessCommunity($community) && $user->hasCompanyPermission(Permission::ManageServiceRequests)) {
+            return true;
+        }
+
+        $user->loadMissing('resident');
+
+        return $user->resident !== null
+            && $user->resident->residencies()->where('community_id', $community->id)->where('unit_id', $unitId)->active()->exists();
     }
 
     private function attachPhoto(ServiceRequest $serviceRequest, UploadedFile $photo, User $uploadedBy): void
