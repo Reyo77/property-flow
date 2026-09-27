@@ -97,7 +97,7 @@
                             <flux:table.row :key="$delivery->id">
                                 <flux:table.cell><code class="text-xs">{{ $delivery->event }}</code></flux:table.cell>
                                 <flux:table.cell>
-                                    <flux:badge size="sm" :color="$delivery->status->color()">{{ $delivery->status->label() }}</flux:badge>
+                                    <flux:badge size="sm" :color="$delivery->status->color()">{{ $delivery->status === App\Enums\WebhookDeliveryStatus::Pending && $delivery->attempts === 0 ? __('Queued') : $delivery->status->label() }}</flux:badge>
                                     <div class="mt-1 text-xs">{{ trans_choice(':count attempt|:count attempts', $delivery->attempts) }}</div>
                                 </flux:table.cell>
                                 <flux:table.cell>
