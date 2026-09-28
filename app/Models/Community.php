@@ -66,6 +66,7 @@ class Community extends Model
         'fiscal_year_start_month' => 1,
         'billing_due_day' => 1,
         'bill_approval_limit_cents' => 500000,
+        'disabled_modules' => null,
     ];
 
     protected static function booted(): void

@@ -98,6 +98,14 @@ function residentWithLogin(?Company $company = null): Resident
 }
 
 /**
+ * Create a platform super admin, who belongs to no company.
+ */
+function superAdmin(): User
+{
+    return User::factory()->superAdmin()->create();
+}
+
+/**
  * Create a resident with a portal login and an active residency in the given community.
  */
 function residentOf(Community $community, array $residencyAttributes = []): Resident

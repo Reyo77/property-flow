@@ -55,6 +55,12 @@ class FortifyServiceProvider extends ServiceProvider
                 ]);
             }
 
+            if ($user->company?->isSuspended() === true) {
+                throw ValidationException::withMessages([
+                    Fortify::username() => __('Your company\'s account has been suspended.'),
+                ]);
+            }
+
             return $user;
         });
     }

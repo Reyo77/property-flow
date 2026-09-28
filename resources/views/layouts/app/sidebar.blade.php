@@ -4,6 +4,16 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
+        @if (session('impersonator_id'))
+            <div class="flex items-center justify-between gap-4 bg-amber-500 px-4 py-2 text-sm font-medium text-amber-950">
+                <span>{{ __('You are viewing as :name (:company).', ['name' => auth()->user()->name, 'company' => auth()->user()->company?->name]) }}</span>
+                <form method="POST" action="{{ route('stop-impersonating') }}">
+                    @csrf
+                    <button type="submit" class="underline">{{ __('Return to admin') }}</button>
+                </form>
+            </div>
+        @endif
+
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
@@ -53,6 +63,14 @@
                         </flux:sidebar.item>
                     @endif
                 </flux:sidebar.group>
+
+                @if (auth()->user()->isSuperAdmin())
+                    <flux:sidebar.group :heading="__('Platform')" class="grid">
+                        <flux:sidebar.item icon="building-library" :href="route('platform.companies.index')" :current="request()->routeIs('platform.companies.*')" wire:navigate>
+                            {{ __('Companies') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endif
 
                 @if ($currentCommunity = app(App\Support\Tenancy\CurrentCommunity::class)->get())
                     <flux:sidebar.group :heading="$currentCommunity->name" class="grid">

@@ -9,6 +9,7 @@ use App\Http\Controllers\DataExportDownloadController;
 use App\Http\Controllers\DocumentDownloadController;
 use App\Http\Controllers\DocumentVersionDownloadController;
 use App\Http\Controllers\FinancialReportExportController;
+use App\Http\Controllers\ImpersonateCompanyController;
 use App\Http\Controllers\OnlinePaymentReturnController;
 use App\Http\Controllers\PackageSignatureController;
 use App\Http\Controllers\PatrolCheckpointQrController;
@@ -16,9 +17,11 @@ use App\Http\Controllers\PatrolScanController;
 use App\Http\Controllers\PaymentReceiptController;
 use App\Http\Controllers\PublicDocumentDownloadController;
 use App\Http\Controllers\StartOnlinePaymentController;
+use App\Http\Controllers\StopImpersonatingController;
 use App\Http\Controllers\TestCheckoutController;
 use App\Http\Controllers\UnitStatementController;
 use App\Http\Controllers\ViolationNoticeLetterController;
+use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\RememberCurrentCommunity;
 use App\Livewire\AccessKeys;
 use App\Livewire\Amenities;
@@ -45,6 +48,7 @@ use App\Livewire\Packages;
 use App\Livewire\ParkingPermits;
 use App\Livewire\PatrolRoutes;
 use App\Livewire\PhoneBook;
+use App\Livewire\Platform;
 use App\Livewire\PublicSite;
 use App\Livewire\Residents;
 use App\Livewire\ServiceRequests;
@@ -95,6 +99,13 @@ Route::middleware('auth')->group(function () {
     Route::livewire('webhooks', Webhooks\Index::class)->name('webhooks.index');
     Route::get('data-exports/{dataExportRequest}/download', DataExportDownloadController::class)->name('data-exports.download');
     Route::livewire('data-deletion-requests', DataDeletionRequests\Index::class)->name('data-deletion-requests.index');
+    Route::post('stop-impersonating', StopImpersonatingController::class)->name('stop-impersonating');
+
+    Route::prefix('platform')->name('platform.')->middleware(EnsureSuperAdmin::class)->group(function () {
+        Route::livewire('companies', Platform\Companies::class)->name('companies.index');
+        Route::post('companies/{company}/impersonate', ImpersonateCompanyController::class)->name('companies.impersonate');
+    });
+
     Route::livewire('my-work-orders', WorkOrders\MyWorkOrders::class)->name('work-orders.mine');
     Route::get('patrol-scan/{qrToken}', PatrolScanController::class)->name('patrol-scan');
     Route::get('payments/test-checkout/{reference}', [TestCheckoutController::class, 'show'])->name('payments.test-checkout');

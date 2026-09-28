@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Signs out anyone whose account was deactivated while they were signed in.
+ * Signs out anyone whose account was deactivated, or whose company was suspended, while they
+ * were signed in.
  */
 class EnsureUserIsActive
 {
@@ -21,13 +22,22 @@ class EnsureUserIsActive
         $user = $request->user();
 
         if ($user instanceof User && $user->isDeactivated()) {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            return $this->signOut($request, __('Your account has been deactivated.'));
+        }
 
-            return redirect()->route('login')->with('status', __('Your account has been deactivated.'));
+        if ($user instanceof User && $user->company?->isSuspended() === true) {
+            return $this->signOut($request, __('Your company\'s account has been suspended.'));
         }
 
         return $next($request);
+    }
+
+    private function signOut(Request $request, string $message): Response
+    {
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->with('status', $message);
     }
 }

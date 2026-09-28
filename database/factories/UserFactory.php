@@ -79,4 +79,15 @@ class UserFactory extends Factory
     {
         return $this->withRole(CompanyRole::CompanyAdmin);
     }
+
+    /**
+     * A platform operator with no company of their own.
+     */
+    public function superAdmin(): static
+    {
+        return $this->state([
+            'company_id' => null,
+            'is_super_admin' => true,
+        ]);
+    }
 }

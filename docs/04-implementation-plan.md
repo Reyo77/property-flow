@@ -359,7 +359,7 @@ Bugs found and fixed along the way (in earlier phases' code): permissions added 
 Tasks
 - [x] Public community website: pages, news, public documents, contact form; subdomain `{community}.propertyflow.test`
 - [x] Company settings: branding (logo, colours), modules on/off per community
-- [ ] Super admin panel: companies, usage stats, suspend, impersonate (audited)
+- [x] Super admin panel: companies, usage stats, suspend, impersonate (audited)
 - [x] Plans & limits stored in DB (no billing yet — Cashier/Stripe later)
 - [x] Data export (company download of all data) & resident data deletion (privacy)
 

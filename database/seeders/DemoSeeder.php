@@ -112,13 +112,16 @@ use LogicException;
 
 /**
  * A realistic company for trying the app. Every demo login uses the password "password":
- * demo@ (company admin), manager@ (Harbour Towers only), board@, staff@, resident@ and
- * vendor@propertyflow.test (a vendor with a work order to view and update).
+ * demo@ (company admin), manager@ (Harbour Towers only), board@, staff@, resident@,
+ * vendor@propertyflow.test (a vendor with a work order to view and update), and
+ * platform@propertyflow.test (a super admin, for the /platform panel).
  */
 class DemoSeeder extends Seeder
 {
     public function run(): void
     {
+        User::factory()->superAdmin()->create(['name' => 'Pat Admin', 'email' => 'platform@propertyflow.test']);
+
         $company = Company::factory()->create(['name' => 'Maple Property Management']);
 
         User::factory()->for($company)->companyAdmin()->create(['name' => 'Demo Admin', 'email' => 'demo@propertyflow.test']);

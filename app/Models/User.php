@@ -36,6 +36,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deactivated_at
+ * @property bool $is_super_admin
  * @property-read Company|null $company
  * @property-read Resident|null $resident
  */
@@ -51,6 +52,7 @@ class User extends Authenticatable implements PasskeyUser
      */
     protected $attributes = [
         'deactivated_at' => null,
+        'is_super_admin' => false,
     ];
 
     /**
@@ -63,6 +65,7 @@ class User extends Authenticatable implements PasskeyUser
         return [
             'email_verified_at' => 'datetime',
             'deactivated_at' => 'datetime',
+            'is_super_admin' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -116,6 +119,11 @@ class User extends Authenticatable implements PasskeyUser
     public function isDeactivated(): bool
     {
         return $this->deactivated_at !== null;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->is_super_admin;
     }
 
     /**
