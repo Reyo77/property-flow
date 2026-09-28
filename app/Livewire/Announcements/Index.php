@@ -49,6 +49,8 @@ class Index extends Component
 
     public string $unitSearch = '';
 
+    public bool $is_public = false;
+
     public bool $scheduleForLater = false;
 
     public string $publish_at = '';
@@ -158,6 +160,7 @@ class Index extends Component
         $this->residency_type = (string) $announcement->residency_type?->value;
         $this->building_ids = array_values($announcement->buildings->pluck('id')->map(fn (mixed $id): int => (int) $id)->all());
         $this->unit_ids = array_values($announcement->units->pluck('id')->map(fn (mixed $id): int => (int) $id)->all());
+        $this->is_public = $announcement->is_public;
         $this->scheduleForLater = $announcement->isScheduled();
         $this->publish_at = $announcement->publish_at === null ? '' : LocalTime::forInput($announcement->publish_at, $this->community);
         $this->editingIsPublished = $announcement->isPublished();
@@ -187,6 +190,7 @@ class Index extends Component
         $validated['publish_at'] = $validated['publish_at']?->toDateTimeString();
         $validated['building_ids'] = $validated['building_ids'] ?? [];
         $validated['unit_ids'] = $validated['unit_ids'] ?? [];
+        $validated['is_public'] = $this->is_public;
 
         $saveAnnouncement->handle($this->community, $this->currentUser(), $announcement, $validated);
 
@@ -268,7 +272,7 @@ class Index extends Component
         $this->resetValidation();
         $this->reset(
             'editingAnnouncementId', 'title', 'body', 'audience_type', 'residency_type',
-            'building_ids', 'unit_ids', 'unitSearch', 'scheduleForLater', 'publish_at', 'editingIsPublished',
+            'building_ids', 'unit_ids', 'unitSearch', 'is_public', 'scheduleForLater', 'publish_at', 'editingIsPublished',
         );
         $this->audience_type = AnnouncementAudience::Community->value;
     }

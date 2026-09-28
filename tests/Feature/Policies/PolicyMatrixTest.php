@@ -4,6 +4,7 @@ use App\Enums\CompanyRole;
 use App\Models\Building;
 use App\Models\Community;
 use App\Models\Company;
+use App\Models\ContactMessage;
 use App\Models\Residency;
 use App\Models\Resident;
 use App\Models\ResidentDataDeletionRequest;
@@ -32,6 +33,8 @@ function communityAbilities(): array
         'view resident' => fn (Community $c) => ['view', [Residency::factory()->for(Unit::factory()->for($c))->create()->resident, $c]],
         'manage residents' => fn (Community $c) => ['manageResidents', Unit::factory()->for($c)->create()],
         'edit resident' => fn (Community $c) => ['update', [Residency::factory()->for(Unit::factory()->for($c))->create()->resident, $c]],
+        'list contact messages' => fn (Community $c) => ['viewAny', [ContactMessage::class, $c]],
+        'manage contact messages' => fn (Community $c) => ['update', ContactMessage::factory()->for($c)->create()],
     ];
 }
 
@@ -40,11 +43,11 @@ function communityAbilities(): array
  */
 function expectedAbilities(): array
 {
-    $viewOnly = ['view community', 'list buildings', 'list units', 'view unit', 'list residents', 'view resident'];
+    $viewOnly = ['view community', 'list buildings', 'list units', 'view unit', 'list residents', 'view resident', 'list contact messages'];
 
     return [
         CompanyRole::CompanyAdmin->value => array_keys(communityAbilities()),
-        CompanyRole::PropertyManager->value => [...$viewOnly, 'manage buildings', 'manage units', 'import units', 'manage residents', 'edit resident'],
+        CompanyRole::PropertyManager->value => [...$viewOnly, 'manage buildings', 'manage units', 'import units', 'manage residents', 'edit resident', 'manage contact messages'],
         CompanyRole::BoardMember->value => $viewOnly,
         CompanyRole::Staff->value => $viewOnly,
         CompanyRole::Vendor->value => [],

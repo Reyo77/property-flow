@@ -3,10 +3,8 @@
 namespace App\Enums;
 
 /**
- * Who can see a document or folder, from most to least open.
- *
- * There is no public website yet (Phase 10), so "public" currently behaves the same as "residents"
- * for anyone signed in; it marks documents that will be shown on the community website later.
+ * Who can see a document or folder, from most to least open. "Public" documents are also shown,
+ * unauthenticated, on the community's public website.
  */
 enum DocumentVisibility: string
 {
@@ -30,7 +28,7 @@ enum DocumentVisibility: string
     public function description(): string
     {
         return match ($this) {
-            self::Public => __('Everyone, including the future public website'),
+            self::Public => __('Everyone, including the public website'),
             self::Residents => __('All residents (owners, tenants and occupants) and the team'),
             self::Owners => __('Owners and the team, not tenants'),
             self::Board => __('Board members, managers and admins only'),

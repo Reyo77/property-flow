@@ -29,6 +29,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property AnnouncementAudience $audience_type
  * @property ResidencyType|null $residency_type
  * @property bool $pinned
+ * @property bool $is_public
  * @property Carbon|null $publish_at
  * @property Carbon|null $published_at
  * @property Carbon|null $created_at
@@ -37,7 +38,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property-read Community $community
  * @property-read User|null $createdBy
  */
-#[Fillable(['created_by_id', 'title', 'body', 'audience_type', 'residency_type', 'pinned', 'publish_at'])]
+#[Fillable(['created_by_id', 'title', 'body', 'audience_type', 'residency_type', 'pinned', 'is_public', 'publish_at'])]
 class Announcement extends Model implements BelongsToOneCommunity
 {
     /** @use HasFactory<AnnouncementFactory> */
@@ -52,6 +53,7 @@ class Announcement extends Model implements BelongsToOneCommunity
             'audience_type' => AnnouncementAudience::class,
             'residency_type' => ResidencyType::class,
             'pinned' => 'boolean',
+            'is_public' => 'boolean',
             'publish_at' => 'datetime',
             'published_at' => 'datetime',
         ];
@@ -143,6 +145,20 @@ class Announcement extends Model implements BelongsToOneCommunity
         $query->whereNull('published_at')
             ->whereNotNull('publish_at')
             ->where('publish_at', '<=', now());
+    }
+
+    /**
+     * Announcements shown on the community's public news page: community-wide (a public visitor
+     * has no unit, building or residency type to match a narrower audience against).
+     *
+     * @param  Builder<Announcement>  $query
+     */
+    #[Scope]
+    protected function publicNews(Builder $query): void
+    {
+        $query->published()
+            ->where('is_public', true)
+            ->where('audience_type', AnnouncementAudience::Community);
     }
 
     public function getActivitylogOptions(): LogOptions

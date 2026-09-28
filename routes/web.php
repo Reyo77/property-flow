@@ -14,6 +14,7 @@ use App\Http\Controllers\PackageSignatureController;
 use App\Http\Controllers\PatrolCheckpointQrController;
 use App\Http\Controllers\PatrolScanController;
 use App\Http\Controllers\PaymentReceiptController;
+use App\Http\Controllers\PublicDocumentDownloadController;
 use App\Http\Controllers\StartOnlinePaymentController;
 use App\Http\Controllers\TestCheckoutController;
 use App\Http\Controllers\UnitStatementController;
@@ -26,6 +27,7 @@ use App\Livewire\ArchitecturalRequests;
 use App\Livewire\Assets;
 use App\Livewire\Buildings;
 use App\Livewire\Communities;
+use App\Livewire\ContactMessages;
 use App\Livewire\Dashboard;
 use App\Livewire\DataDeletionRequests;
 use App\Livewire\Documents;
@@ -43,6 +45,7 @@ use App\Livewire\Packages;
 use App\Livewire\ParkingPermits;
 use App\Livewire\PatrolRoutes;
 use App\Livewire\PhoneBook;
+use App\Livewire\PublicSite;
 use App\Livewire\Residents;
 use App\Livewire\ServiceRequests;
 use App\Livewire\ShiftLog;
@@ -54,7 +57,17 @@ use App\Livewire\Violations;
 use App\Livewire\Visitors;
 use App\Livewire\Webhooks;
 use App\Livewire\WorkOrders;
+use App\Support\PublicSite\CommunityDomain;
 use Illuminate\Support\Facades\Route;
+
+// Registered before the bare-domain routes below, so a community's subdomain matches here first.
+Route::domain(CommunityDomain::pattern())->name('public.')->group(function () {
+    Route::livewire('/', PublicSite\Home::class)->name('home');
+    Route::livewire('news', PublicSite\News::class)->name('news');
+    Route::livewire('documents', PublicSite\Documents::class)->name('documents');
+    Route::get('documents/{document}/download', PublicDocumentDownloadController::class)->name('documents.download');
+    Route::livewire('contact', PublicSite\Contact::class)->name('contact');
+});
 
 Route::view('/', 'welcome')->name('home');
 
@@ -109,6 +122,7 @@ Route::middleware('auth')->group(function () {
             Route::get('documents/{document}/download', DocumentDownloadController::class)->name('documents.download');
             Route::get('documents/{document}/versions/{version}/download', DocumentVersionDownloadController::class)->name('documents.versions.download');
             Route::livewire('announcements', Announcements\Index::class)->name('announcements.index');
+            Route::livewire('contact-messages', ContactMessages\Index::class)->name('contact-messages.index');
 
             Route::middleware('module:'.Module::Maintenance->value)->group(function () {
                 Route::livewire('service-requests', ServiceRequests\Index::class)->name('service-requests.index');

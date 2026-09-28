@@ -16,7 +16,7 @@ class SaveAnnouncement
     public function __construct(private readonly PublishAnnouncement $publishAnnouncement) {}
 
     /**
-     * @param  array{title: string, body: string, audience_type: string, residency_type: string|null, building_ids: list<int>, unit_ids: list<int>, publish_at: string|null}  $validated
+     * @param  array{title: string, body: string, audience_type: string, residency_type: string|null, building_ids: list<int>, unit_ids: list<int>, is_public: bool, publish_at: string|null}  $validated
      */
     public function handle(Community $community, User $actor, ?Announcement $announcement, array $validated): Announcement
     {
@@ -28,6 +28,7 @@ class SaveAnnouncement
                 'body' => $validated['body'],
                 'audience_type' => $audience,
                 'residency_type' => $audience === AnnouncementAudience::ResidencyType ? $validated['residency_type'] : null,
+                'is_public' => $audience === AnnouncementAudience::Community && $validated['is_public'],
             ];
 
             if ($announcement === null) {

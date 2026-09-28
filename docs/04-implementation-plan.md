@@ -357,7 +357,7 @@ Bugs found and fixed along the way (in earlier phases' code): permissions added 
 **Goal:** complete product for companies.
 
 Tasks
-- [ ] Public community website: pages, news, public documents, contact form; subdomain `{community}.propertyflow.test`
+- [x] Public community website: pages, news, public documents, contact form; subdomain `{community}.propertyflow.test`
 - [x] Company settings: branding (logo, colours), modules on/off per community
 - [ ] Super admin panel: companies, usage stats, suspend, impersonate (audited)
 - [x] Plans & limits stored in DB (no billing yet — Cashier/Stripe later)

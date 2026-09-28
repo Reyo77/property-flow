@@ -88,6 +88,11 @@
                                 {{ __('Events') }}
                             </flux:sidebar.item>
                         @endcan
+                        @can('viewAny', [App\Models\ContactMessage::class, $currentCommunity])
+                            <flux:sidebar.item icon="envelope" :href="route('communities.contact-messages.index', $currentCommunity)" :current="request()->routeIs('communities.contact-messages.*')" wire:navigate>
+                                {{ __('Contact messages') }}
+                            </flux:sidebar.item>
+                        @endcan
                         @can('viewAny', [App\Models\Contact::class, $currentCommunity])
                             <flux:sidebar.item icon="phone" :href="route('communities.phone-book.index', $currentCommunity)" :current="request()->routeIs('communities.phone-book.*')" wire:navigate>
                                 {{ __('Phone book') }}

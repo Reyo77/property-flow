@@ -285,7 +285,7 @@ class DemoSeeder extends Seeder
         $this->seedDocument($condo, $bylawsFolder, 'Condo Declaration.pdf', DocumentVisibility::Residents, $admin);
         $this->seedDocument($condo, $bylawsFolder, 'Rules & Regulations.pdf', DocumentVisibility::Residents, $admin);
         $this->seedDocument($condo, $boardFolder, 'Reserve Fund Study.pdf', DocumentVisibility::Board, $admin);
-        $this->seedDocument($condo, null, 'Welcome Package.pdf', DocumentVisibility::Residents, $admin);
+        $this->seedDocument($condo, null, 'Welcome Package.pdf', DocumentVisibility::Public, $admin);
 
         // Announcements: one of each state, so every part of the feature has something to show
         $publishedForEveryone = Announcement::factory()->for($condo)->pinned()->create([
@@ -320,6 +320,16 @@ class DemoSeeder extends Seeder
             'audience_type' => AnnouncementAudience::Community,
             'created_by_id' => $admin->id,
         ]);
+
+        // Shown on the community's public website, so there's something to see there out of the box.
+        $publicNews = Announcement::factory()->for($condo)->create([
+            'title' => 'Now accepting new residents',
+            'body' => 'Harbour Towers has units available. Reach out through the contact form to schedule a tour.',
+            'audience_type' => AnnouncementAudience::Community,
+            'is_public' => true,
+            'created_by_id' => $admin->id,
+        ]);
+        app(PublishAnnouncement::class)->handle($publicNews);
     }
 
     /**

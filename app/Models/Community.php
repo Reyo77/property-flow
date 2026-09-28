@@ -7,6 +7,7 @@ use App\Enums\CommunityType;
 use App\Enums\Module;
 use App\Enums\Permission;
 use App\Models\Concerns\BelongsToCompany;
+use App\Support\PublicSite\CommunityDomain;
 use Database\Factories\CommunityFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -19,12 +20,15 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
+use LogicException;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * @property int $id
  * @property string $name
+ * @property string|null $slug
  * @property CommunityType $type
  * @property string|null $address_line_1
  * @property string|null $address_line_2
@@ -63,6 +67,28 @@ class Community extends Model
         'billing_due_day' => 1,
         'bill_approval_limit_cents' => 500000,
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Community $community): void {
+            if ($community->slug === null || $community->slug === '') {
+                $community->slug = self::uniqueSlug($community->name);
+            }
+        });
+    }
+
+    private static function uniqueSlug(string $name): string
+    {
+        $base = Str::slug($name) ?: 'community';
+        $slug = $base;
+        $suffix = 2;
+
+        while (static::withoutGlobalScopes()->where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$suffix++;
+        }
+
+        return $slug;
+    }
 
     /**
      * @return array<string, string>
@@ -117,6 +143,14 @@ class Community extends Model
     public function announcements(): HasMany
     {
         return $this->hasMany(Announcement::class);
+    }
+
+    /**
+     * @return HasMany<ContactMessage, $this>
+     */
+    public function contactMessages(): HasMany
+    {
+        return $this->hasMany(ContactMessage::class);
     }
 
     /**
@@ -468,6 +502,11 @@ class Community extends Model
     public function moduleEnabled(Module $module): bool
     {
         return ! in_array($module->value, $this->disabled_modules ?? [], strict: true);
+    }
+
+    public function publicUrl(): string
+    {
+        return CommunityDomain::urlFor($this->slug ?? throw new LogicException('A saved community always has a slug.'));
     }
 
     public function getActivitylogOptions(): LogOptions

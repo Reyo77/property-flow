@@ -154,6 +154,46 @@ describe('targeting', function () {
     });
 });
 
+describe('public website', function () {
+    it('marks a community-wide announcement as shown on the public website', function () {
+        $admin = companyAdmin();
+        $community = Community::factory()->for($admin->company)->create();
+
+        actingAs($admin);
+
+        Livewire::test(Index::class, ['community' => $community])
+            ->call('create')
+            ->set('title', 'Pool reopening')
+            ->set('body', 'The pool reopens next week.')
+            ->set('audience_type', AnnouncementAudience::Community->value)
+            ->set('is_public', true)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        expect(Announcement::sole()->is_public)->toBeTrue();
+    });
+
+    it('never makes a targeted announcement public, even if requested', function () {
+        $admin = companyAdmin();
+        $community = Community::factory()->for($admin->company)->create();
+        $building = Building::factory()->for($community)->create();
+
+        actingAs($admin);
+
+        Livewire::test(Index::class, ['community' => $community])
+            ->call('create')
+            ->set('title', 'Elevator maintenance')
+            ->set('body', 'Elevator A is out of service.')
+            ->set('audience_type', AnnouncementAudience::Buildings->value)
+            ->set('building_ids', [$building->id])
+            ->set('is_public', true)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        expect(Announcement::sole()->is_public)->toBeFalse();
+    });
+});
+
 describe('scheduling', function () {
     it('does not publish or notify when scheduled for later', function () {
         Notification::fake();

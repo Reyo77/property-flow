@@ -25,6 +25,9 @@
                                     <flux:icon name="bookmark" variant="solid" class="size-4 text-amber-500" />
                                 @endif
                                 <flux:heading size="lg">{{ $announcement->title }}</flux:heading>
+                                @if ($announcement->is_public)
+                                    <flux:badge size="sm" color="green">{{ __('Public') }}</flux:badge>
+                                @endif
                             </div>
                             <flux:text class="mt-1 text-sm">
                                 {{ $this->statusLabel($announcement) }}
@@ -104,6 +107,10 @@
                     @endif
                 </div>
                 <flux:error name="unit_ids" />
+            @endif
+
+            @if ($audience_type === App\Enums\AnnouncementAudience::Community->value)
+                <flux:checkbox wire:model="is_public" :label="__('Show on the public website')" :description="__('Visible to anyone, even without signing in.')" />
             @endif
 
             @unless ($editingIsPublished)

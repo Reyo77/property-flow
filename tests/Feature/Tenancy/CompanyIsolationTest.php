@@ -28,6 +28,7 @@ use App\Models\Company;
 use App\Models\ConsentForm;
 use App\Models\ConsentSignature;
 use App\Models\Contact;
+use App\Models\ContactMessage;
 use App\Models\ContentReport;
 use App\Models\DataExportRequest;
 use App\Models\Document;
@@ -169,6 +170,7 @@ dataset('tenant models', [
     'content reports' => fn () => ContentReport::factory(),
     'data export requests' => fn () => DataExportRequest::factory(),
     'resident data deletion requests' => fn () => ResidentDataDeletionRequest::factory(),
+    'contact messages' => fn () => ContactMessage::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {
@@ -233,6 +235,7 @@ it('returns 404 for pages of another company\'s community', function (string $ro
     'surveys' => 'communities.surveys.index',
     'forms' => 'communities.consent-forms.index',
     'community board' => 'communities.forum.index',
+    'contact messages' => 'communities.contact-messages.index',
 ]);
 
 it('refuses to edit a unit of another company', function () {

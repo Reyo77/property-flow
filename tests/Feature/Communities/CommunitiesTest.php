@@ -78,7 +78,24 @@ describe('create', function () {
             ->currency->toBe('CAD')
             ->area_unit->toBe(AreaUnit::SquareMetres)
             ->address_line_1->toBeNull()
+            ->slug->toBe('harbour-towers')
             ->and(session('current_community_id'))->toBe($community->id);
+    });
+
+    it('gives communities with the same name distinct slugs, even across companies', function () {
+        Community::factory()->create(['name' => 'Harbour Towers']);
+
+        $admin = companyAdmin();
+
+        actingAs($admin);
+
+        Livewire::test(Create::class)
+            ->set('form.name', 'Harbour Towers')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        expect(Community::withoutGlobalScopes()->where('name', 'Harbour Towers')->orderBy('id')->pluck('slug')->all())
+            ->toBe(['harbour-towers', 'harbour-towers-2']);
     });
 
     it('requires a name', function () {

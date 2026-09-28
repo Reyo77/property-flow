@@ -63,6 +63,8 @@ enum Permission: string
     case ModerateCommunity = 'community.moderate';
     case ManageWebhooks = 'webhooks.manage';
     case ManageCompanySettings = 'company.manage-settings';
+    case ViewContactMessages = 'contact-messages.view';
+    case ManageContactMessages = 'contact-messages.manage';
 
     public function label(): string
     {
@@ -126,6 +128,8 @@ enum Permission: string
             self::ModerateCommunity => __('Moderate the forum and classifieds'),
             self::ManageWebhooks => __('Manage webhooks that send events to other systems'),
             self::ManageCompanySettings => __('Manage company branding, modules, plan limits and privacy requests'),
+            self::ViewContactMessages => __('View messages submitted through the public website'),
+            self::ManageContactMessages => __('Manage messages submitted through the public website'),
         };
     }
 
@@ -159,6 +163,7 @@ enum Permission: string
             self::ModerateCommunity => __('Community'),
             self::ManageWebhooks => __('Integrations'),
             self::ManageCompanySettings => __('Company settings'),
+            self::ViewContactMessages, self::ManageContactMessages => __('Public website'),
         };
     }
 

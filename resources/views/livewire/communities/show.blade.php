@@ -10,9 +10,12 @@
             </flux:subheading>
         </div>
 
-        @can('update', $community)
-            <flux:button icon="pencil-square" :href="route('communities.edit', $community)" wire:navigate>{{ __('Edit') }}</flux:button>
-        @endcan
+        <div class="flex items-center gap-2">
+            <flux:button icon="globe-alt" :href="$community->publicUrl()" target="_blank">{{ __('Public site') }}</flux:button>
+            @can('update', $community)
+                <flux:button icon="pencil-square" :href="route('communities.edit', $community)" wire:navigate>{{ __('Edit') }}</flux:button>
+            @endcan
+        </div>
     </div>
 
     @if ($this->unitFactorIsUnbalanced)
