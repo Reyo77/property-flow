@@ -382,7 +382,7 @@ Tasks
 - [ ] Load test with k6 (p95 < 300 ms on dashboard & main lists with 10k units seeded)
 - [x] Reliability: health check route, failed-job alerts (log), scheduled DB backups (spatie/laravel-backup to local disk), restore drill
 - [ ] Deployment scripts, zero-downtime deploy, `.env.production.example`
-- [ ] Docs: admin guide, resident help, runbook
+- [x] Docs: admin guide, resident help, runbook
 - [ ] Full browser test suite for critical flows on staging
 
 Critical browser flows
