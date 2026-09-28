@@ -6,6 +6,7 @@ use App\Models\Community;
 use App\Models\Company;
 use App\Models\Residency;
 use App\Models\Resident;
+use App\Models\ResidentDataDeletionRequest;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
@@ -121,4 +122,31 @@ test('nobody can change their own access', function () {
 
 test('admins cannot manage people in another company', function () {
     expect(Gate::forUser(companyAdmin())->allows('update', User::factory()->create()))->toBeFalse();
+});
+
+test('only company admins manage company settings by default', function (CompanyRole $role) {
+    $company = Company::factory()->create();
+    $member = teamMember($role, $company);
+    $isAdmin = $role === CompanyRole::CompanyAdmin;
+
+    expect(Gate::forUser($member)->allows('manageSettings', $company))->toBe($isAdmin);
+})->with(CompanyRole::cases());
+
+test('company admins and property managers review data deletion requests by default', function (CompanyRole $role) {
+    $company = Company::factory()->create();
+    $member = teamMember($role, $company);
+    $request = ResidentDataDeletionRequest::factory()->for(Resident::factory()->for($company))->create();
+    $canReview = in_array($role, [CompanyRole::CompanyAdmin, CompanyRole::PropertyManager], true);
+
+    expect(Gate::forUser($member)->allows('viewAny', ResidentDataDeletionRequest::class))->toBe($canReview)
+        ->and(Gate::forUser($member)->allows('review', $request))->toBe($canReview);
+})->with(CompanyRole::cases());
+
+test('only residents may request their own data deletion', function () {
+    $residency = Residency::factory()->create();
+    $residentUser = User::factory()->for(Company::findOrFail($residency->company_id))->create();
+    $residency->resident->forceFill(['user_id' => $residentUser->id])->save();
+
+    expect(Gate::forUser($residentUser)->allows('create', ResidentDataDeletionRequest::class))->toBeTrue()
+        ->and(Gate::forUser(companyAdmin())->allows('create', ResidentDataDeletionRequest::class))->toBeFalse();
 });

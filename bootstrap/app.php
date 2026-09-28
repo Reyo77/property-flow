@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureModuleEnabled;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Support\Api\ApiExceptionRenderer;
 use Illuminate\Foundation\Application;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [EnsureUserIsActive::class]);
+        $middleware->alias(['module' => EnsureModuleEnabled::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(new ApiExceptionRenderer);

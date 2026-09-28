@@ -62,6 +62,7 @@ enum Permission: string
     case ManageViolations = 'violations.manage';
     case ModerateCommunity = 'community.moderate';
     case ManageWebhooks = 'webhooks.manage';
+    case ManageCompanySettings = 'company.manage-settings';
 
     public function label(): string
     {
@@ -124,6 +125,7 @@ enum Permission: string
             self::ManageViolations => __('Issue notices and fines, resolve violations, manage rules'),
             self::ModerateCommunity => __('Moderate the forum and classifieds'),
             self::ManageWebhooks => __('Manage webhooks that send events to other systems'),
+            self::ManageCompanySettings => __('Manage company branding, modules, plan limits and privacy requests'),
         };
     }
 
@@ -156,6 +158,7 @@ enum Permission: string
             self::ViewViolations, self::ReportViolations, self::ManageViolations => __('Violations'),
             self::ModerateCommunity => __('Community'),
             self::ManageWebhooks => __('Integrations'),
+            self::ManageCompanySettings => __('Company settings'),
         };
     }
 

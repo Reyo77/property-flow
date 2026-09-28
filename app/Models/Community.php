@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AreaUnit;
 use App\Enums\CommunityType;
+use App\Enums\Module;
 use App\Enums\Permission;
 use App\Models\Concerns\BelongsToCompany;
 use Database\Factories\CommunityFactory;
@@ -37,6 +38,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int $billing_due_day
  * @property int $bill_approval_limit_cents
  * @property AreaUnit $area_unit
+ * @property list<string>|null $disabled_modules
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
@@ -44,6 +46,7 @@ use Spatie\Activitylog\Support\LogOptions;
 #[Fillable([
     'name', 'type', 'address_line_1', 'address_line_2', 'city', 'region',
     'postal_code', 'country', 'timezone', 'currency', 'area_unit', 'fiscal_year_start_month', 'billing_due_day', 'bill_approval_limit_cents',
+    'disabled_modules',
 ])]
 class Community extends Model
 {
@@ -72,6 +75,7 @@ class Community extends Model
             'fiscal_year_start_month' => 'integer',
             'billing_due_day' => 'integer',
             'bill_approval_limit_cents' => 'integer',
+            'disabled_modules' => 'array',
         ];
     }
 
@@ -459,6 +463,11 @@ class Community extends Model
         $total = $this->units()->toBase()->selectRaw('SUM(unit_factor) as total')->value('total');
 
         return is_string($total) && is_numeric($total) ? $total : null;
+    }
+
+    public function moduleEnabled(Module $module): bool
+    {
+        return ! in_array($module->value, $this->disabled_modules ?? [], strict: true);
     }
 
     public function getActivitylogOptions(): LogOptions

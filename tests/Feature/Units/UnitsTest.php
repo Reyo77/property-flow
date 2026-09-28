@@ -3,6 +3,8 @@
 use App\Livewire\Units\Index;
 use App\Models\Building;
 use App\Models\Community;
+use App\Models\Company;
+use App\Models\Plan;
 use App\Models\Unit;
 use Livewire\Livewire;
 
@@ -46,6 +48,23 @@ it('adds a unit to a building of the community', function () {
         ->unit_factor->toBe('0.512345')
         ->parking->toBe('P1-22')
         ->locker->toBeNull();
+});
+
+it('blocks adding a unit once the plan\'s unit limit is reached', function () {
+    $plan = Plan::factory()->create(['max_units' => 1]);
+    $admin = companyAdmin(Company::factory()->create(['plan_id' => $plan->id]));
+    $community = Community::factory()->for($admin->company)->create();
+    Unit::factory()->for($community)->create();
+
+    actingAs($admin);
+
+    Livewire::test(Index::class, ['community' => $community])
+        ->call('create')
+        ->set('number', '1204')
+        ->call('save')
+        ->assertHasErrors('number');
+
+    expect(Unit::count())->toBe(1);
 });
 
 it('rejects a building from another community', function () {

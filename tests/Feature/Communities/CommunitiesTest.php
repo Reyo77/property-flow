@@ -5,6 +5,8 @@ use App\Enums\CommunityType;
 use App\Livewire\Communities\Create;
 use App\Livewire\Communities\Edit;
 use App\Models\Community;
+use App\Models\Company;
+use App\Models\Plan;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
 
@@ -110,6 +112,21 @@ describe('create', function () {
         actingAs(memberWithoutRole());
 
         Livewire::test(Create::class)->assertForbidden();
+    });
+
+    it('blocks creating a community once the plan\'s community limit is reached', function () {
+        $plan = Plan::factory()->create(['max_communities' => 1]);
+        $admin = companyAdmin(Company::factory()->create(['plan_id' => $plan->id]));
+        Community::factory()->for($admin->company)->create();
+
+        actingAs($admin);
+
+        Livewire::test(Create::class)
+            ->set('form.name', 'Harbour Towers')
+            ->call('save')
+            ->assertHasErrors('name');
+
+        expect(Community::count())->toBe(1);
     });
 
     it('records who created the community', function () {

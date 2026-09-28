@@ -15,5 +15,9 @@
         </form>
 
         <livewire:settings.delete-user-form />
+
+        @if (auth()->user()->resident !== null)
+            <livewire:settings.request-data-deletion />
+        @endif
     </x-settings.layout>
 </section>

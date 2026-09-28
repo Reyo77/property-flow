@@ -4,6 +4,8 @@ use App\Actions\Units\ImportUnits;
 use App\Actions\Units\UnitImportResult;
 use App\Models\Building;
 use App\Models\Community;
+use App\Models\Company;
+use App\Models\Plan;
 use App\Models\Unit;
 use Illuminate\Http\UploadedFile;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -128,6 +130,22 @@ it('skips blank rows but keeps row numbers accurate', function () {
     ]));
 
     expect(array_keys($result->errors))->toBe([4]);
+});
+
+it('rejects the whole import once it would exceed the plan\'s unit limit', function () {
+    $plan = Plan::factory()->create(['max_units' => 4]);
+    $company = Company::factory()->create(['plan_id' => $plan->id]);
+    $community = Community::factory()->for($company)->create();
+    Unit::factory()->for($community)->count(2)->create();
+
+    $result = importInto($community, unitsCsv([
+        ['Tower A', '101', '', '', '', '', ''],
+        ['Tower A', '102', '', '', '', '', ''],
+        ['Tower A', '103', '', '', '', '', ''],
+    ]));
+
+    expect($result->errors)->toBe([1 => ['Your plan allows up to 4 units. Upgrade your plan to add more.']])
+        ->and(Unit::count())->toBe(2);
 });
 
 it('rejects a file without unit rows', function () {

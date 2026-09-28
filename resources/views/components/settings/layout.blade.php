@@ -5,6 +5,9 @@
             <flux:navlist.item :href="route('notifications.edit')" wire:navigate>{{ __('Notifications') }}</flux:navlist.item>
             <flux:navlist.item :href="route('security.edit')" wire:navigate>{{ __('Security') }}</flux:navlist.item>
             <flux:navlist.item :href="route('appearance.edit')" wire:navigate>{{ __('Appearance') }}</flux:navlist.item>
+            @if (auth()->user()->company && auth()->user()->can('manageSettings', auth()->user()->company))
+                <flux:navlist.item :href="route('settings.company')" wire:navigate>{{ __('Company') }}</flux:navlist.item>
+            @endif
         </flux:navlist>
     </div>
 

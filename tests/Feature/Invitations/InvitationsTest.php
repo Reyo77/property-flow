@@ -7,6 +7,7 @@ use App\Livewire\Team\Index as Team;
 use App\Models\Community;
 use App\Models\Company;
 use App\Models\Invitation;
+use App\Models\Plan;
 use App\Models\Residency;
 use App\Models\Unit;
 use App\Models\User;
@@ -153,6 +154,22 @@ it('does not let anyone invite people with more access than they have', function
         ->set('inviteRole', CompanyRole::CompanyAdmin->value)
         ->call('sendInvite')
         ->assertHasErrors(['role' => 'You cannot give someone more access than you have.']);
+
+    expect(Invitation::count())->toBe(0);
+});
+
+it('blocks inviting a new team member once the plan\'s team limit is reached', function () {
+    $plan = Plan::factory()->create(['max_team_members' => 1]);
+    $admin = companyAdmin(Company::factory()->create(['plan_id' => $plan->id]));
+
+    actingAs($admin);
+
+    Livewire::test(Team::class)
+        ->set('inviteName', 'One Too Many')
+        ->set('inviteEmail', 'one-too-many@example.com')
+        ->set('inviteRole', CompanyRole::Staff->value)
+        ->call('sendInvite')
+        ->assertHasErrors('role');
 
     expect(Invitation::count())->toBe(0);
 });

@@ -43,6 +43,8 @@ arch('tenant models are scoped to a company')
         'App\Models\User',
         // Owned via user_id, which already ties it to exactly one company; it has no company_id column.
         'App\Models\NotificationPreference',
+        // Shared platform reference data set up by the platform, not owned by a single company.
+        'App\Models\Plan',
     ]);
 
 arch('no email is sent until an email provider is set up in Phase 12')

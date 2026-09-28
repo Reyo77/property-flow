@@ -6,11 +6,13 @@ use App\Concerns\UnitValidationRules;
 use App\Imports\UnitRowsImport;
 use App\Models\Building;
 use App\Models\Community;
+use App\Support\Plans\PlanLimits;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
 /**
@@ -29,6 +31,8 @@ class ImportUnits
     /** The first data row, after the heading row. */
     private const int FIRST_DATA_ROW = 2;
 
+    public function __construct(private readonly PlanLimits $planLimits) {}
+
     public function handle(Community $community, UploadedFile $file): UnitImportResult
     {
         $rows = $this->readRows($file);
@@ -39,6 +43,12 @@ class ImportUnits
 
         if ($rows->count() > self::MAX_ROWS) {
             return new UnitImportResult(errors: [1 => [__('The file has more than :max rows.', ['max' => self::MAX_ROWS])]]);
+        }
+
+        try {
+            $this->planLimits->ensureCanAddUnits($community->company, $rows->count());
+        } catch (ValidationException $exception) {
+            return new UnitImportResult(errors: [1 => array_values($exception->errors())[0]]);
         }
 
         $errors = $this->validateRows($community, $rows);

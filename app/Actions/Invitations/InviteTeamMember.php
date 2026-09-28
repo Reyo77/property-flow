@@ -6,6 +6,7 @@ use App\Enums\Permission;
 use App\Models\Community;
 use App\Models\Invitation;
 use App\Models\User;
+use App\Support\Plans\PlanLimits;
 use App\Support\Tenancy\CompanyRoles;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -14,7 +15,7 @@ use InvalidArgumentException;
 
 class InviteTeamMember
 {
-    public function __construct(private readonly IssueInvitationLink $issueLink) {}
+    public function __construct(private readonly IssueInvitationLink $issueLink, private readonly PlanLimits $planLimits) {}
 
     /**
      * @param  list<int>  $communityIds
@@ -45,6 +46,8 @@ class InviteTeamMember
                 'email.unique' => __('This email already has an account or a pending invitation.'),
             ],
         )->validate();
+
+        $this->planLimits->ensureCanAddTeamMember($inviter->company ?? throw new InvalidArgumentException('Only company members can invite people.'));
 
         $role = CompanyRoles::find($companyId, $roleName);
 

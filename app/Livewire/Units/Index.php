@@ -6,6 +6,7 @@ use App\Concerns\UnitValidationRules;
 use App\Models\Building;
 use App\Models\Community;
 use App\Models\Unit;
+use App\Support\Plans\PlanLimits;
 use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
@@ -125,13 +126,17 @@ class Index extends Component
         Flux::modal('unit-form')->show();
     }
 
-    public function save(): void
+    public function save(PlanLimits $planLimits): void
     {
         $unit = $this->editingUnitId === null ? null : $this->findUnit($this->editingUnitId);
 
         $unit === null
             ? $this->authorize('create', [Unit::class, $this->community])
             : $this->authorize('update', $unit);
+
+        if ($unit === null) {
+            $planLimits->ensureCanAddUnits($this->community->company);
+        }
 
         $buildingId = $this->building_id === '' ? null : (int) $this->building_id;
 

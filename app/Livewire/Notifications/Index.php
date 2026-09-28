@@ -39,6 +39,12 @@ class Index extends Component
 
         if (is_int($communityId)) {
             $this->redirectRoute('communities.announcements.index', $communityId, navigate: true);
+
+            return;
+        }
+
+        if (($notification->data['type'] ?? null) === 'company_data_export_ready') {
+            $this->redirectRoute('settings.company', navigate: true);
         }
     }
 

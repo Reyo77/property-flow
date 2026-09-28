@@ -6,6 +6,12 @@
     <form wire:submit="save" class="space-y-6">
         @include('livewire.communities.partials.form-fields')
 
+        <flux:checkbox.group wire:model="enabledModules" :label="__('Modules')" :description="__('Turn off feature areas this community doesn\'t use. Their menu items and pages are hidden.')">
+            @foreach (App\Enums\Module::cases() as $module)
+                <flux:checkbox :value="$module->value" :label="$module->label()" :description="$module->description()" />
+            @endforeach
+        </flux:checkbox.group>
+
         <div class="flex items-center gap-3">
             <flux:button type="submit" variant="primary">{{ __('Save') }}</flux:button>
             <flux:button :href="route('communities.show', $community)" variant="ghost" wire:navigate>{{ __('Cancel') }}</flux:button>

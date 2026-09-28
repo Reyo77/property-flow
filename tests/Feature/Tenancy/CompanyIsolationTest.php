@@ -29,6 +29,7 @@ use App\Models\ConsentForm;
 use App\Models\ConsentSignature;
 use App\Models\Contact;
 use App\Models\ContentReport;
+use App\Models\DataExportRequest;
 use App\Models\Document;
 use App\Models\DocumentFolder;
 use App\Models\EmergencyContact;
@@ -61,6 +62,7 @@ use App\Models\Pet;
 use App\Models\RecurringCharge;
 use App\Models\Residency;
 use App\Models\Resident;
+use App\Models\ResidentDataDeletionRequest;
 use App\Models\ServiceRequest;
 use App\Models\ServiceRequestComment;
 use App\Models\ShiftLogEntry;
@@ -165,6 +167,8 @@ dataset('tenant models', [
     'forum topics' => fn () => ForumTopic::factory(),
     'forum posts' => fn () => ForumPost::factory(),
     'content reports' => fn () => ContentReport::factory(),
+    'data export requests' => fn () => DataExportRequest::factory(),
+    'resident data deletion requests' => fn () => ResidentDataDeletionRequest::factory(),
 ]);
 
 it('hides another company\'s records from queries', function ($factory) {

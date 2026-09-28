@@ -82,6 +82,14 @@ class Resident extends Model
         return $this->hasMany(Invitation::class);
     }
 
+    /**
+     * @return HasMany<ResidentDataDeletionRequest, $this>
+     */
+    public function dataDeletionRequests(): HasMany
+    {
+        return $this->hasMany(ResidentDataDeletionRequest::class);
+    }
+
     public function hasPortalAccess(): bool
     {
         return $this->user_id !== null;
