@@ -15,10 +15,13 @@ use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -52,6 +55,22 @@ class AppServiceProvider extends ServiceProvider
         $this->configureTenancy();
         $this->configureRateLimiting();
         $this->configureApiDocs();
+        $this->configureReliability();
+    }
+
+    /**
+     * Failed jobs don't otherwise stand out in the logs; a `critical`-level entry is what a log
+     * alerting rule (e.g. in the hosting platform or a log shipper) would watch for.
+     */
+    protected function configureReliability(): void
+    {
+        Queue::failing(function (JobFailed $event): void {
+            Log::critical('Queued job failed', [
+                'connection' => $event->connectionName,
+                'job' => $event->job->resolveName(),
+                'exception' => $event->exception->getMessage(),
+            ]);
+        });
     }
 
     /**

@@ -153,4 +153,26 @@ describe('contact', function () {
 
         expect(ContactMessage::count())->toBe(0);
     });
+
+    it('throttles repeated submissions from the same visitor', function () {
+        $community = Community::factory()->create();
+
+        for ($i = 0; $i < 5; $i++) {
+            Livewire::test(Contact::class, ['community' => $community])
+                ->set('name', 'Jordan Rivera')
+                ->set('email', 'jordan@example.com')
+                ->set('message', "Message number {$i}")
+                ->call('submit')
+                ->assertHasNoErrors();
+        }
+
+        Livewire::test(Contact::class, ['community' => $community])
+            ->set('name', 'Jordan Rivera')
+            ->set('email', 'jordan@example.com')
+            ->set('message', 'One too many')
+            ->call('submit')
+            ->assertHasErrors('message');
+
+        expect(ContactMessage::count())->toBe(5);
+    });
 });

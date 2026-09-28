@@ -120,11 +120,11 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
-        User::factory()->superAdmin()->create(['name' => 'Pat Admin', 'email' => 'platform@propertyflow.test']);
+        User::factory()->withTwoFactor()->superAdmin()->create(['name' => 'Pat Admin', 'email' => 'platform@propertyflow.test']);
 
         $company = Company::factory()->create(['name' => 'Maple Property Management']);
 
-        User::factory()->for($company)->companyAdmin()->create(['name' => 'Demo Admin', 'email' => 'demo@propertyflow.test']);
+        User::factory()->for($company)->withTwoFactor()->companyAdmin()->create(['name' => 'Demo Admin', 'email' => 'demo@propertyflow.test']);
 
         $condo = $this->seedCondo($company);
         $hoa = $this->seedHoa($company);
@@ -197,15 +197,15 @@ class DemoSeeder extends Seeder
 
     private function seedTeam(Company $company, Community $condo, Community $hoa): void
     {
-        $manager = User::factory()->for($company)->withRole(CompanyRole::PropertyManager)
+        $manager = User::factory()->for($company)->withTwoFactor()->withRole(CompanyRole::PropertyManager)
             ->create(['name' => 'Priya Manager', 'email' => 'manager@propertyflow.test']);
         $manager->communities()->attach($condo);
 
-        $board = User::factory()->for($company)->withRole(CompanyRole::BoardMember)
+        $board = User::factory()->for($company)->withTwoFactor()->withRole(CompanyRole::BoardMember)
             ->create(['name' => 'Ben Board', 'email' => 'board@propertyflow.test']);
         $board->communities()->attach($condo);
 
-        $staff = User::factory()->for($company)->withRole(CompanyRole::Staff)
+        $staff = User::factory()->for($company)->withTwoFactor()->withRole(CompanyRole::Staff)
             ->create(['name' => 'Sam Concierge', 'email' => 'staff@propertyflow.test']);
         $staff->communities()->attach([$condo->id, $hoa->id]);
     }

@@ -62,6 +62,7 @@ function companyAdmin(?Company $company = null): User
 {
     return User::factory()
         ->for($company ?? Company::factory())
+        ->withTwoFactor()
         ->companyAdmin()
         ->create();
 }
@@ -83,7 +84,7 @@ function memberWithoutRole(?Company $company = null): User
  */
 function teamMember(CompanyRole $role, Company $company, array $communities = []): User
 {
-    $user = User::factory()->for($company)->withRole($role)->create();
+    $user = User::factory()->for($company)->withTwoFactor()->withRole($role)->create();
     $user->communities()->attach(array_map(fn (Community $community) => $community->id, $communities));
 
     return $user;
@@ -102,7 +103,7 @@ function residentWithLogin(?Company $company = null): Resident
  */
 function superAdmin(): User
 {
-    return User::factory()->superAdmin()->create();
+    return User::factory()->withTwoFactor()->superAdmin()->create();
 }
 
 /**
