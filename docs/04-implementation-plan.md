@@ -380,7 +380,7 @@ Tasks
 - [x] Security: OWASP top-10 review, security headers/CSP, rate limits on auth, encrypted sensitive columns, 2FA required for staff roles, signed file URLs, `composer audit`
 - [ ] Performance: indexes review, eager loading, caching of dashboards/reports, queue for heavy work, pagination everywhere
 - [ ] Load test with k6 (p95 < 300 ms on dashboard & main lists with 10k units seeded)
-- [ ] Reliability: health check route, failed-job alerts (log), scheduled DB backups (spatie/laravel-backup to local disk), restore drill
+- [x] Reliability: health check route, failed-job alerts (log), scheduled DB backups (spatie/laravel-backup to local disk), restore drill
 - [ ] Deployment scripts, zero-downtime deploy, `.env.production.example`
 - [ ] Docs: admin guide, resident help, runbook
 - [ ] Full browser test suite for critical flows on staging

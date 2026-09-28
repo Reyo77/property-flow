@@ -16,3 +16,7 @@ Schedule::command('finance:assess-late-fees')->dailyAt('02:00');
 Schedule::command('finance:send-overdue-reminders')->dailyAt('09:00');
 Schedule::command('ballots:close-ended')->everyMinute();
 Schedule::command('violations:escalate')->dailyAt('06:00');
+
+Schedule::command('backup:clean')->dailyAt('01:00');
+Schedule::command('backup:run')->dailyAt('01:30');
+Schedule::command('backup:monitor')->dailyAt('02:30');

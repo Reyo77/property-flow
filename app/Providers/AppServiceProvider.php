@@ -28,6 +28,9 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use InvalidArgumentException;
 use Knuckles\Scribe\Scribe;
+use Spatie\Backup\Events\BackupHasFailed;
+use Spatie\Backup\Events\CleanupHasFailed;
+use Spatie\Backup\Events\UnhealthyBackupWasFound;
 use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
@@ -59,8 +62,10 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Failed jobs don't otherwise stand out in the logs; a `critical`-level entry is what a log
-     * alerting rule (e.g. in the hosting platform or a log shipper) would watch for.
+     * Failed jobs and backup problems don't otherwise stand out in the logs; a `critical`-level
+     * entry is what a log alerting rule (e.g. in the hosting platform or a log shipper) would
+     * watch for. No email provider is wired up yet (Phase 12), so this replaces laravel-backup's
+     * own mail notifications rather than leaving them silently unconfigured.
      */
     protected function configureReliability(): void
     {
@@ -69,6 +74,21 @@ class AppServiceProvider extends ServiceProvider
                 'connection' => $event->connectionName,
                 'job' => $event->job->resolveName(),
                 'exception' => $event->exception->getMessage(),
+            ]);
+        });
+
+        Event::listen(function (BackupHasFailed $event): void {
+            Log::critical('Backup failed', ['exception' => $event->exception->getMessage()]);
+        });
+
+        Event::listen(function (CleanupHasFailed $event): void {
+            Log::critical('Backup cleanup failed', ['exception' => $event->exception->getMessage()]);
+        });
+
+        Event::listen(function (UnhealthyBackupWasFound $event): void {
+            Log::critical('Backup is unhealthy', [
+                'disk' => $event->diskName,
+                'reason' => $event->failureMessages->pluck('message')->implode(' '),
             ]);
         });
     }

@@ -47,6 +47,15 @@ return [
             'report' => false,
         ],
 
+        // Outside storage/app on purpose: that's what gets backed up, so the backups
+        // themselves must live somewhere else to avoid including prior backups in the next one.
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('backups'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
