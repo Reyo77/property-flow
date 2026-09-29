@@ -11,6 +11,7 @@ use App\Support\Finance\UnitLedger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -23,6 +24,10 @@ class Dashboard extends Component
     /**
      * Portfolio totals for the communities the user works in, or null for people without a team role.
      *
+     * Cached briefly per user: expensive to compute (four aggregate queries across every
+     * community they can access) and viewed on nearly every page load, but a minute of staleness
+     * on a portfolio-wide count is unnoticeable.
+     *
      * @return array{communities: int, units: int, occupied_units: int, residents: int}|null
      */
     #[Computed]
@@ -34,15 +39,17 @@ class Dashboard extends Component
             return null;
         }
 
-        $communityIds = Community::query()->accessibleBy($user)->pluck('id');
-        $units = Unit::query()->whereIn('community_id', $communityIds)->whereHas('community');
+        return Cache::remember("dashboard-totals:user:{$user->id}", 60, function () use ($user) {
+            $communityIds = Community::query()->accessibleBy($user)->pluck('id');
+            $units = Unit::query()->whereIn('community_id', $communityIds)->whereHas('community');
 
-        return [
-            'communities' => $communityIds->count(),
-            'units' => (clone $units)->count(),
-            'occupied_units' => (clone $units)->whereHas('residencies', fn (Builder $query) => $query->active())->count(),
-            'residents' => Residency::query()->whereIn('community_id', $communityIds)->active()->distinct()->count('resident_id'),
-        ];
+            return [
+                'communities' => $communityIds->count(),
+                'units' => (clone $units)->count(),
+                'occupied_units' => (clone $units)->whereHas('residencies', fn (Builder $query) => $query->active())->count(),
+                'residents' => Residency::query()->whereIn('community_id', $communityIds)->active()->distinct()->count('resident_id'),
+            ];
+        });
     }
 
     /**

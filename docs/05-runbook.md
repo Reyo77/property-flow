@@ -133,7 +133,17 @@ things just stop happening).
 
 ---
 
-## 6. Common support situations
+## 6. Load testing
+
+`tests/load/` has a k6 script (`dashboard-and-lists.js`) exercising the dashboard and the two
+main community lists (units, residents) under concurrent load — see its README for setup
+(including the two-factor one-time-code step, since staff logins require it). Re-run it after any
+change likely to affect those pages, and before trusting a specific server's capacity — the
+result depends on the PHP-FPM worker pool size of whatever it's run against, not just the code.
+
+---
+
+## 7. Common support situations
 
 | Situation | What's happening | Where to look / what to do |
 |---|---|---|

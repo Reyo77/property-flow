@@ -64,4 +64,20 @@ class DashboardTest extends TestCase
 
         $this->assertSame(['communities' => 1, 'units' => 4, 'occupied_units' => 2, 'residents' => 3], $totals);
     }
+
+    public function test_the_dashboard_totals_are_cached_briefly_per_user(): void
+    {
+        $admin = companyAdmin();
+        $community = Community::factory()->for($admin->company)->create();
+        Unit::factory()->for($community)->count(2)->create();
+
+        $this->actingAs($admin);
+
+        $first = Livewire::test(Dashboard::class)->instance()->totals();
+        Unit::factory()->for($community)->count(3)->create();
+        $second = Livewire::test(Dashboard::class)->instance()->totals();
+
+        $this->assertSame($first, $second);
+        $this->assertSame(2, $second['units']);
+    }
 }
