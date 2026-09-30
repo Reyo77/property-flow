@@ -49,6 +49,12 @@
                     </div>
                 @endforeach
             </div>
+
+            @if ($this->financialsTrend !== null)
+                <div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" data-test="financials-trend">
+                    <x-charts.trend-line :series="$this->financialsTrend['series']" :labels="$this->financialsTrend['labels']" />
+                </div>
+            @endif
         </div>
     @endif
 

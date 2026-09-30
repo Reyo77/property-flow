@@ -1,9 +1,11 @@
 <?php
 
+use App\Actions\Finance\IssueInvoice;
 use App\Enums\Audience;
 use App\Enums\CompanyRole;
 use App\Enums\ForumTopicKind;
 use App\Enums\ResidencyType;
+use App\Enums\SystemAccount;
 use App\Livewire\Engagement\ConsentForms;
 use App\Livewire\Engagement\ConsentFormShow;
 use App\Livewire\Engagement\Forum;
@@ -26,6 +28,10 @@ use App\Models\SurveyResponse;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\VendorBill;
+use App\Support\Finance\ChartOfAccounts;
+use App\Support\Finance\InvoiceLineData;
+use App\Support\Finance\Money;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -274,5 +280,27 @@ describe('board portal', function () {
 
         actingAs(memberOf($community));
         get(route('communities.board', $community))->assertForbidden();
+    });
+
+    it('shows an income vs. expenses trend for a board member with finance access', function () {
+        $community = Community::factory()->create();
+        $unit = Unit::factory()->for($community)->create();
+        app(IssueInvoice::class)->handle(
+            $unit,
+            CarbonImmutable::now($community->timezone),
+            CarbonImmutable::now($community->timezone),
+            [new InvoiceLineData('Fees', Money::of(50000), app(ChartOfAccounts::class)->account($community, SystemAccount::Assessments))],
+        );
+        actingAs(teamMember(CompanyRole::BoardMember, $community->company, [$community]));
+
+        $trend = Livewire::test(BoardPortal::class, ['community' => $community])->instance()->financialsTrend();
+
+        expect($trend['series'])->toHaveCount(2)
+            ->and($trend['series'][0]['label'])->toBe('Income')
+            ->and(end($trend['series'][0]['values']))->toBe(50000)
+            ->and(end($trend['series'][1]['values']))->toBe(0);
+
+        Livewire::test(BoardPortal::class, ['community' => $community])
+            ->assertSee('data-test="financials-trend"', escape: false);
     });
 });

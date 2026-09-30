@@ -13,6 +13,7 @@ use App\Models\ArchitecturalRequest;
 use App\Models\Ballot;
 use App\Models\Community;
 use App\Models\Document;
+use App\Models\FiscalYear;
 use App\Models\Invoice;
 use App\Models\Meeting;
 use App\Models\VendorBill;
@@ -96,8 +97,7 @@ class BoardPortal extends Component
         }
 
         $balances = app(AccountBalances::class);
-        $today = CarbonImmutable::now($this->community->timezone);
-        $year = app(FiscalYears::class)->covering($this->community, $today);
+        [$year, $today] = $this->fiscalYearContext();
         $statement = app(FinancialReports::class)->incomeStatement($this->community, CarbonImmutable::parse($year->starts_on->toDateString()), $today);
         $currency = $this->community->currency;
 
@@ -114,6 +114,56 @@ class BoardPortal extends Component
             'net' => Money::of((int) ($statement->centsFor(__('Net income'))[0] ?? 0), $currency),
             'year' => $year->label(),
         ];
+    }
+
+    /**
+     * The same income-vs-expenses trend chart used on the Finance overview page, scoped to the
+     * board's own fiscal year to date — same permission gate as financials(), reusing the fiscal
+     * year lookup instead of computing it twice.
+     *
+     * @return array{series: list<array{label: string, color: string, values: list<int>, display: list<string>}>, labels: list<string>}|null
+     */
+    #[Computed]
+    public function financialsTrend(): ?array
+    {
+        if (! $this->currentUser()->hasCompanyPermission(Permission::ViewFinance)) {
+            return null;
+        }
+
+        [$year, $today] = $this->fiscalYearContext();
+        $months = app(FinancialReports::class)->monthlyIncomeAndExpenses(
+            $this->community,
+            CarbonImmutable::parse($year->starts_on->toDateString()),
+            $today,
+        );
+
+        return [
+            'series' => [
+                [
+                    'label' => __('Income'),
+                    'color' => 'emerald-500',
+                    'values' => array_map(fn (array $month) => $month['income']->cents, $months),
+                    'display' => array_map(fn (array $month) => $month['income']->format(), $months),
+                ],
+                [
+                    'label' => __('Expenses'),
+                    'color' => 'red-500',
+                    'values' => array_map(fn (array $month) => $month['expenses']->cents, $months),
+                    'display' => array_map(fn (array $month) => $month['expenses']->format(), $months),
+                ],
+            ],
+            'labels' => array_map(fn (array $month) => $month['month']->translatedFormat('M'), $months),
+        ];
+    }
+
+    /**
+     * @return array{0: FiscalYear, 1: CarbonImmutable}
+     */
+    private function fiscalYearContext(): array
+    {
+        $today = CarbonImmutable::now($this->community->timezone);
+
+        return [app(FiscalYears::class)->covering($this->community, $today), $today];
     }
 
     /**
