@@ -82,6 +82,15 @@
                 @endforeach
             </div>
         </div>
+    @elseif ($this->vendorOpenWorkOrdersCount !== null)
+        <div class="rounded-xl border border-dashed border-zinc-300 p-10 text-center dark:border-zinc-600" data-test="vendor-summary">
+            <flux:icon name="clipboard-document-list" class="mx-auto mb-3 size-8 text-zinc-400" />
+            <flux:heading>
+                {{ trans_choice(':count open work order|:count open work orders', $this->vendorOpenWorkOrdersCount, ['count' => $this->vendorOpenWorkOrdersCount]) }}
+            </flux:heading>
+            <flux:text class="mt-1">{{ __('Jobs assigned to you, across every community.') }}</flux:text>
+            <flux:button variant="primary" class="mt-4" :href="route('work-orders.mine')" wire:navigate>{{ __('My work orders') }}</flux:button>
+        </div>
     @elseif ($this->totals === null)
         <div class="rounded-xl border border-dashed border-zinc-300 p-10 text-center dark:border-zinc-600" data-test="no-access">
             <flux:heading>{{ __('Nothing to show yet') }}</flux:heading>

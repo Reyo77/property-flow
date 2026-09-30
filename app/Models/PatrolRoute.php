@@ -67,8 +67,10 @@ class PatrolRoute extends Model implements BelongsToOneCommunity
      */
     public function scanSummaryFor(CarbonInterface $date): array
     {
-        $dayStart = $date->clone()->startOfDay();
-        $dayEnd = $date->clone()->endOfDay();
+        // scanned_at is stored in UTC; convert the local day's boundaries to UTC before querying,
+        // or a community behind UTC would show tonight's scans as missed until UTC catches up.
+        $dayStart = $date->clone()->startOfDay()->utc();
+        $dayEnd = $date->clone()->endOfDay()->utc();
 
         $checkpoints = $this->checkpoints()
             ->with(['scans' => fn ($query) => $query->whereBetween('scanned_at', [$dayStart, $dayEnd])->latest('scanned_at')])

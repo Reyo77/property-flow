@@ -7,11 +7,13 @@ use App\Models\Community;
 use App\Models\PatrolCheckpoint;
 use App\Models\PatrolRoute;
 use App\Models\PatrolScan;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Pest\Laravel\travelTo;
 
 it('creates a patrol route and adds checkpoints in order', function () {
     $admin = companyAdmin();
@@ -104,6 +106,24 @@ it('reports a checkpoint as missed when it was not scanned that day, and scanned
 
     expect($summary['Scanned checkpoint']['last_scan_at'])->not->toBeNull();
     expect($summary['Missed checkpoint']['last_scan_at'])->toBeNull();
+});
+
+it('counts a scan from earlier tonight even while UTC has already rolled over to tomorrow', function () {
+    // 2am UTC is still 10pm the previous day in Toronto (UTC-4 in October) — scanned_at is stored
+    // in UTC, so the day boundary must be converted to UTC before querying, not compared as-is.
+    travelTo(CarbonImmutable::parse('2026-10-02 02:00', 'UTC'));
+
+    $admin = companyAdmin();
+    $community = Community::factory()->for($admin->company)->create(['timezone' => 'America/Toronto']);
+    $route = PatrolRoute::factory()->for($community)->create();
+    $checkpoint = PatrolCheckpoint::factory()->for($route)->create();
+    PatrolScan::factory()->for($checkpoint)->create(['scanned_at' => now()->subHours(2)]);
+
+    actingAs($admin);
+
+    $summary = collect($route->scanSummaryFor(now($community->timezone)))->keyBy(fn ($entry) => $entry['checkpoint']->name);
+
+    expect($summary[$checkpoint->name]['last_scan_at'])->not->toBeNull();
 });
 
 it('404s scanning a checkpoint belonging to another company\'s route', function () {

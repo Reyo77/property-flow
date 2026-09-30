@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use PragmaRX\Google2FA\Google2FA;
 
 /**
  * @extends Factory<User>
@@ -52,11 +53,16 @@ class UserFactory extends Factory
 
     /**
      * Indicate that the model has two-factor authentication configured.
+     *
+     * Generates a real Base32 TOTP secret (not a placeholder) so a genuine one-time code can be
+     * computed against it if needed — pass one explicitly to pin it to a known value.
      */
-    public function withTwoFactor(): static
+    public function withTwoFactor(?string $secret = null): static
     {
+        $secret ??= (new Google2FA)->generateSecretKey();
+
         return $this->state(fn (array $attributes) => [
-            'two_factor_secret' => encrypt('secret'),
+            'two_factor_secret' => encrypt($secret),
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
         ]);

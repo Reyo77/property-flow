@@ -2,10 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Enums\WorkOrderStatus;
 use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Models\Residency;
 use App\Models\Unit;
+use App\Models\WorkOrder;
 use App\Support\Finance\Money;
 use App\Support\Finance\UnitLedger;
 use Illuminate\Contracts\View\View;
@@ -85,6 +87,25 @@ class Dashboard extends Component
         }
 
         return $balances;
+    }
+
+    /**
+     * The count of the signed-in vendor's own open jobs, for the vendor portal, or null for
+     * people who aren't logged in as a vendor.
+     */
+    #[Computed]
+    public function vendorOpenWorkOrdersCount(): ?int
+    {
+        $vendor = $this->currentUser()->vendor;
+
+        if ($vendor === null) {
+            return null;
+        }
+
+        return WorkOrder::query()
+            ->where('assigned_vendor_id', $vendor->id)
+            ->whereNotIn('status', [WorkOrderStatus::Completed, WorkOrderStatus::Cancelled])
+            ->count();
     }
 
     public function render(): View

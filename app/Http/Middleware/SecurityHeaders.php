@@ -42,11 +42,24 @@ class SecurityHeaders
             "style-src 'self' 'unsafe-inline'",
             "font-src 'self' data:",
             "img-src 'self' data: blob:",
-            "connect-src 'self'",
+            "connect-src 'self' {$this->reverbOrigin()}",
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",
             "frame-ancestors 'none'",
         ]);
+    }
+
+    /**
+     * The WebSocket origin the browser connects to for live front-desk activity and other
+     * broadcast features, so the CSP doesn't silently block it — Reverb runs on its own
+     * host/port, not the app's own origin.
+     */
+    private function reverbOrigin(): string
+    {
+        $options = config('broadcasting.connections.reverb.options');
+        $scheme = ($options['scheme'] ?? 'https') === 'https' ? 'wss' : 'ws';
+
+        return "{$scheme}://{$options['host']}:{$options['port']}";
     }
 }

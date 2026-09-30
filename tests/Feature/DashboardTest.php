@@ -7,8 +7,11 @@ use App\Models\Community;
 use App\Models\Residency;
 use App\Models\Unit;
 use App\Models\User;
+use App\Models\Vendor;
+use App\Models\WorkOrder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use LogicException;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -79,5 +82,21 @@ class DashboardTest extends TestCase
 
         $this->assertSame($first, $second);
         $this->assertSame(2, $second['units']);
+    }
+
+    public function test_vendors_see_their_open_work_order_count_instead_of_the_no_access_message(): void
+    {
+        $vendor = Vendor::factory()->withLogin()->create();
+        $community = Community::factory()->for($vendor->company)->create();
+        WorkOrder::factory()->for($community)->assignedToVendor($vendor->id)->create();
+        WorkOrder::factory()->for($community)->assignedToVendor($vendor->id)->completed()->create();
+
+        $this->actingAs($vendor->user ?? throw new LogicException('Vendor has no login.'));
+
+        $this->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('data-test="vendor-summary"', escape: false)
+            ->assertSee('1 open work order')
+            ->assertDontSee('data-test="no-access"', escape: false);
     }
 }
