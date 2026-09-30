@@ -28,6 +28,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Pest\Laravel\travelTo;
 
 function monthlyFees(Community $community, ?int $defaultCents = 45000): ChargeType
 {
@@ -323,6 +324,30 @@ describe('overview', function () {
             ->and($component->instance()->receivables()->cents)->toBe(42500)
             ->and($balances->map(fn (array $row) => [$row['unit']->id, $row['balance']->cents])->all())
             ->toBe([[$owing->id, 50000], [$credit->id, -7500]]);
+    });
+
+    it('shows an income vs. expenses trend for the last 6 months', function () {
+        travelTo(CarbonImmutable::parse('2026-09-15 12:00', 'America/Toronto'));
+        $admin = companyAdmin();
+        $community = Community::factory()->for($admin->company)->create(['timezone' => 'America/Toronto']);
+        $unit = Unit::factory()->for($community)->create();
+        billUnit($unit, 50000); // dated Sep 1 (and a Sep 15 due date) — lands in the current month
+        actingAs($admin);
+
+        $trend = Livewire::test(Overview::class, ['community' => $community])->instance()->trend();
+
+        expect($trend['series'])->toHaveCount(2)
+            ->and($trend['series'][0]['label'])->toBe('Income')
+            ->and($trend['series'][1]['label'])->toBe('Expenses')
+            ->and($trend['labels'])->toHaveCount(6)
+            ->and(end($trend['labels']))->toBe('Sep')
+            ->and(end($trend['series'][0]['values']))->toBe(50000)
+            ->and(end($trend['series'][1]['values']))->toBe(0);
+
+        get(route('communities.finance.overview', $community))
+            ->assertOk()
+            ->assertSee('data-test="trend"', escape: false)
+            ->assertSee('Income vs. expenses');
     });
 });
 

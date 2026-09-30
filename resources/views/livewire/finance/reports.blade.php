@@ -37,6 +37,12 @@
             <flux:text>{{ $this->table->period }}</flux:text>
         </div>
 
+        @if ($this->chartBars !== null)
+            <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700" data-test="chart-bars">
+                <x-charts.bar-list :bars="$this->chartBars" />
+            </div>
+        @endif
+
         <flux:table>
             <flux:table.columns>
                 <flux:table.column>{{ $this->table->labelHeading }}</flux:table.column>

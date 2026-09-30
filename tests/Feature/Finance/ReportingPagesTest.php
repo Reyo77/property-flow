@@ -69,6 +69,60 @@ describe('reports page', function () {
         'general ledger' => ['general-ledger', 'Opening balance'],
     ]);
 
+    it('shows the aging buckets as a bar chart, using only the 6 real buckets not the grand total', function () {
+        $admin = companyAdmin();
+        $community = reportingCommunity($admin);
+        actingAs($admin);
+
+        $bars = Livewire::test(Reports::class, ['community' => $community])
+            ->set('report', 'aged-receivables')
+            ->set('from', '2026-09-01')->set('to', '2026-09-30')
+            ->instance()->chartBars();
+
+        expect($bars)->toHaveCount(6)
+            ->and($bars[1]['label'])->toBe('1–30 days')
+            ->and($bars[1]['value'])->toBe('$200.00')
+            ->and($bars[1]['percent'])->toEqual(100.0) // the only non-zero bucket
+            ->and($bars[1]['color'])->toBe('emerald-500')
+            ->and($bars[0]['value'])->toBe('$0.00'); // Current bucket: nothing overdue yet
+
+        get(route('communities.finance.reports', [$community, 'report' => 'aged-receivables', 'from' => '2026-09-01', 'to' => '2026-09-30']))
+            ->assertOk()
+            ->assertSee('data-test="chart-bars"', escape: false);
+    });
+
+    it('shows income and expenses as favorable/unfavorable bars for budget vs actual', function () {
+        $admin = companyAdmin();
+        $community = reportingCommunity($admin);
+        actingAs($admin);
+
+        $bars = Livewire::test(Reports::class, ['community' => $community])
+            ->set('report', 'budget-vs-actual')
+            ->set('from', '2026-09-01')->set('to', '2026-09-30')
+            ->instance()->chartBars();
+
+        expect($bars)->toHaveCount(2)
+            ->and($bars[0]['label'])->toBe('Income')
+            ->and($bars[0]['color'])->toBe('emerald-500') // $500 actual against no budget is favorable
+            ->and($bars[1]['label'])->toBe('Expenses')
+            ->and($bars[1]['color'])->toBe('emerald-500'); // nothing spent, nothing budgeted
+    });
+
+    it('shows no chart for report types that do not have one', function (string $report) {
+        $admin = companyAdmin();
+        $community = reportingCommunity($admin);
+        actingAs($admin);
+
+        Livewire::test(Reports::class, ['community' => $community])
+            ->set('report', $report)
+            ->set('from', '2026-09-01')->set('to', '2026-09-30')
+            ->assertDontSee('data-test="chart-bars"', escape: false);
+    })->with([
+        'income statement' => ['income-statement'],
+        'balance sheet' => ['balance-sheet'],
+        'general ledger' => ['general-ledger'],
+    ]);
+
     it('asks for a valid range instead of failing', function () {
         $admin = companyAdmin();
         $community = reportingCommunity($admin);

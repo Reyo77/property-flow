@@ -220,6 +220,46 @@ class FinancialReports
     }
 
     /**
+     * Income, expenses and net for each calendar month touched by [$from, $to] (the first/last
+     * bucket may be partial when the range doesn't land on month boundaries), using the same
+     * income/expense account grouping as incomeStatement(). One entry per month, oldest first.
+     *
+     * Issues roughly two queries per month (one ledger-movement query, one account list) — the
+     * same "one query per report call" style as the rest of this class, just repeated per month
+     * rather than optimized into a single grouped query; acceptable at this app's scale.
+     *
+     * @return list<array{month: CarbonImmutable, income: Money, expenses: Money, net: Money}>
+     */
+    public function monthlyIncomeAndExpenses(Community $community, CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        if ($to->lessThan($from)) {
+            return [];
+        }
+
+        $accounts = $this->accounts($community);
+        $incomeAccounts = $accounts->where('type', AccountType::Income);
+        $expenseAccounts = $accounts->where('type', AccountType::Expense);
+        $currency = $community->currency;
+
+        $months = [];
+        $cursor = $from->startOfMonth();
+
+        while ($cursor->lessThanOrEqualTo($to)) {
+            $monthStart = $cursor->greaterThan($from) ? $cursor : $from;
+            $monthEnd = $cursor->endOfMonth()->greaterThan($to) ? $to : $cursor->endOfMonth();
+
+            $movements = $this->accountBalances->forCommunity($community, $monthEnd, $monthStart);
+            $income = $this->sum($incomeAccounts, $movements, $currency);
+            $expenses = $this->sum($expenseAccounts, $movements, $currency);
+
+            $months[] = ['month' => $cursor, 'income' => $income, 'expenses' => $expenses, 'net' => $income->minus($expenses)];
+            $cursor = $cursor->addMonth();
+        }
+
+        return $months;
+    }
+
+    /**
      * Every posted line in the period, account by account, with opening and running balances
      * (signed by each account's normal side).
      */

@@ -221,6 +221,53 @@ describe('income statement', function () {
     });
 });
 
+describe('monthly income and expenses', function () {
+    it('buckets the quarter into one entry per month, including a net-loss month', function () {
+        ['community' => $community] = reportScenario();
+
+        $months = reports()->monthlyIncomeAndExpenses($community, CarbonImmutable::parse('2026-01-01'), CarbonImmutable::parse('2026-03-31'));
+
+        expect($months)->toHaveCount(3)
+            ->and($months[0]['month']->toDateString())->toBe('2026-01-01')
+            ->and(dollars($months[0]['income']->cents))->toBe(800.0)
+            ->and(dollars($months[0]['expenses']->cents))->toBe(1000.0)
+            ->and(dollars($months[0]['net']->cents))->toBe(-200.0) // a real net-loss month
+            ->and($months[1]['month']->toDateString())->toBe('2026-02-01')
+            ->and(dollars($months[1]['income']->cents))->toBe(825.0)
+            ->and(dollars($months[1]['expenses']->cents))->toBe(0.0)
+            ->and($months[2]['month']->toDateString())->toBe('2026-03-01')
+            ->and(dollars($months[2]['income']->cents))->toBe(800.0)
+            ->and(dollars($months[2]['expenses']->cents))->toBe(600.0);
+
+        // The three months must agree with the quarter's own totals.
+        $totalIncome = array_sum(array_map(fn (array $m) => $m['income']->cents, $months));
+        $totalExpenses = array_sum(array_map(fn (array $m) => $m['expenses']->cents, $months));
+        expect(dollars($totalIncome))->toBe(2425.0)
+            ->and(dollars($totalExpenses))->toBe(1600.0);
+    });
+
+    it('handles a partial range that does not land on month boundaries', function () {
+        ['community' => $community] = reportScenario();
+
+        $months = reports()->monthlyIncomeAndExpenses($community, CarbonImmutable::parse('2026-01-15'), CarbonImmutable::parse('2026-02-10'));
+
+        expect($months)->toHaveCount(2)
+            // Jan 15–31: no billing in that window (Jan's bills are dated Jan 1), but the Jan 20
+            // repairs bill still falls inside it.
+            ->and(dollars($months[0]['income']->cents))->toBe(0.0)
+            ->and(dollars($months[0]['expenses']->cents))->toBe(1000.0)
+            // Feb 1–10: both Feb bills are dated Feb 1, inside the window; nothing else is.
+            ->and(dollars($months[1]['income']->cents))->toBe(800.0)
+            ->and(dollars($months[1]['expenses']->cents))->toBe(0.0);
+    });
+
+    it('returns nothing when the range is inverted', function () {
+        ['community' => $community] = reportScenario();
+
+        expect(reports()->monthlyIncomeAndExpenses($community, CarbonImmutable::parse('2026-03-01'), CarbonImmutable::parse('2026-01-01')))->toBe([]);
+    });
+});
+
 describe('balance sheet', function () {
     it('balances, with the quarter\'s surplus in equity', function () {
         ['community' => $community] = reportScenario();

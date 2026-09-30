@@ -22,6 +22,11 @@
         </div>
     </div>
 
+    <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="trend">
+        <flux:heading size="lg">{{ __('Income vs. expenses') }}</flux:heading>
+        <x-charts.trend-line :series="$this->trend['series']" :labels="$this->trend['labels']" />
+    </div>
+
     <div class="space-y-3">
         <flux:heading size="lg">{{ __('Unit balances') }}</flux:heading>
 

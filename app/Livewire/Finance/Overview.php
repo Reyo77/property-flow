@@ -7,6 +7,7 @@ use App\Models\Community;
 use App\Models\Invoice;
 use App\Models\Unit;
 use App\Support\Finance\AccountBalances;
+use App\Support\Finance\FinancialReports;
 use App\Support\Finance\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -70,6 +71,40 @@ class Overview extends Component
             ->filter(fn (array $row) => $row['unit'] !== null)
             ->sortByDesc(fn (array $row) => $row['balance']->cents)
             ->values();
+    }
+
+    /**
+     * Income vs. expenses for each of the last 6 months, for the trend chart.
+     *
+     * @return array{series: list<array{label: string, color: string, values: list<int>, display: list<string>}>, labels: list<string>}
+     */
+    #[Computed]
+    public function trend(): array
+    {
+        $today = CarbonImmutable::now($this->community->timezone);
+        $months = app(FinancialReports::class)->monthlyIncomeAndExpenses(
+            $this->community,
+            $today->subMonthsNoOverflow(5)->startOfMonth(),
+            $today,
+        );
+
+        return [
+            'series' => [
+                [
+                    'label' => __('Income'),
+                    'color' => 'emerald-500',
+                    'values' => array_map(fn (array $month) => $month['income']->cents, $months),
+                    'display' => array_map(fn (array $month) => $month['income']->format(), $months),
+                ],
+                [
+                    'label' => __('Expenses'),
+                    'color' => 'red-500',
+                    'values' => array_map(fn (array $month) => $month['expenses']->cents, $months),
+                    'display' => array_map(fn (array $month) => $month['expenses']->format(), $months),
+                ],
+            ],
+            'labels' => array_map(fn (array $month) => $month['month']->translatedFormat('M'), $months),
+        ];
     }
 
     public function render(): View
