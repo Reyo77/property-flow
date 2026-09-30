@@ -112,6 +112,32 @@ class BallotShow extends Component
         ];
     }
 
+    /**
+     * Voted vs. not-voted weight for the results turnout donut — null until the ballot is closed
+     * and results are frozen (same gate as showing results at all).
+     *
+     * @return list<array{label: string, value: float, percent: float, color: string}>|null
+     */
+    #[Computed]
+    public function turnoutDonut(): ?array
+    {
+        $results = $this->ballot->results;
+
+        if ($results === null) {
+            return null;
+        }
+
+        $eligibleWeight = is_numeric($results['eligible_weight']) ? $results['eligible_weight'] : '0';
+        $votedWeight = is_numeric($results['voted_weight']) ? $results['voted_weight'] : '0';
+        $notVotedWeight = bcsub($eligibleWeight, $votedWeight, VotingRoll::SCALE);
+        $votedPercent = (float) $results['turnout_percent'];
+
+        return [
+            ['label' => __('Voted'), 'value' => (float) $results['voted_weight'], 'percent' => $votedPercent, 'color' => 'emerald-500'],
+            ['label' => __('Not voted'), 'value' => (float) $notVotedWeight, 'percent' => round(100 - $votedPercent, 2), 'color' => 'zinc-400'],
+        ];
+    }
+
     public function vote(int $unitId, CastVote $castVote): void
     {
         $unit = $this->community->units()->findOrFail($unitId);

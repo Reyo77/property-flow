@@ -119,9 +119,18 @@ describe('voting page', function () {
         travelTo(CarbonImmutable::parse('2026-10-20 12:00'));
         app(CloseBallot::class)->handle($ballot);
 
-        Livewire::test(BallotShow::class, ['community' => $community, 'ballot' => $ballot->fresh()])
+        $component = Livewire::test(BallotShow::class, ['community' => $community, 'ballot' => $ballot->fresh()])
             ->assertSee('Quorum met')
-            ->assertSee('100.00%');
+            ->assertSee('100.00%')
+            ->assertSee('data-test="turnout-donut"', escape: false);
+
+        $donut = $component->instance()->turnoutDonut();
+
+        expect($donut)->toHaveCount(2)
+            ->and($donut[0]['label'])->toBe('Voted')
+            ->and($donut[0]['percent'])->toBe(100.0)
+            ->and($donut[1]['label'])->toBe('Not voted')
+            ->and($donut[1]['percent'])->toBe(0.0);
     });
 
     it('shows an error instead of voting when an answer is missing', function () {

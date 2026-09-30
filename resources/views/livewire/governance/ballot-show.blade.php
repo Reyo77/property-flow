@@ -55,18 +55,20 @@
                         {{ $ballot->results['quorum_met'] ? __('Quorum met') : __('Quorum not met') }} · {{ __(':percent% turnout', ['percent' => $ballot->results['turnout_percent']]) }}
                     </flux:badge>
                 </div>
+
+                @if ($this->turnoutDonut !== null)
+                    <x-charts.donut :segments="$this->turnoutDonut" data-test="turnout-donut" />
+                @endif
+
                 @foreach ($ballot->results['questions'] as $question)
                     <div class="space-y-2">
                         <flux:text variant="strong">{{ $question['title'] }}</flux:text>
-                        @foreach ($question['options'] as $option)
-                            <div>
-                                <div class="flex justify-between text-sm">
-                                    <span>{{ $option['label'] }}</span>
-                                    <span>{{ $option['percent'] }}% · {{ trans_choice(':count unit|:count units', $option['votes']) }}</span>
-                                </div>
-                                <div class="h-2 rounded bg-zinc-200 dark:bg-zinc-700"><div class="h-2 rounded bg-emerald-500" style="width: {{ $option['percent'] }}%"></div></div>
-                            </div>
-                        @endforeach
+                        <x-charts.bar-list :bars="collect($question['options'])->map(fn (array $option) => [
+                            'label' => $option['label'],
+                            'value' => $option['percent'].'% · '.trans_choice(':count unit|:count units', $option['votes']),
+                            'percent' => (float) $option['percent'],
+                            'color' => 'emerald-500',
+                        ])->all()" />
                     </div>
                 @endforeach
             </div>
