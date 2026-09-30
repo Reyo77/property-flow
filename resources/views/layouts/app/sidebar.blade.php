@@ -27,6 +27,9 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="book-open" :href="route('guide')" :current="request()->routeIs('guide')" wire:navigate>
+                        {{ __('Docs') }}
+                    </flux:sidebar.item>
                     @can('viewAny', App\Models\Community::class)
                         <flux:sidebar.item icon="squares-2x2" :href="route('communities.index')" :current="request()->routeIs('communities.index', 'communities.create')" wire:navigate>
                             {{ __('Communities') }}

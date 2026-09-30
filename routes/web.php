@@ -41,6 +41,7 @@ use App\Livewire\Finance;
 use App\Livewire\FrontDesk;
 use App\Livewire\Governance;
 use App\Livewire\GuestPasses;
+use App\Livewire\Guide;
 use App\Livewire\IncidentReports;
 use App\Livewire\Invitations;
 use App\Livewire\Notifications;
@@ -90,6 +91,7 @@ Route::livewire('invitations/{token}', Invitations\Accept::class)
 
 Route::middleware('auth')->group(function () {
     Route::livewire('dashboard', Dashboard::class)->name('dashboard');
+    Route::livewire('guide', Guide::class)->name('guide');
 
     Route::livewire('notifications', Notifications\Index::class)->name('notifications.index');
 
