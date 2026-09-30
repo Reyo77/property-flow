@@ -2,7 +2,7 @@ The PropertyFlow API is what our mobile apps use, and it's open to your own apps
 
 ## Signing in
 
-1. `POST /api/v1/auth/token` with `email`, `password` and a `device_name` (shown when listing and revoking tokens). Accounts with two-factor authentication also send `code` — if it's missing you get a `422` with `code: "two_factor_required"`; ask for it and try again.
+1. `POST /api/v1/auth/token` with `email`, `password` and a `device_name` (shown when listing and revoking tokens).
 2. Send the returned token on every request: `Authorization: Bearer {token}`.
 3. `GET /api/v1/me` tells you who you are: your role and `permissions` (to show or hide features), the `communities` you work in as a team member, and the `homes` you live in as a resident.
 
@@ -48,7 +48,6 @@ Every error has the same shape. `code` is stable — branch on it; `message` is 
 | 403 | `forbidden` | You may see the record but not do this. |
 | 404 | `not_found` | It doesn't exist, or belongs to another company. |
 | 422 | `validation_failed` | Check `errors`, keyed by field. |
-| 422 | `two_factor_required` | Sign-in needs the authenticator `code`. |
 | 429 | `too_many_requests` | Slow down; wait `Retry-After` seconds. |
 
 ## Rate limits

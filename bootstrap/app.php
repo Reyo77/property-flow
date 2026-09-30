@@ -2,7 +2,6 @@
 
 use App\Http\Middleware\EnsureModuleEnabled;
 use App\Http\Middleware\EnsureUserIsActive;
-use App\Http\Middleware\RequireTwoFactorForStaff;
 use App\Http\Middleware\SecurityHeaders;
 use App\Support\Api\ApiExceptionRenderer;
 use Illuminate\Foundation\Application;
@@ -19,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [EnsureUserIsActive::class, RequireTwoFactorForStaff::class, SecurityHeaders::class]);
+        $middleware->web(append: [EnsureUserIsActive::class, SecurityHeaders::class]);
         $middleware->alias(['module' => EnsureModuleEnabled::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

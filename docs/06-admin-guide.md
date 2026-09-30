@@ -8,16 +8,13 @@
 ## 1. Getting started
 
 1. **Sign up** creates your company and makes you its Company Admin.
-2. **Set up two-factor authentication** the first time you sign in — every team role except
-   Vendor is required to before doing anything else (Settings → Security). Vendors and residents
-   aren't required to, since they can't manage anything sensitive.
-3. **Create a community** (Communities → New community). A company can run several — a management
+2. **Create a community** (Communities → New community). A company can run several — a management
    company with multiple buildings, or a single self-managed HOA with just one.
-4. **Add buildings and units**, either one at a time or in bulk via the CSV/Excel importer on the
+3. **Add buildings and units**, either one at a time or in bulk via the CSV/Excel importer on the
    Units page (a template with the expected columns is available from the same screen).
-5. **Invite your team** (Team → Invite member). Since no email is wired up yet, invitations are
+4. **Invite your team** (Team → Invite member). Since no email is wired up yet, invitations are
    copyable links you send yourself (Slack, text, however) rather than automatic emails.
-6. **Invite residents**: from a unit's page, add the resident, then invite them the same way —
+5. **Invite residents**: from a unit's page, add the resident, then invite them the same way —
    a link, not an email.
 
 ---
@@ -171,7 +168,5 @@ the "Public site" button on a community's Overview page links straight to it.
 
 - **A page is missing that should be there**: check the community's Modules (§3) — it may be
   switched off — and the signed-in user's role/permissions (§2).
-- **Can't reach a page you expect to see**: two-factor authentication may not be confirmed yet
-  (§1) — you're redirected to Settings → Security until it is.
 - **Data looks wrong across the whole company**: contact PropertyFlow support (or, if you have
   platform access, check `/platform/companies` for a suspension).

@@ -479,7 +479,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: September 26, 2026 (c061cc8)</li>
+        <li>Last updated: September 30, 2026 (1186a90)</li>
     </ul>
 </div>
 
@@ -489,12 +489,12 @@
         <h1 id="introduction">Introduction</h1>
 <p>Everything a mobile or partner app needs: residents, maintenance, amenities, front desk, finance, governance and community engagement.</p>
 <aside>
-    <strong>Base URL</strong>: <code>http://property-flow.test</code>
+    <strong>Base URL</strong>: <code>https://property-flow.test</code>
 </aside>
 <p>The PropertyFlow API is what our mobile apps use, and it's open to your own apps and integrations. Everything is under <code>/api/v1</code>, speaks JSON, and follows the rules below.</p>
 <h2 id="signing-in">Signing in</h2>
 <ol>
-<li><code>POST /api/v1/auth/token</code> with <code>email</code>, <code>password</code> and a <code>device_name</code> (shown when listing and revoking tokens). Accounts with two-factor authentication also send <code>code</code> — if it's missing you get a <code>422</code> with <code>code: "two_factor_required"</code>; ask for it and try again.</li>
+<li><code>POST /api/v1/auth/token</code> with <code>email</code>, <code>password</code> and a <code>device_name</code> (shown when listing and revoking tokens).</li>
 <li>Send the returned token on every request: <code>Authorization: Bearer {token}</code>.</li>
 <li><code>GET /api/v1/me</code> tells you who you are: your role and <code>permissions</code> (to show or hide features), the <code>communities</code> you work in as a team member, and the <code>homes</code> you live in as a resident.</li>
 </ol>
@@ -576,11 +576,6 @@
 <td>Check <code>errors</code>, keyed by field.</td>
 </tr>
 <tr>
-<td>422</td>
-<td><code>two_factor_required</code></td>
-<td>Sign-in needs the authenticator <code>code</code>.</td>
-</tr>
-<tr>
 <td>429</td>
 <td><code>too_many_requests</code></td>
 <td>Slow down; wait <code>Retry-After</code> seconds.</td>
@@ -618,16 +613,14 @@ const valid = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(v1)) &am
 
     <p>Sign in by exchanging an email and password for a bearer token, then send it on every request
 as <code>Authorization: Bearer {token}</code>. Each device gets its own token, which can be listed and
-revoked. Accounts with two-factor authentication also need a <code>code</code> (or <code>recovery_code</code>).</p>
+revoked.</p>
 
                                 <h2 id="authentication-POSTapi-v1-auth-token">Sign in</h2>
 
 <p>
 </p>
 
-<p>Returns a new token for this device. Store it securely; it is only shown once. If the
-account has two-factor authentication and no code is sent, the response is a 422 with
-<code>code: two_factor_required</code> — ask for the code and send the request again.</p>
+<p>Returns a new token for this device. Store it securely; it is only shown once.</p>
 
 <span id="example-requests-POSTapi-v1-auth-token">
 <blockquote>Example request:</blockquote>
@@ -635,7 +628,7 @@ account has two-factor authentication and no code is sent, the response is a 422
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/auth/token" \
+    "https://property-flow.test/api/v1/auth/token" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -648,7 +641,7 @@ account has two-factor authentication and no code is sent, the response is a 422
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/auth/token"
+    "https://property-flow.test/api/v1/auth/token"
 );
 
 const headers = {
@@ -697,21 +690,6 @@ fetch(url, {
     &quot;errors&quot;: {
         &quot;email&quot;: [
             &quot;These credentials do not match our records.&quot;
-        ]
-    }
-}</code>
- </pre>
-            <blockquote>
-            <p>Example response (422, Two-factor code needed):</p>
-        </blockquote>
-                <pre>
-
-<code class="language-json" style="max-height: 300px;">{
-    &quot;message&quot;: &quot;Enter the code from your authenticator app.&quot;,
-    &quot;code&quot;: &quot;two_factor_required&quot;,
-    &quot;errors&quot;: {
-        &quot;code&quot;: [
-            &quot;Enter the code from your authenticator app.&quot;
         ]
     }
 }</code>
@@ -808,30 +786,6 @@ You can check the Dev Tools console for debugging information.</code></pre>
     <br>
 <p>A name for this device, shown when listing and revoking tokens. Must not be greater than 100 characters. Example: <code>Rita's iPhone</code></p>
         </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>code</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
-<i>optional</i> &nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="code"                data-endpoint="POSTapi-v1-auth-token"
-               value=""
-               data-component="body">
-    <br>
-<p>Required when the account has two-factor authentication: the 6-digit code from the authenticator app. Must not be greater than 10 characters.</p>
-        </div>
-                <div style=" padding-left: 28px;  clear: unset;">
-            <b style="line-height: 2;"><code>recovery_code</code></b>&nbsp;&nbsp;
-<small>string</small>&nbsp;
-<i>optional</i> &nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="recovery_code"                data-endpoint="POSTapi-v1-auth-token"
-               value=""
-               data-component="body">
-    <br>
-<p>Instead of <code>code</code>: one of the account's two-factor recovery codes (each works once). Must not be greater than 50 characters.</p>
-        </div>
         </form>
 
                     <h2 id="authentication-GETapi-v1-me">Who am I</h2>
@@ -850,7 +804,7 @@ lists the company permissions they hold, so an app can show or hide features.</p
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/me" \
+    --get "https://property-flow.test/api/v1/me" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -858,7 +812,7 @@ lists the company permissions they hold, so an app can show or hide features.</p
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/me"
+    "https://property-flow.test/api/v1/me"
 );
 
 const headers = {
@@ -996,7 +950,7 @@ token making this request.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/auth/tokens" \
+    --get "https://property-flow.test/api/v1/auth/tokens" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1004,7 +958,7 @@ token making this request.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/auth/tokens"
+    "https://property-flow.test/api/v1/auth/tokens"
 );
 
 const headers = {
@@ -1129,7 +1083,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://property-flow.test/api/v1/auth/tokens/current" \
+    "https://property-flow.test/api/v1/auth/tokens/current" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1137,7 +1091,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/auth/tokens/current"
+    "https://property-flow.test/api/v1/auth/tokens/current"
 );
 
 const headers = {
@@ -1262,7 +1216,7 @@ under a community: <code>/communities/{community}/...</code>.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities" \
+    --get "https://property-flow.test/api/v1/communities" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1270,7 +1224,7 @@ under a community: <code>/communities/{community}/...</code>.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities"
+    "https://property-flow.test/api/v1/communities"
 );
 
 const headers = {
@@ -1296,7 +1250,7 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 1230,
+            &quot;id&quot;: 5,
             &quot;name&quot;: &quot;Noah Path Residences&quot;,
             &quot;type&quot;: &quot;condo&quot;,
             &quot;address&quot;: {
@@ -1311,7 +1265,7 @@ fetch(url, {
             &quot;currency&quot;: &quot;CAD&quot;
         },
         {
-            &quot;id&quot;: 1231,
+            &quot;id&quot;: 6,
             &quot;name&quot;: &quot;Leffler Coves Towers&quot;,
             &quot;type&quot;: &quot;condo&quot;,
             &quot;address&quot;: {
@@ -1411,7 +1365,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1" \
+    --get "https://property-flow.test/api/v1/communities/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1419,7 +1373,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1"
+    "https://property-flow.test/api/v1/communities/1"
 );
 
 const headers = {
@@ -1444,7 +1398,7 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 1232,
+        &quot;id&quot;: 7,
         &quot;name&quot;: &quot;Noah Path Residences&quot;,
         &quot;type&quot;: &quot;condo&quot;,
         &quot;address&quot;: {
@@ -1560,7 +1514,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/buildings?sort=name" \
+    --get "https://property-flow.test/api/v1/communities/1/buildings?sort=name" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1568,7 +1522,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/buildings"
+    "https://property-flow.test/api/v1/communities/1/buildings"
 );
 
 const params = {
@@ -1600,15 +1554,15 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 263,
-            &quot;community_id&quot;: 1233,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 8,
             &quot;name&quot;: &quot;Tower u&quot;,
             &quot;address&quot;: null,
             &quot;floors&quot;: 29
         },
         {
-            &quot;id&quot;: 264,
-            &quot;community_id&quot;: 1234,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 9,
             &quot;name&quot;: &quot;Tower w&quot;,
             &quot;address&quot;: null,
             &quot;floors&quot;: 8
@@ -1760,7 +1714,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/units?filter%5Bbuilding_id%5D=1&amp;filter%5Bsearch%5D=10&amp;sort=0" \
+    --get "https://property-flow.test/api/v1/communities/1/units?filter%5Bbuilding_id%5D=1&amp;filter%5Bsearch%5D=10&amp;sort=0" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1768,7 +1722,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/units"
+    "https://property-flow.test/api/v1/communities/1/units"
 );
 
 const params = {
@@ -1802,10 +1756,10 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 427,
-            &quot;community_id&quot;: 1235,
+            &quot;id&quot;: 161,
+            &quot;community_id&quot;: 10,
             &quot;building&quot;: {
-                &quot;id&quot;: 265,
+                &quot;id&quot;: 5,
                 &quot;name&quot;: &quot;Tower w&quot;
             },
             &quot;number&quot;: &quot;11680&quot;,
@@ -1817,10 +1771,10 @@ fetch(url, {
             &quot;locker&quot;: null
         },
         {
-            &quot;id&quot;: 428,
-            &quot;community_id&quot;: 1237,
+            &quot;id&quot;: 162,
+            &quot;community_id&quot;: 12,
             &quot;building&quot;: {
-                &quot;id&quot;: 266,
+                &quot;id&quot;: 6,
                 &quot;name&quot;: &quot;Tower y&quot;
             },
             &quot;number&quot;: &quot;52497&quot;,
@@ -2002,7 +1956,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/units/1" \
+    --get "https://property-flow.test/api/v1/communities/1/units/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -2010,7 +1964,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/units/1"
+    "https://property-flow.test/api/v1/communities/1/units/1"
 );
 
 const headers = {
@@ -2035,10 +1989,10 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 429,
-        &quot;community_id&quot;: 1239,
+        &quot;id&quot;: 163,
+        &quot;community_id&quot;: 14,
         &quot;building&quot;: {
-            &quot;id&quot;: 267,
+            &quot;id&quot;: 7,
             &quot;name&quot;: &quot;Tower w&quot;
         },
         &quot;number&quot;: &quot;26824&quot;,
@@ -2164,7 +2118,7 @@ this community.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/residents?filter%5Bstatus%5D=current&amp;filter%5Btype%5D=owner&amp;filter%5Bsearch%5D=rita&amp;sort=name" \
+    --get "https://property-flow.test/api/v1/communities/1/residents?filter%5Bstatus%5D=current&amp;filter%5Btype%5D=owner&amp;filter%5Bsearch%5D=rita&amp;sort=name" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -2172,7 +2126,7 @@ this community.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/residents"
+    "https://property-flow.test/api/v1/communities/1/residents"
 );
 
 const params = {
@@ -2207,41 +2161,41 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 237,
+            &quot;id&quot;: 161,
             &quot;name&quot;: &quot;Morgan Hirthe&quot;,
             &quot;email&quot;: &quot;dare.emelie@example.com&quot;,
             &quot;phone&quot;: &quot;416-555-9279&quot;,
             &quot;has_login&quot;: false,
             &quot;residencies&quot;: [
                 {
-                    &quot;id&quot;: 179,
+                    &quot;id&quot;: 161,
                     &quot;unit&quot;: {
-                        &quot;id&quot;: 430,
+                        &quot;id&quot;: 164,
                         &quot;label&quot;: &quot;2665&quot;
                     },
                     &quot;type&quot;: &quot;owner&quot;,
                     &quot;is_primary&quot;: true,
-                    &quot;moved_in_on&quot;: &quot;2025-09-26&quot;,
+                    &quot;moved_in_on&quot;: &quot;2025-09-30&quot;,
                     &quot;moved_out_on&quot;: null
                 }
             ]
         },
         {
-            &quot;id&quot;: 238,
+            &quot;id&quot;: 162,
             &quot;name&quot;: &quot;Prof. Kyla Kutch DDS&quot;,
             &quot;email&quot;: &quot;colt.balistreri@example.net&quot;,
             &quot;phone&quot;: &quot;416-555-5933&quot;,
             &quot;has_login&quot;: false,
             &quot;residencies&quot;: [
                 {
-                    &quot;id&quot;: 180,
+                    &quot;id&quot;: 162,
                     &quot;unit&quot;: {
-                        &quot;id&quot;: 431,
+                        &quot;id&quot;: 165,
                         &quot;label&quot;: &quot;80989&quot;
                     },
                     &quot;type&quot;: &quot;owner&quot;,
                     &quot;is_primary&quot;: true,
-                    &quot;moved_in_on&quot;: &quot;2025-09-26&quot;,
+                    &quot;moved_in_on&quot;: &quot;2025-09-30&quot;,
                     &quot;moved_out_on&quot;: null
                 }
             ]
@@ -2429,7 +2383,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/residents/1" \
+    --get "https://property-flow.test/api/v1/communities/1/residents/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -2437,7 +2391,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/residents/1"
+    "https://property-flow.test/api/v1/communities/1/residents/1"
 );
 
 const headers = {
@@ -2462,21 +2416,21 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 239,
+        &quot;id&quot;: 163,
         &quot;name&quot;: &quot;Morgan Hirthe&quot;,
         &quot;email&quot;: &quot;imclaughlin@example.org&quot;,
         &quot;phone&quot;: &quot;416-555-5052&quot;,
         &quot;has_login&quot;: false,
         &quot;residencies&quot;: [
             {
-                &quot;id&quot;: 181,
+                &quot;id&quot;: 163,
                 &quot;unit&quot;: {
-                    &quot;id&quot;: 432,
+                    &quot;id&quot;: 166,
                     &quot;label&quot;: &quot;9866&quot;
                 },
                 &quot;type&quot;: &quot;owner&quot;,
                 &quot;is_primary&quot;: true,
-                &quot;moved_in_on&quot;: &quot;2025-09-26&quot;,
+                &quot;moved_in_on&quot;: &quot;2025-09-30&quot;,
                 &quot;moved_out_on&quot;: null
             }
         ]
@@ -2597,7 +2551,7 @@ Pinned ones come first.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/announcements" \
+    --get "https://property-flow.test/api/v1/communities/1/announcements" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -2605,7 +2559,7 @@ Pinned ones come first.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/announcements"
+    "https://property-flow.test/api/v1/communities/1/announcements"
 );
 
 const headers = {
@@ -2631,8 +2585,8 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 23,
-            &quot;community_id&quot;: 1244,
+            &quot;id&quot;: 6,
+            &quot;community_id&quot;: 19,
             &quot;title&quot;: &quot;Adipisci quidem nostrum qui commodi.&quot;,
             &quot;body&quot;: &quot;Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.&quot;,
             &quot;pinned&quot;: false,
@@ -2640,13 +2594,13 @@ fetch(url, {
             &quot;published_at&quot;: null,
             &quot;publish_at&quot;: null,
             &quot;author&quot;: {
-                &quot;id&quot;: 222,
+                &quot;id&quot;: 67,
                 &quot;name&quot;: &quot;Mr. Nelson Little MD&quot;
             }
         },
         {
-            &quot;id&quot;: 24,
-            &quot;community_id&quot;: 1245,
+            &quot;id&quot;: 7,
+            &quot;community_id&quot;: 20,
             &quot;title&quot;: &quot;Repellendus assumenda et tenetur.&quot;,
             &quot;body&quot;: &quot;Quia perspiciatis deserunt ducimus corrupti et. Quia maiores assumenda odit. Repellat officiis corporis nesciunt ut. Iure impedit molestiae ut rem est esse sint.&quot;,
             &quot;pinned&quot;: false,
@@ -2654,7 +2608,7 @@ fetch(url, {
             &quot;published_at&quot;: null,
             &quot;publish_at&quot;: null,
             &quot;author&quot;: {
-                &quot;id&quot;: 223,
+                &quot;id&quot;: 68,
                 &quot;name&quot;: &quot;Jody Wilderman&quot;
             }
         }
@@ -2792,7 +2746,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/announcements/1" \
+    --get "https://property-flow.test/api/v1/communities/1/announcements/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -2800,7 +2754,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/announcements/1"
+    "https://property-flow.test/api/v1/communities/1/announcements/1"
 );
 
 const headers = {
@@ -2825,8 +2779,8 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 25,
-        &quot;community_id&quot;: 1246,
+        &quot;id&quot;: 8,
+        &quot;community_id&quot;: 21,
         &quot;title&quot;: &quot;Adipisci quidem nostrum qui commodi.&quot;,
         &quot;body&quot;: &quot;Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.&quot;,
         &quot;pinned&quot;: false,
@@ -2834,7 +2788,7 @@ fetch(url, {
         &quot;published_at&quot;: null,
         &quot;publish_at&quot;: null,
         &quot;author&quot;: {
-            &quot;id&quot;: 224,
+            &quot;id&quot;: 69,
             &quot;name&quot;: &quot;Mr. Nelson Little MD&quot;
         }
     }
@@ -2948,7 +2902,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/events?filter%5Bwhen%5D=upcoming&amp;sort=starts_at" \
+    --get "https://property-flow.test/api/v1/communities/1/events?filter%5Bwhen%5D=upcoming&amp;sort=starts_at" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -2956,7 +2910,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/events"
+    "https://property-flow.test/api/v1/communities/1/events"
 );
 
 const params = {
@@ -2989,13 +2943,13 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 27,
-            &quot;community_id&quot;: 1247,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 22,
             &quot;title&quot;: &quot;Quidem nostrum qui commodi.&quot;,
             &quot;description&quot;: &quot;Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.&quot;,
             &quot;location&quot;: &quot;Party room&quot;,
-            &quot;starts_at&quot;: &quot;2026-10-02T01:38:47+00:00&quot;,
-            &quot;ends_at&quot;: &quot;2026-10-02T03:38:47+00:00&quot;,
+            &quot;starts_at&quot;: &quot;2026-10-05T18:53:11+00:00&quot;,
+            &quot;ends_at&quot;: &quot;2026-10-05T20:53:11+00:00&quot;,
             &quot;rsvps&quot;: {
                 &quot;going&quot;: 1,
                 &quot;maybe&quot;: 0,
@@ -3004,13 +2958,13 @@ fetch(url, {
             }
         },
         {
-            &quot;id&quot;: 28,
-            &quot;community_id&quot;: 1248,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 23,
             &quot;title&quot;: &quot;Et dolores.&quot;,
             &quot;description&quot;: &quot;Assumenda odit doloribus repellat officiis corporis nesciunt ut. Iure impedit molestiae ut rem est esse sint. Molestiae sunt suscipit doloribus fugiat ut aut.&quot;,
             &quot;location&quot;: &quot;Rooftop terrace&quot;,
-            &quot;starts_at&quot;: &quot;2026-11-02T17:08:17+00:00&quot;,
-            &quot;ends_at&quot;: &quot;2026-11-02T19:08:17+00:00&quot;,
+            &quot;starts_at&quot;: &quot;2026-11-06T10:22:40+00:00&quot;,
+            &quot;ends_at&quot;: &quot;2026-11-06T12:22:40+00:00&quot;,
             &quot;rsvps&quot;: {
                 &quot;going&quot;: 1,
                 &quot;maybe&quot;: 0,
@@ -3177,7 +3131,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/events/1" \
+    --get "https://property-flow.test/api/v1/communities/1/events/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -3185,7 +3139,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/events/1"
+    "https://property-flow.test/api/v1/communities/1/events/1"
 );
 
 const headers = {
@@ -3210,13 +3164,13 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 29,
-        &quot;community_id&quot;: 1249,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 24,
         &quot;title&quot;: &quot;Quidem nostrum qui commodi.&quot;,
         &quot;description&quot;: &quot;Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.&quot;,
         &quot;location&quot;: &quot;Party room&quot;,
-        &quot;starts_at&quot;: &quot;2026-10-02T01:38:48+00:00&quot;,
-        &quot;ends_at&quot;: &quot;2026-10-02T03:38:48+00:00&quot;,
+        &quot;starts_at&quot;: &quot;2026-10-05T18:53:12+00:00&quot;,
+        &quot;ends_at&quot;: &quot;2026-10-05T20:53:12+00:00&quot;,
         &quot;rsvps&quot;: {
             &quot;going&quot;: 1,
             &quot;maybe&quot;: 0,
@@ -3334,7 +3288,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://property-flow.test/api/v1/communities/1/events/1/rsvp" \
+    "https://property-flow.test/api/v1/communities/1/events/1/rsvp" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -3346,7 +3300,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/events/1/rsvp"
+    "https://property-flow.test/api/v1/communities/1/events/1/rsvp"
 );
 
 const headers = {
@@ -3375,13 +3329,13 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 30,
-        &quot;community_id&quot;: 1250,
+        &quot;id&quot;: 6,
+        &quot;community_id&quot;: 25,
         &quot;title&quot;: &quot;Quidem nostrum qui commodi.&quot;,
         &quot;description&quot;: &quot;Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.&quot;,
         &quot;location&quot;: &quot;Party room&quot;,
-        &quot;starts_at&quot;: &quot;2026-10-02T01:38:48+00:00&quot;,
-        &quot;ends_at&quot;: &quot;2026-10-02T03:38:48+00:00&quot;,
+        &quot;starts_at&quot;: &quot;2026-10-05T18:53:13+00:00&quot;,
+        &quot;ends_at&quot;: &quot;2026-10-05T20:53:13+00:00&quot;,
         &quot;rsvps&quot;: {
             &quot;going&quot;: 1,
             &quot;maybe&quot;: 0,
@@ -3517,7 +3471,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/document-folders" \
+    --get "https://property-flow.test/api/v1/communities/1/document-folders" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -3525,7 +3479,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/document-folders"
+    "https://property-flow.test/api/v1/communities/1/document-folders"
 );
 
 const headers = {
@@ -3551,13 +3505,13 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 15,
+            &quot;id&quot;: 3,
             &quot;parent_id&quot;: null,
             &quot;name&quot;: &quot;aut adipisci&quot;,
             &quot;visibility&quot;: &quot;residents&quot;
         },
         {
-            &quot;id&quot;: 16,
+            &quot;id&quot;: 4,
             &quot;parent_id&quot;: null,
             &quot;name&quot;: &quot;tempora ex&quot;,
             &quot;visibility&quot;: &quot;residents&quot;
@@ -3661,7 +3615,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/documents?filter%5Bfolder_id%5D=root&amp;filter%5Bsearch%5D=bylaws&amp;sort=title" \
+    --get "https://property-flow.test/api/v1/communities/1/documents?filter%5Bfolder_id%5D=root&amp;filter%5Bsearch%5D=bylaws&amp;sort=title" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -3669,7 +3623,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/documents"
+    "https://property-flow.test/api/v1/communities/1/documents"
 );
 
 const params = {
@@ -3703,8 +3657,8 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 42,
-            &quot;community_id&quot;: 1253,
+            &quot;id&quot;: 6,
+            &quot;community_id&quot;: 28,
             &quot;folder_id&quot;: null,
             &quot;title&quot;: &quot;Adipisci quidem nostrum qui.&quot;,
             &quot;visibility&quot;: &quot;residents&quot;,
@@ -3713,13 +3667,13 @@ fetch(url, {
                 &quot;mime_type&quot;: &quot;application/pdf&quot;,
                 &quot;size_bytes&quot;: 168927,
                 &quot;version&quot;: 1,
-                &quot;download_url&quot;: &quot;http://property-flow.test/api/v1/communities/1253/documents/42/download&quot;
+                &quot;download_url&quot;: &quot;http://property-flow.test/api/v1/communities/28/documents/6/download&quot;
             },
-            &quot;updated_at&quot;: &quot;2026-09-26T11:17:44+00:00&quot;
+            &quot;updated_at&quot;: &quot;2026-09-30T04:32:09+00:00&quot;
         },
         {
-            &quot;id&quot;: 44,
-            &quot;community_id&quot;: 1255,
+            &quot;id&quot;: 8,
+            &quot;community_id&quot;: 30,
             &quot;folder_id&quot;: null,
             &quot;title&quot;: &quot;Delectus fugit qui.&quot;,
             &quot;visibility&quot;: &quot;residents&quot;,
@@ -3728,9 +3682,9 @@ fetch(url, {
                 &quot;mime_type&quot;: &quot;application/pdf&quot;,
                 &quot;size_bytes&quot;: 342443,
                 &quot;version&quot;: 1,
-                &quot;download_url&quot;: &quot;http://property-flow.test/api/v1/communities/1255/documents/44/download&quot;
+                &quot;download_url&quot;: &quot;http://property-flow.test/api/v1/communities/30/documents/8/download&quot;
             },
-            &quot;updated_at&quot;: &quot;2026-09-26T11:17:44+00:00&quot;
+            &quot;updated_at&quot;: &quot;2026-09-30T04:32:10+00:00&quot;
         }
     ],
     &quot;links&quot;: {
@@ -3903,7 +3857,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/documents/1" \
+    --get "https://property-flow.test/api/v1/communities/1/documents/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -3911,7 +3865,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/documents/1"
+    "https://property-flow.test/api/v1/communities/1/documents/1"
 );
 
 const headers = {
@@ -3936,8 +3890,8 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 46,
-        &quot;community_id&quot;: 1257,
+        &quot;id&quot;: 10,
+        &quot;community_id&quot;: 32,
         &quot;folder_id&quot;: null,
         &quot;title&quot;: &quot;Adipisci quidem nostrum qui.&quot;,
         &quot;visibility&quot;: &quot;residents&quot;,
@@ -3946,9 +3900,9 @@ fetch(url, {
             &quot;mime_type&quot;: &quot;application/pdf&quot;,
             &quot;size_bytes&quot;: 168927,
             &quot;version&quot;: 1,
-            &quot;download_url&quot;: &quot;http://property-flow.test/api/v1/communities/1257/documents/46/download&quot;
+            &quot;download_url&quot;: &quot;http://property-flow.test/api/v1/communities/32/documents/10/download&quot;
         },
-        &quot;updated_at&quot;: &quot;2026-09-26T11:17:45+00:00&quot;
+        &quot;updated_at&quot;: &quot;2026-09-30T04:32:10+00:00&quot;
     }
 }</code>
  </pre>
@@ -4060,7 +4014,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/documents/1/download" \
+    --get "https://property-flow.test/api/v1/communities/1/documents/1/download" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -4068,7 +4022,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/documents/1/download"
+    "https://property-flow.test/api/v1/communities/1/documents/1/download"
 );
 
 const headers = {
@@ -4208,7 +4162,7 @@ internal.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/my-work-orders" \
+    --get "https://property-flow.test/api/v1/my-work-orders" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -4216,7 +4170,7 @@ internal.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/my-work-orders"
+    "https://property-flow.test/api/v1/my-work-orders"
 );
 
 const headers = {
@@ -4242,8 +4196,8 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 40,
-            &quot;community_id&quot;: 1228,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 3,
             &quot;service_request_id&quot;: null,
             &quot;title&quot;: &quot;Adipisci quidem nostrum qui.&quot;,
             &quot;description&quot;: &quot;Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.&quot;,
@@ -4253,21 +4207,21 @@ fetch(url, {
             &quot;due_on&quot;: null,
             &quot;completed_at&quot;: null,
             &quot;completion_notes&quot;: null,
-            &quot;created_at&quot;: &quot;2026-09-26T11:17:39+00:00&quot;
+            &quot;created_at&quot;: &quot;2026-09-30T04:32:00+00:00&quot;
         },
         {
-            &quot;id&quot;: 41,
-            &quot;community_id&quot;: 1229,
+            &quot;id&quot;: 5,
+            &quot;community_id&quot;: 4,
             &quot;service_request_id&quot;: null,
-            &quot;title&quot;: &quot;Et officiis itaque alias.&quot;,
-            &quot;description&quot;: null,
+            &quot;title&quot;: &quot;Similique labore nam doloremque.&quot;,
+            &quot;description&quot;: &quot;Nesciunt eum explicabo molestiae nihil. Placeat exercitationem iure deleniti odit enim saepe sunt alias.&quot;,
             &quot;status&quot;: &quot;pending&quot;,
             &quot;status_label&quot;: &quot;Pending&quot;,
             &quot;assignee&quot;: null,
             &quot;due_on&quot;: null,
             &quot;completed_at&quot;: null,
             &quot;completion_notes&quot;: null,
-            &quot;created_at&quot;: &quot;2026-09-26T11:17:39+00:00&quot;
+            &quot;created_at&quot;: &quot;2026-09-30T04:32:00+00:00&quot;
         }
     ],
     &quot;links&quot;: {
@@ -4390,7 +4344,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/service-requests?filter%5Bstatus%5D=open&amp;filter%5Bcategory%5D=plumbing&amp;filter%5Bpriority%5D=high&amp;filter%5Bunit_id%5D=1&amp;sort=-created_at" \
+    --get "https://property-flow.test/api/v1/communities/1/service-requests?filter%5Bstatus%5D=open&amp;filter%5Bcategory%5D=plumbing&amp;filter%5Bpriority%5D=high&amp;filter%5Bunit_id%5D=1&amp;sort=-created_at" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -4398,7 +4352,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/service-requests"
+    "https://property-flow.test/api/v1/communities/1/service-requests"
 );
 
 const params = {
@@ -4434,10 +4388,10 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 40,
-            &quot;community_id&quot;: 1259,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 34,
             &quot;unit&quot;: {
-                &quot;id&quot;: 433,
+                &quot;id&quot;: 167,
                 &quot;label&quot;: &quot;Tower k &middot; 7852&quot;
             },
             &quot;title&quot;: &quot;Adipisci quidem nostrum qui commodi.&quot;,
@@ -4447,15 +4401,15 @@ fetch(url, {
             &quot;status&quot;: &quot;open&quot;,
             &quot;status_label&quot;: &quot;Open&quot;,
             &quot;entry_permission&quot;: false,
-            &quot;created_at&quot;: &quot;2026-09-26T11:17:45+00:00&quot;,
-            &quot;updated_at&quot;: &quot;2026-09-26T11:17:45+00:00&quot;
+            &quot;created_at&quot;: &quot;2026-09-30T04:32:11+00:00&quot;,
+            &quot;updated_at&quot;: &quot;2026-09-30T04:32:11+00:00&quot;
         },
         {
-            &quot;id&quot;: 41,
-            &quot;community_id&quot;: 1262,
+            &quot;id&quot;: 5,
+            &quot;community_id&quot;: 37,
             &quot;unit&quot;: {
-                &quot;id&quot;: 434,
-                &quot;label&quot;: &quot;Tower w &middot; 22441&quot;
+                &quot;id&quot;: 168,
+                &quot;label&quot;: &quot;Tower d &middot; 43729&quot;
             },
             &quot;title&quot;: &quot;Sunt suscipit doloribus fugiat ut aut.&quot;,
             &quot;description&quot;: &quot;Error neque recusandae et ipsam dolorem et ut dicta. Assumenda consequatur ut et sunt quisquam. Repellendus ut eaque alias ratione dolores.&quot;,
@@ -4464,8 +4418,8 @@ fetch(url, {
             &quot;status&quot;: &quot;open&quot;,
             &quot;status_label&quot;: &quot;Open&quot;,
             &quot;entry_permission&quot;: false,
-            &quot;created_at&quot;: &quot;2026-09-26T11:17:46+00:00&quot;,
-            &quot;updated_at&quot;: &quot;2026-09-26T11:17:46+00:00&quot;
+            &quot;created_at&quot;: &quot;2026-09-30T04:32:12+00:00&quot;,
+            &quot;updated_at&quot;: &quot;2026-09-30T04:32:12+00:00&quot;
         }
     ],
     &quot;links&quot;: {
@@ -4663,7 +4617,7 @@ in or own (or none, for common areas).</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/service-requests" \
+    "https://property-flow.test/api/v1/communities/1/service-requests" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
@@ -4673,12 +4627,12 @@ in or own (or none, for common areas).</p>
     --form "priority=medium"\
     --form "unit_id=1"\
     --form "entry_permission=1"\
-    --form "photos[]=@/private/var/folders/yw/b2m38hv92jd695td2jqmtlnw0000gn/T/phprbb7ka3tge52fpWZff0" </code></pre></div>
+    --form "photos[]=@/private/var/folders/yw/b2m38hv92jd695td2jqmtlnw0000gn/T/phpavpm9uomd6a18LmtzUl" </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/service-requests"
+    "https://property-flow.test/api/v1/communities/1/service-requests"
 );
 
 const headers = {
@@ -4712,8 +4666,8 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 42,
-        &quot;community_id&quot;: 1265,
+        &quot;id&quot;: 6,
+        &quot;community_id&quot;: 40,
         &quot;unit&quot;: null,
         &quot;title&quot;: &quot;Eius et animi quos.&quot;,
         &quot;description&quot;: &quot;Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.&quot;,
@@ -4722,8 +4676,8 @@ fetch(url, {
         &quot;status&quot;: &quot;open&quot;,
         &quot;status_label&quot;: &quot;Open&quot;,
         &quot;entry_permission&quot;: false,
-        &quot;created_at&quot;: &quot;2026-09-26T11:17:46+00:00&quot;,
-        &quot;updated_at&quot;: &quot;2026-09-26T11:17:46+00:00&quot;
+        &quot;created_at&quot;: &quot;2026-09-30T04:32:13+00:00&quot;,
+        &quot;updated_at&quot;: &quot;2026-09-30T04:32:13+00:00&quot;
     }
 }</code>
  </pre>
@@ -4920,7 +4874,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/service-requests/1" \
+    --get "https://property-flow.test/api/v1/communities/1/service-requests/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -4928,7 +4882,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/service-requests/1"
+    "https://property-flow.test/api/v1/communities/1/service-requests/1"
 );
 
 const headers = {
@@ -4953,10 +4907,10 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 43,
-        &quot;community_id&quot;: 1266,
+        &quot;id&quot;: 7,
+        &quot;community_id&quot;: 41,
         &quot;unit&quot;: {
-            &quot;id&quot;: 435,
+            &quot;id&quot;: 169,
             &quot;label&quot;: &quot;Tower m &middot; 92968&quot;
         },
         &quot;title&quot;: &quot;Adipisci quidem nostrum qui commodi.&quot;,
@@ -4966,18 +4920,18 @@ fetch(url, {
         &quot;status&quot;: &quot;open&quot;,
         &quot;status_label&quot;: &quot;Open&quot;,
         &quot;entry_permission&quot;: false,
-        &quot;created_at&quot;: &quot;2026-09-26T11:17:46+00:00&quot;,
-        &quot;updated_at&quot;: &quot;2026-09-26T11:17:46+00:00&quot;,
+        &quot;created_at&quot;: &quot;2026-09-30T04:32:13+00:00&quot;,
+        &quot;updated_at&quot;: &quot;2026-09-30T04:32:13+00:00&quot;,
         &quot;comments&quot;: [
             {
-                &quot;id&quot;: 15,
+                &quot;id&quot;: 3,
                 &quot;body&quot;: &quot;Neque recusandae et ipsam dolorem et ut dicta.&quot;,
                 &quot;internal&quot;: false,
                 &quot;author&quot;: {
-                    &quot;id&quot;: 229,
+                    &quot;id&quot;: 74,
                     &quot;name&quot;: &quot;Joey Crooks&quot;
                 },
-                &quot;created_at&quot;: &quot;2026-09-26T11:17:46+00:00&quot;
+                &quot;created_at&quot;: &quot;2026-09-30T04:32:14+00:00&quot;
             }
         ]
     }
@@ -5092,7 +5046,7 @@ back to <code>open</code>) is refused with a 422.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://property-flow.test/api/v1/communities/1/service-requests/1" \
+    "https://property-flow.test/api/v1/communities/1/service-requests/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -5104,7 +5058,7 @@ back to <code>open</code>) is refused with a 422.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/service-requests/1"
+    "https://property-flow.test/api/v1/communities/1/service-requests/1"
 );
 
 const headers = {
@@ -5133,10 +5087,10 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 44,
-        &quot;community_id&quot;: 1269,
+        &quot;id&quot;: 8,
+        &quot;community_id&quot;: 44,
         &quot;unit&quot;: {
-            &quot;id&quot;: 436,
+            &quot;id&quot;: 170,
             &quot;label&quot;: &quot;Tower t &middot; 65788&quot;
         },
         &quot;title&quot;: &quot;Adipisci quidem nostrum qui commodi.&quot;,
@@ -5146,8 +5100,8 @@ fetch(url, {
         &quot;status&quot;: &quot;open&quot;,
         &quot;status_label&quot;: &quot;Open&quot;,
         &quot;entry_permission&quot;: false,
-        &quot;created_at&quot;: &quot;2026-09-26T11:17:47+00:00&quot;,
-        &quot;updated_at&quot;: &quot;2026-09-26T11:17:47+00:00&quot;
+        &quot;created_at&quot;: &quot;2026-09-30T04:32:15+00:00&quot;,
+        &quot;updated_at&quot;: &quot;2026-09-30T04:32:15+00:00&quot;
     }
 }</code>
  </pre>
@@ -5276,7 +5230,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/service-requests/1/comments" \
+    "https://property-flow.test/api/v1/communities/1/service-requests/1/comments" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -5289,7 +5243,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/service-requests/1/comments"
+    "https://property-flow.test/api/v1/communities/1/service-requests/1/comments"
 );
 
 const headers = {
@@ -5319,14 +5273,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 16,
+        &quot;id&quot;: 4,
         &quot;body&quot;: &quot;Et animi quos velit et fugiat.&quot;,
         &quot;internal&quot;: false,
         &quot;author&quot;: {
-            &quot;id&quot;: 230,
+            &quot;id&quot;: 75,
             &quot;name&quot;: &quot;Josiane Emard&quot;
         },
-        &quot;created_at&quot;: &quot;2026-09-26T11:17:47+00:00&quot;
+        &quot;created_at&quot;: &quot;2026-09-30T04:32:15+00:00&quot;
     }
 }</code>
  </pre>
@@ -5473,7 +5427,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/work-orders?filter%5Bstatus%5D=pending&amp;sort=due_on" \
+    --get "https://property-flow.test/api/v1/communities/1/work-orders?filter%5Bstatus%5D=pending&amp;sort=due_on" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -5481,7 +5435,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/work-orders"
+    "https://property-flow.test/api/v1/communities/1/work-orders"
 );
 
 const params = {
@@ -5514,8 +5468,8 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 42,
-            &quot;community_id&quot;: 1273,
+            &quot;id&quot;: 6,
+            &quot;community_id&quot;: 48,
             &quot;service_request_id&quot;: null,
             &quot;title&quot;: &quot;Adipisci quidem nostrum qui.&quot;,
             &quot;description&quot;: &quot;Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.&quot;,
@@ -5523,17 +5477,17 @@ fetch(url, {
             &quot;status_label&quot;: &quot;Pending&quot;,
             &quot;assignee&quot;: {
                 &quot;type&quot;: &quot;vendor&quot;,
-                &quot;id&quot;: 52,
+                &quot;id&quot;: 4,
                 &quot;name&quot;: &quot;Corwin Ltd&quot;
             },
             &quot;due_on&quot;: null,
             &quot;completed_at&quot;: null,
             &quot;completion_notes&quot;: null,
-            &quot;created_at&quot;: &quot;2026-09-26T11:17:48+00:00&quot;
+            &quot;created_at&quot;: &quot;2026-09-30T04:32:16+00:00&quot;
         },
         {
-            &quot;id&quot;: 43,
-            &quot;community_id&quot;: 1274,
+            &quot;id&quot;: 7,
+            &quot;community_id&quot;: 49,
             &quot;service_request_id&quot;: null,
             &quot;title&quot;: &quot;Ut aut deserunt et.&quot;,
             &quot;description&quot;: null,
@@ -5541,13 +5495,13 @@ fetch(url, {
             &quot;status_label&quot;: &quot;Pending&quot;,
             &quot;assignee&quot;: {
                 &quot;type&quot;: &quot;vendor&quot;,
-                &quot;id&quot;: 53,
+                &quot;id&quot;: 5,
                 &quot;name&quot;: &quot;Schroeder, Stroman and Batz&quot;
             },
             &quot;due_on&quot;: null,
             &quot;completed_at&quot;: null,
             &quot;completion_notes&quot;: null,
-            &quot;created_at&quot;: &quot;2026-09-26T11:17:48+00:00&quot;
+            &quot;created_at&quot;: &quot;2026-09-30T04:32:18+00:00&quot;
         }
     ],
     &quot;links&quot;: {
@@ -5708,7 +5662,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/work-orders/1" \
+    --get "https://property-flow.test/api/v1/communities/1/work-orders/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -5716,7 +5670,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/work-orders/1"
+    "https://property-flow.test/api/v1/communities/1/work-orders/1"
 );
 
 const headers = {
@@ -5741,8 +5695,8 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 44,
-        &quot;community_id&quot;: 1275,
+        &quot;id&quot;: 8,
+        &quot;community_id&quot;: 50,
         &quot;service_request_id&quot;: null,
         &quot;title&quot;: &quot;Adipisci quidem nostrum qui.&quot;,
         &quot;description&quot;: &quot;Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.&quot;,
@@ -5750,13 +5704,13 @@ fetch(url, {
         &quot;status_label&quot;: &quot;Pending&quot;,
         &quot;assignee&quot;: {
             &quot;type&quot;: &quot;vendor&quot;,
-            &quot;id&quot;: 54,
+            &quot;id&quot;: 6,
             &quot;name&quot;: &quot;Schimmel Ltd&quot;
         },
         &quot;due_on&quot;: null,
         &quot;completed_at&quot;: null,
         &quot;completion_notes&quot;: null,
-        &quot;created_at&quot;: &quot;2026-09-26T11:17:49+00:00&quot;
+        &quot;created_at&quot;: &quot;2026-09-30T04:32:20+00:00&quot;
     }
 }</code>
  </pre>
@@ -5868,7 +5822,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://property-flow.test/api/v1/communities/1/work-orders/1" \
+    "https://property-flow.test/api/v1/communities/1/work-orders/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -5881,7 +5835,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/work-orders/1"
+    "https://property-flow.test/api/v1/communities/1/work-orders/1"
 );
 
 const headers = {
@@ -5911,8 +5865,8 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 45,
-        &quot;community_id&quot;: 1276,
+        &quot;id&quot;: 9,
+        &quot;community_id&quot;: 51,
         &quot;service_request_id&quot;: null,
         &quot;title&quot;: &quot;Et animi quos.&quot;,
         &quot;description&quot;: null,
@@ -5920,13 +5874,13 @@ fetch(url, {
         &quot;status_label&quot;: &quot;Pending&quot;,
         &quot;assignee&quot;: {
             &quot;type&quot;: &quot;vendor&quot;,
-            &quot;id&quot;: 55,
+            &quot;id&quot;: 7,
             &quot;name&quot;: &quot;Mitchell-VonRueden&quot;
         },
         &quot;due_on&quot;: null,
         &quot;completed_at&quot;: null,
         &quot;completion_notes&quot;: null,
-        &quot;created_at&quot;: &quot;2026-09-26T11:17:49+00:00&quot;
+        &quot;created_at&quot;: &quot;2026-09-30T04:32:21+00:00&quot;
     }
 }</code>
  </pre>
@@ -6072,7 +6026,7 @@ booking times are UTC instants. Fees are integer cents in the community's curren
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/amenities" \
+    --get "https://property-flow.test/api/v1/communities/1/amenities" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -6080,7 +6034,7 @@ booking times are UTC instants. Fees are integer cents in the community's curren
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/amenities"
+    "https://property-flow.test/api/v1/communities/1/amenities"
 );
 
 const headers = {
@@ -6106,8 +6060,8 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 52,
-            &quot;community_id&quot;: 1277,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 52,
             &quot;name&quot;: &quot;Party Room&quot;,
             &quot;description&quot;: &quot;Nostrum qui commodi incidunt iure.&quot;,
             &quot;location&quot;: null,
@@ -6130,8 +6084,8 @@ fetch(url, {
             &quot;active&quot;: true
         },
         {
-            &quot;id&quot;: 53,
-            &quot;community_id&quot;: 1278,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 53,
             &quot;name&quot;: &quot;Rooftop Pool&quot;,
             &quot;description&quot;: &quot;Distinctio eum doloremque id aut libero aliquam veniam corporis.&quot;,
             &quot;location&quot;: null,
@@ -6253,19 +6207,19 @@ bookable day). Slots at capacity are included with <code>bookable: false</code>.
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/amenities/1?date=2026-10-03" \
+    --get "https://property-flow.test/api/v1/communities/1/amenities/1?date=2026-10-03" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"date\": \"2026-09-26\"
+    \"date\": \"2026-09-30\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/amenities/1"
+    "https://property-flow.test/api/v1/communities/1/amenities/1"
 );
 
 const params = {
@@ -6281,7 +6235,7 @@ const headers = {
 };
 
 let body = {
-    "date": "2026-09-26"
+    "date": "2026-09-30"
 };
 
 fetch(url, {
@@ -6300,8 +6254,8 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 54,
-        &quot;community_id&quot;: 1279,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 54,
         &quot;name&quot;: &quot;Party Room&quot;,
         &quot;description&quot;: &quot;Nostrum qui commodi incidunt iure.&quot;,
         &quot;location&quot;: null,
@@ -6449,10 +6403,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date"                data-endpoint="GETapi-v1-communities--community--amenities--amenity-"
-               value="2026-09-26"
+               value="2026-09-30"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-09-26</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-09-30</code></p>
         </div>
         </form>
 
@@ -6470,7 +6424,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/amenity-bookings?filter%5Bstatus%5D=confirmed&amp;filter%5Bamenity_id%5D=1&amp;filter%5Bupcoming%5D=1&amp;sort=starts_at" \
+    --get "https://property-flow.test/api/v1/communities/1/amenity-bookings?filter%5Bstatus%5D=confirmed&amp;filter%5Bamenity_id%5D=1&amp;filter%5Bupcoming%5D=1&amp;sort=starts_at" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -6478,7 +6432,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/amenity-bookings"
+    "https://property-flow.test/api/v1/communities/1/amenity-bookings"
 );
 
 const params = {
@@ -6513,46 +6467,46 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 40,
-            &quot;community_id&quot;: 1280,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 55,
             &quot;amenity&quot;: {
-                &quot;id&quot;: 55,
+                &quot;id&quot;: 6,
                 &quot;name&quot;: &quot;Rooftop Pool&quot;
             },
             &quot;unit&quot;: {
-                &quot;id&quot;: 437,
+                &quot;id&quot;: 171,
                 &quot;label&quot;: &quot;Tower s &middot; 45645&quot;
             },
-            &quot;starts_at&quot;: &quot;2026-09-27T10:00:00+00:00&quot;,
-            &quot;ends_at&quot;: &quot;2026-09-27T11:00:00+00:00&quot;,
+            &quot;starts_at&quot;: &quot;2026-10-01T10:00:00+00:00&quot;,
+            &quot;ends_at&quot;: &quot;2026-10-01T11:00:00+00:00&quot;,
             &quot;status&quot;: &quot;confirmed&quot;,
             &quot;status_label&quot;: &quot;Confirmed&quot;,
             &quot;fee_cents&quot;: null,
             &quot;deposit_cents&quot;: null,
             &quot;notes&quot;: null,
             &quot;decision_notes&quot;: null,
-            &quot;created_at&quot;: &quot;2026-09-26T11:17:50+00:00&quot;
+            &quot;created_at&quot;: &quot;2026-09-30T04:32:24+00:00&quot;
         },
         {
-            &quot;id&quot;: 41,
-            &quot;community_id&quot;: 1283,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 58,
             &quot;amenity&quot;: {
-                &quot;id&quot;: 56,
+                &quot;id&quot;: 7,
                 &quot;name&quot;: &quot;Tennis Court&quot;
             },
             &quot;unit&quot;: {
-                &quot;id&quot;: 438,
+                &quot;id&quot;: 172,
                 &quot;label&quot;: &quot;Tower p &middot; 34534&quot;
             },
-            &quot;starts_at&quot;: &quot;2026-09-27T10:00:00+00:00&quot;,
-            &quot;ends_at&quot;: &quot;2026-09-27T11:00:00+00:00&quot;,
+            &quot;starts_at&quot;: &quot;2026-10-01T10:00:00+00:00&quot;,
+            &quot;ends_at&quot;: &quot;2026-10-01T11:00:00+00:00&quot;,
             &quot;status&quot;: &quot;confirmed&quot;,
             &quot;status_label&quot;: &quot;Confirmed&quot;,
             &quot;fee_cents&quot;: null,
             &quot;deposit_cents&quot;: null,
             &quot;notes&quot;: null,
             &quot;decision_notes&quot;: null,
-            &quot;created_at&quot;: &quot;2026-09-26T11:17:51+00:00&quot;
+            &quot;created_at&quot;: &quot;2026-09-30T04:32:27+00:00&quot;
         }
     ],
     &quot;links&quot;: {
@@ -6739,7 +6693,7 @@ filled up, or a unit over its limit, is a 422.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/amenity-bookings" \
+    "https://property-flow.test/api/v1/communities/1/amenity-bookings" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -6755,7 +6709,7 @@ filled up, or a unit over its limit, is a 422.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/amenity-bookings"
+    "https://property-flow.test/api/v1/communities/1/amenity-bookings"
 );
 
 const headers = {
@@ -6788,25 +6742,25 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 42,
-        &quot;community_id&quot;: 1286,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 61,
         &quot;amenity&quot;: {
-            &quot;id&quot;: 57,
+            &quot;id&quot;: 8,
             &quot;name&quot;: &quot;Fitness Centre&quot;
         },
         &quot;unit&quot;: {
-            &quot;id&quot;: 439,
+            &quot;id&quot;: 173,
             &quot;label&quot;: &quot;Tower b &middot; 87658&quot;
         },
-        &quot;starts_at&quot;: &quot;2026-09-27T10:00:00+00:00&quot;,
-        &quot;ends_at&quot;: &quot;2026-09-27T11:00:00+00:00&quot;,
+        &quot;starts_at&quot;: &quot;2026-10-01T10:00:00+00:00&quot;,
+        &quot;ends_at&quot;: &quot;2026-10-01T11:00:00+00:00&quot;,
         &quot;status&quot;: &quot;confirmed&quot;,
         &quot;status_label&quot;: &quot;Confirmed&quot;,
         &quot;fee_cents&quot;: null,
         &quot;deposit_cents&quot;: null,
         &quot;notes&quot;: null,
         &quot;decision_notes&quot;: null,
-        &quot;created_at&quot;: &quot;2026-09-26T11:17:52+00:00&quot;
+        &quot;created_at&quot;: &quot;2026-09-30T04:32:29+00:00&quot;
     }
 }</code>
  </pre>
@@ -6977,7 +6931,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/amenity-bookings/1" \
+    --get "https://property-flow.test/api/v1/communities/1/amenity-bookings/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -6985,7 +6939,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/amenity-bookings/1"
+    "https://property-flow.test/api/v1/communities/1/amenity-bookings/1"
 );
 
 const headers = {
@@ -7010,25 +6964,25 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 43,
-        &quot;community_id&quot;: 1289,
+        &quot;id&quot;: 6,
+        &quot;community_id&quot;: 64,
         &quot;amenity&quot;: {
-            &quot;id&quot;: 58,
+            &quot;id&quot;: 9,
             &quot;name&quot;: &quot;Rooftop Pool&quot;
         },
         &quot;unit&quot;: {
-            &quot;id&quot;: 440,
+            &quot;id&quot;: 174,
             &quot;label&quot;: &quot;Tower y &middot; 884&quot;
         },
-        &quot;starts_at&quot;: &quot;2026-09-27T10:00:00+00:00&quot;,
-        &quot;ends_at&quot;: &quot;2026-09-27T11:00:00+00:00&quot;,
+        &quot;starts_at&quot;: &quot;2026-10-01T10:00:00+00:00&quot;,
+        &quot;ends_at&quot;: &quot;2026-10-01T11:00:00+00:00&quot;,
         &quot;status&quot;: &quot;confirmed&quot;,
         &quot;status_label&quot;: &quot;Confirmed&quot;,
         &quot;fee_cents&quot;: null,
         &quot;deposit_cents&quot;: null,
         &quot;notes&quot;: null,
         &quot;decision_notes&quot;: null,
-        &quot;created_at&quot;: &quot;2026-09-26T11:17:52+00:00&quot;
+        &quot;created_at&quot;: &quot;2026-09-30T04:32:31+00:00&quot;
     }
 }</code>
  </pre>
@@ -7141,7 +7095,7 @@ cancel any. A booking too close to its start is a 422.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/amenity-bookings/1/cancellation" \
+    "https://property-flow.test/api/v1/communities/1/amenity-bookings/1/cancellation" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -7153,7 +7107,7 @@ cancel any. A booking too close to its start is a 422.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/amenity-bookings/1/cancellation"
+    "https://property-flow.test/api/v1/communities/1/amenity-bookings/1/cancellation"
 );
 
 const headers = {
@@ -7182,25 +7136,25 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 44,
-        &quot;community_id&quot;: 1292,
+        &quot;id&quot;: 7,
+        &quot;community_id&quot;: 67,
         &quot;amenity&quot;: {
-            &quot;id&quot;: 59,
+            &quot;id&quot;: 10,
             &quot;name&quot;: &quot;Rooftop Pool&quot;
         },
         &quot;unit&quot;: {
-            &quot;id&quot;: 441,
+            &quot;id&quot;: 175,
             &quot;label&quot;: &quot;Tower v &middot; 79783&quot;
         },
-        &quot;starts_at&quot;: &quot;2026-09-27T10:00:00+00:00&quot;,
-        &quot;ends_at&quot;: &quot;2026-09-27T11:00:00+00:00&quot;,
+        &quot;starts_at&quot;: &quot;2026-10-01T10:00:00+00:00&quot;,
+        &quot;ends_at&quot;: &quot;2026-10-01T11:00:00+00:00&quot;,
         &quot;status&quot;: &quot;confirmed&quot;,
         &quot;status_label&quot;: &quot;Confirmed&quot;,
         &quot;fee_cents&quot;: null,
         &quot;deposit_cents&quot;: null,
         &quot;notes&quot;: null,
         &quot;decision_notes&quot;: null,
-        &quot;created_at&quot;: &quot;2026-09-26T11:17:53+00:00&quot;
+        &quot;created_at&quot;: &quot;2026-09-30T04:32:33+00:00&quot;
     }
 }</code>
  </pre>
@@ -7325,7 +7279,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/amenity-bookings/1/decision" \
+    "https://property-flow.test/api/v1/communities/1/amenity-bookings/1/decision" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -7338,7 +7292,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/amenity-bookings/1/decision"
+    "https://property-flow.test/api/v1/communities/1/amenity-bookings/1/decision"
 );
 
 const headers = {
@@ -7368,25 +7322,25 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 45,
-        &quot;community_id&quot;: 1295,
+        &quot;id&quot;: 8,
+        &quot;community_id&quot;: 70,
         &quot;amenity&quot;: {
-            &quot;id&quot;: 60,
+            &quot;id&quot;: 11,
             &quot;name&quot;: &quot;Fitness Centre&quot;
         },
         &quot;unit&quot;: {
-            &quot;id&quot;: 442,
+            &quot;id&quot;: 176,
             &quot;label&quot;: &quot;Tower x &middot; 75024&quot;
         },
-        &quot;starts_at&quot;: &quot;2026-09-27T10:00:00+00:00&quot;,
-        &quot;ends_at&quot;: &quot;2026-09-27T11:00:00+00:00&quot;,
+        &quot;starts_at&quot;: &quot;2026-10-01T10:00:00+00:00&quot;,
+        &quot;ends_at&quot;: &quot;2026-10-01T11:00:00+00:00&quot;,
         &quot;status&quot;: &quot;confirmed&quot;,
         &quot;status_label&quot;: &quot;Confirmed&quot;,
         &quot;fee_cents&quot;: null,
         &quot;deposit_cents&quot;: null,
         &quot;notes&quot;: null,
         &quot;decision_notes&quot;: null,
-        &quot;created_at&quot;: &quot;2026-09-26T11:17:53+00:00&quot;
+        &quot;created_at&quot;: &quot;2026-09-30T04:32:35+00:00&quot;
     }
 }</code>
  </pre>
@@ -7528,7 +7482,7 @@ own packages and guest passes; the rest is for the front desk and security team.
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/packages?filter%5Bstatus%5D=awaiting_pickup&amp;sort=-created_at" \
+    --get "https://property-flow.test/api/v1/communities/1/packages?filter%5Bstatus%5D=awaiting_pickup&amp;sort=-created_at" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -7536,7 +7490,7 @@ own packages and guest passes; the rest is for the front desk and security team.
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/packages"
+    "https://property-flow.test/api/v1/communities/1/packages"
 );
 
 const params = {
@@ -7569,40 +7523,40 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 33,
-            &quot;community_id&quot;: 1298,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 73,
             &quot;unit&quot;: {
-                &quot;id&quot;: 443,
+                &quot;id&quot;: 177,
                 &quot;label&quot;: &quot;Tower t &middot; 75316&quot;
             },
             &quot;recipient&quot;: {
-                &quot;id&quot;: 240,
+                &quot;id&quot;: 164,
                 &quot;name&quot;: &quot;Michelle Cassin&quot;
             },
             &quot;carrier&quot;: &quot;UPS&quot;,
             &quot;tracking_number&quot;: &quot;1Z090933724&quot;,
             &quot;shelf_location&quot;: &quot;Shelf C&quot;,
             &quot;status&quot;: &quot;awaiting_pickup&quot;,
-            &quot;arrived_at&quot;: &quot;2026-09-26T11:17:54+00:00&quot;,
+            &quot;arrived_at&quot;: &quot;2026-09-30T04:32:36+00:00&quot;,
             &quot;released_at&quot;: null,
             &quot;released_to_name&quot;: null
         },
         {
-            &quot;id&quot;: 34,
-            &quot;community_id&quot;: 1301,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 76,
             &quot;unit&quot;: {
-                &quot;id&quot;: 444,
-                &quot;label&quot;: &quot;Tower t &middot; 72133&quot;
+                &quot;id&quot;: 178,
+                &quot;label&quot;: &quot;Tower u &middot; 72195&quot;
             },
             &quot;recipient&quot;: {
-                &quot;id&quot;: 241,
-                &quot;name&quot;: &quot;Adelia Maggio&quot;
+                &quot;id&quot;: 165,
+                &quot;name&quot;: &quot;Maxie Fay&quot;
             },
             &quot;carrier&quot;: &quot;Amazon&quot;,
             &quot;tracking_number&quot;: &quot;1Z395275298&quot;,
             &quot;shelf_location&quot;: &quot;Shelf C&quot;,
             &quot;status&quot;: &quot;awaiting_pickup&quot;,
-            &quot;arrived_at&quot;: &quot;2026-09-26T11:17:55+00:00&quot;,
+            &quot;arrived_at&quot;: &quot;2026-09-30T04:32:39+00:00&quot;,
             &quot;released_at&quot;: null,
             &quot;released_to_name&quot;: null
         }
@@ -7765,7 +7719,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/packages" \
+    "https://property-flow.test/api/v1/communities/1/packages" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -7781,7 +7735,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/packages"
+    "https://property-flow.test/api/v1/communities/1/packages"
 );
 
 const headers = {
@@ -7814,21 +7768,21 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 35,
-        &quot;community_id&quot;: 1304,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 79,
         &quot;unit&quot;: {
-            &quot;id&quot;: 445,
+            &quot;id&quot;: 179,
             &quot;label&quot;: &quot;Tower t &middot; 48309&quot;
         },
         &quot;recipient&quot;: {
-            &quot;id&quot;: 242,
+            &quot;id&quot;: 166,
             &quot;name&quot;: &quot;Zachery Fadel&quot;
         },
         &quot;carrier&quot;: &quot;UPS&quot;,
         &quot;tracking_number&quot;: &quot;1Z090933724&quot;,
         &quot;shelf_location&quot;: &quot;Shelf C&quot;,
         &quot;status&quot;: &quot;awaiting_pickup&quot;,
-        &quot;arrived_at&quot;: &quot;2026-09-26T11:17:56+00:00&quot;,
+        &quot;arrived_at&quot;: &quot;2026-09-30T04:32:41+00:00&quot;,
         &quot;released_at&quot;: null,
         &quot;released_to_name&quot;: null
     }
@@ -7991,7 +7945,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/packages/1" \
+    --get "https://property-flow.test/api/v1/communities/1/packages/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -7999,7 +7953,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/packages/1"
+    "https://property-flow.test/api/v1/communities/1/packages/1"
 );
 
 const headers = {
@@ -8024,21 +7978,21 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 36,
-        &quot;community_id&quot;: 1307,
+        &quot;id&quot;: 6,
+        &quot;community_id&quot;: 82,
         &quot;unit&quot;: {
-            &quot;id&quot;: 446,
+            &quot;id&quot;: 180,
             &quot;label&quot;: &quot;Tower v &middot; 6223&quot;
         },
         &quot;recipient&quot;: {
-            &quot;id&quot;: 243,
+            &quot;id&quot;: 167,
             &quot;name&quot;: &quot;Zachery Fadel&quot;
         },
         &quot;carrier&quot;: &quot;UPS&quot;,
         &quot;tracking_number&quot;: &quot;1Z090933724&quot;,
         &quot;shelf_location&quot;: &quot;Shelf C&quot;,
         &quot;status&quot;: &quot;awaiting_pickup&quot;,
-        &quot;arrived_at&quot;: &quot;2026-09-26T11:17:56+00:00&quot;,
+        &quot;arrived_at&quot;: &quot;2026-09-30T04:32:43+00:00&quot;,
         &quot;released_at&quot;: null,
         &quot;released_to_name&quot;: null
     }
@@ -8152,7 +8106,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/packages/1/release" \
+    "https://property-flow.test/api/v1/communities/1/packages/1/release" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -8165,7 +8119,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/packages/1/release"
+    "https://property-flow.test/api/v1/communities/1/packages/1/release"
 );
 
 const headers = {
@@ -8195,21 +8149,21 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 37,
-        &quot;community_id&quot;: 1310,
+        &quot;id&quot;: 7,
+        &quot;community_id&quot;: 85,
         &quot;unit&quot;: {
-            &quot;id&quot;: 447,
+            &quot;id&quot;: 181,
             &quot;label&quot;: &quot;Tower x &middot; 6802&quot;
         },
         &quot;recipient&quot;: {
-            &quot;id&quot;: 244,
+            &quot;id&quot;: 168,
             &quot;name&quot;: &quot;Eileen Schmidt&quot;
         },
         &quot;carrier&quot;: &quot;Amazon&quot;,
         &quot;tracking_number&quot;: &quot;1Z671936806&quot;,
         &quot;shelf_location&quot;: &quot;Shelf C&quot;,
         &quot;status&quot;: &quot;awaiting_pickup&quot;,
-        &quot;arrived_at&quot;: &quot;2026-09-26T11:17:57+00:00&quot;,
+        &quot;arrived_at&quot;: &quot;2026-09-30T04:32:45+00:00&quot;,
         &quot;released_at&quot;: null,
         &quot;released_to_name&quot;: null
     }
@@ -8348,7 +8302,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/visitors?filter%5Bon_site%5D=1&amp;sort=-checked_in_at" \
+    --get "https://property-flow.test/api/v1/communities/1/visitors?filter%5Bon_site%5D=1&amp;sort=-checked_in_at" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -8356,7 +8310,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/visitors"
+    "https://property-flow.test/api/v1/communities/1/visitors"
 );
 
 const params = {
@@ -8389,29 +8343,29 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 31,
-            &quot;community_id&quot;: 1313,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 88,
             &quot;unit&quot;: {
-                &quot;id&quot;: 448,
+                &quot;id&quot;: 182,
                 &quot;label&quot;: &quot;Tower i &middot; 41039&quot;
             },
             &quot;visitor_name&quot;: &quot;Morgan Hirthe&quot;,
             &quot;purpose&quot;: &quot;Visiting&quot;,
             &quot;notes&quot;: null,
-            &quot;checked_in_at&quot;: &quot;2026-09-26T11:17:57+00:00&quot;,
+            &quot;checked_in_at&quot;: &quot;2026-09-30T04:32:45+00:00&quot;,
             &quot;checked_out_at&quot;: null
         },
         {
-            &quot;id&quot;: 32,
-            &quot;community_id&quot;: 1316,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 91,
             &quot;unit&quot;: {
-                &quot;id&quot;: 449,
+                &quot;id&quot;: 183,
                 &quot;label&quot;: &quot;Tower q &middot; 84637&quot;
             },
             &quot;visitor_name&quot;: &quot;Dr. Mona Lemke&quot;,
             &quot;purpose&quot;: &quot;Contractor&quot;,
             &quot;notes&quot;: null,
-            &quot;checked_in_at&quot;: &quot;2026-09-26T11:17:57+00:00&quot;,
+            &quot;checked_in_at&quot;: &quot;2026-09-30T04:32:46+00:00&quot;,
             &quot;checked_out_at&quot;: null
         }
     ],
@@ -8573,7 +8527,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/visitors" \
+    "https://property-flow.test/api/v1/communities/1/visitors" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -8588,7 +8542,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/visitors"
+    "https://property-flow.test/api/v1/communities/1/visitors"
 );
 
 const headers = {
@@ -8620,16 +8574,16 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 33,
-        &quot;community_id&quot;: 1319,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 94,
         &quot;unit&quot;: {
-            &quot;id&quot;: 450,
+            &quot;id&quot;: 184,
             &quot;label&quot;: &quot;Tower i &middot; 61170&quot;
         },
         &quot;visitor_name&quot;: &quot;Morgan Hirthe&quot;,
         &quot;purpose&quot;: &quot;Visiting&quot;,
         &quot;notes&quot;: null,
-        &quot;checked_in_at&quot;: &quot;2026-09-26T11:17:58+00:00&quot;,
+        &quot;checked_in_at&quot;: &quot;2026-09-30T04:32:48+00:00&quot;,
         &quot;checked_out_at&quot;: null
     }
 }</code>
@@ -8779,7 +8733,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://property-flow.test/api/v1/communities/1/visitors/1" \
+    "https://property-flow.test/api/v1/communities/1/visitors/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -8791,7 +8745,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/visitors/1"
+    "https://property-flow.test/api/v1/communities/1/visitors/1"
 );
 
 const headers = {
@@ -8820,16 +8774,16 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 34,
-        &quot;community_id&quot;: 1322,
+        &quot;id&quot;: 6,
+        &quot;community_id&quot;: 97,
         &quot;unit&quot;: {
-            &quot;id&quot;: 451,
+            &quot;id&quot;: 185,
             &quot;label&quot;: &quot;Tower i &middot; 95181&quot;
         },
         &quot;visitor_name&quot;: &quot;Morgan Hirthe&quot;,
         &quot;purpose&quot;: &quot;Visiting&quot;,
         &quot;notes&quot;: null,
-        &quot;checked_in_at&quot;: &quot;2026-09-26T11:17:58+00:00&quot;,
+        &quot;checked_in_at&quot;: &quot;2026-09-30T04:32:49+00:00&quot;,
         &quot;checked_out_at&quot;: null
     }
 }</code>
@@ -8969,7 +8923,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/guest-passes?filter%5Bvalid%5D=1" \
+    --get "https://property-flow.test/api/v1/communities/1/guest-passes?filter%5Bvalid%5D=1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -8977,7 +8931,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/guest-passes"
+    "https://property-flow.test/api/v1/communities/1/guest-passes"
 );
 
 const params = {
@@ -9009,29 +8963,29 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 22,
-            &quot;community_id&quot;: 1325,
+            &quot;id&quot;: 2,
+            &quot;community_id&quot;: 100,
             &quot;unit&quot;: {
-                &quot;id&quot;: 452,
+                &quot;id&quot;: 186,
                 &quot;label&quot;: &quot;Tower s &middot; 10406&quot;
             },
             &quot;guest_name&quot;: &quot;Morgan Hirthe&quot;,
-            &quot;code&quot;: &quot;4Q2LQK&quot;,
-            &quot;valid_from&quot;: &quot;2026-09-26T00:00:00+00:00&quot;,
-            &quot;valid_until&quot;: &quot;2026-09-27T00:00:00+00:00&quot;,
+            &quot;code&quot;: &quot;P6FH2F&quot;,
+            &quot;valid_from&quot;: &quot;2026-09-30T00:00:00+00:00&quot;,
+            &quot;valid_until&quot;: &quot;2026-10-01T00:00:00+00:00&quot;,
             &quot;used_at&quot;: null
         },
         {
-            &quot;id&quot;: 23,
-            &quot;community_id&quot;: 1328,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 103,
             &quot;unit&quot;: {
-                &quot;id&quot;: 453,
-                &quot;label&quot;: &quot;Tower a &middot; 85609&quot;
+                &quot;id&quot;: 187,
+                &quot;label&quot;: &quot;Tower q &middot; 85609&quot;
             },
             &quot;guest_name&quot;: &quot;Hattie Mayert&quot;,
-            &quot;code&quot;: &quot;PFKIN5&quot;,
-            &quot;valid_from&quot;: &quot;2026-09-26T00:00:00+00:00&quot;,
-            &quot;valid_until&quot;: &quot;2026-09-27T00:00:00+00:00&quot;,
+            &quot;code&quot;: &quot;F5DT2Z&quot;,
+            &quot;valid_from&quot;: &quot;2026-09-30T00:00:00+00:00&quot;,
+            &quot;valid_until&quot;: &quot;2026-10-01T00:00:00+00:00&quot;,
             &quot;used_at&quot;: null
         }
     ],
@@ -9181,7 +9135,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/guest-passes" \
+    "https://property-flow.test/api/v1/communities/1/guest-passes" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -9196,7 +9150,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/guest-passes"
+    "https://property-flow.test/api/v1/communities/1/guest-passes"
 );
 
 const headers = {
@@ -9228,16 +9182,16 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 24,
-        &quot;community_id&quot;: 1331,
+        &quot;id&quot;: 4,
+        &quot;community_id&quot;: 106,
         &quot;unit&quot;: {
-            &quot;id&quot;: 454,
+            &quot;id&quot;: 188,
             &quot;label&quot;: &quot;Tower b &middot; 61751&quot;
         },
         &quot;guest_name&quot;: &quot;Morgan Hirthe&quot;,
-        &quot;code&quot;: &quot;SJRORX&quot;,
-        &quot;valid_from&quot;: &quot;2026-09-26T00:00:00+00:00&quot;,
-        &quot;valid_until&quot;: &quot;2026-09-27T00:00:00+00:00&quot;,
+        &quot;code&quot;: &quot;RDZCKO&quot;,
+        &quot;valid_from&quot;: &quot;2026-09-30T00:00:00+00:00&quot;,
+        &quot;valid_until&quot;: &quot;2026-10-01T00:00:00+00:00&quot;,
         &quot;used_at&quot;: null
     }
 }</code>
@@ -9387,7 +9341,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/guest-passes/1" \
+    --get "https://property-flow.test/api/v1/communities/1/guest-passes/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -9395,7 +9349,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/guest-passes/1"
+    "https://property-flow.test/api/v1/communities/1/guest-passes/1"
 );
 
 const headers = {
@@ -9420,16 +9374,16 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 25,
-        &quot;community_id&quot;: 1334,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 109,
         &quot;unit&quot;: {
-            &quot;id&quot;: 455,
+            &quot;id&quot;: 189,
             &quot;label&quot;: &quot;Tower h &middot; 82869&quot;
         },
         &quot;guest_name&quot;: &quot;Morgan Hirthe&quot;,
-        &quot;code&quot;: &quot;4WJBLG&quot;,
-        &quot;valid_from&quot;: &quot;2026-09-26T00:00:00+00:00&quot;,
-        &quot;valid_until&quot;: &quot;2026-09-27T00:00:00+00:00&quot;,
+        &quot;code&quot;: &quot;TBSGQN&quot;,
+        &quot;valid_from&quot;: &quot;2026-09-30T00:00:00+00:00&quot;,
+        &quot;valid_until&quot;: &quot;2026-10-01T00:00:00+00:00&quot;,
         &quot;used_at&quot;: null
     }
 }</code>
@@ -9543,7 +9497,7 @@ code is a 422.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/guest-pass-redemptions" \
+    "https://property-flow.test/api/v1/communities/1/guest-pass-redemptions" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -9555,7 +9509,7 @@ code is a 422.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/guest-pass-redemptions"
+    "https://property-flow.test/api/v1/communities/1/guest-pass-redemptions"
 );
 
 const headers = {
@@ -9584,16 +9538,16 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 35,
-        &quot;community_id&quot;: 1337,
+        &quot;id&quot;: 7,
+        &quot;community_id&quot;: 112,
         &quot;unit&quot;: {
-            &quot;id&quot;: 456,
+            &quot;id&quot;: 190,
             &quot;label&quot;: &quot;Tower x &middot; 84047&quot;
         },
         &quot;visitor_name&quot;: &quot;Mr. Adriel Romaguera&quot;,
         &quot;purpose&quot;: &quot;Contractor&quot;,
         &quot;notes&quot;: null,
-        &quot;checked_in_at&quot;: &quot;2026-09-26T11:18:02+00:00&quot;,
+        &quot;checked_in_at&quot;: &quot;2026-09-30T04:32:59+00:00&quot;,
         &quot;checked_out_at&quot;: null
     }
 }</code>
@@ -9707,7 +9661,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/parking-permits?filter%5Bplate%5D=0&amp;filter%5Bactive%5D=1" \
+    --get "https://property-flow.test/api/v1/communities/1/parking-permits?filter%5Bplate%5D=0&amp;filter%5Bactive%5D=1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -9715,7 +9669,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/parking-permits"
+    "https://property-flow.test/api/v1/communities/1/parking-permits"
 );
 
 const params = {
@@ -9748,29 +9702,29 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 14,
-            &quot;community_id&quot;: 1340,
+            &quot;id&quot;: 2,
+            &quot;community_id&quot;: 115,
             &quot;unit&quot;: {
-                &quot;id&quot;: 457,
+                &quot;id&quot;: 191,
                 &quot;label&quot;: &quot;Tower s &middot; 62982&quot;
             },
             &quot;plate_number&quot;: &quot;wpw-7680&quot;,
             &quot;visitor_name&quot;: &quot;Rogers Leuschke PhD&quot;,
-            &quot;starts_on&quot;: &quot;2026-09-26&quot;,
-            &quot;ends_on&quot;: &quot;2026-09-28&quot;,
+            &quot;starts_on&quot;: &quot;2026-09-30&quot;,
+            &quot;ends_on&quot;: &quot;2026-10-02&quot;,
             &quot;notes&quot;: null
         },
         {
-            &quot;id&quot;: 15,
-            &quot;community_id&quot;: 1343,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 118,
             &quot;unit&quot;: {
-                &quot;id&quot;: 458,
-                &quot;label&quot;: &quot;Tower u &middot; 72195&quot;
+                &quot;id&quot;: 192,
+                &quot;label&quot;: &quot;Tower g &middot; 7556&quot;
             },
             &quot;plate_number&quot;: &quot;mkf-9382&quot;,
             &quot;visitor_name&quot;: &quot;Korey Marvin PhD&quot;,
-            &quot;starts_on&quot;: &quot;2026-09-26&quot;,
-            &quot;ends_on&quot;: &quot;2026-09-28&quot;,
+            &quot;starts_on&quot;: &quot;2026-09-30&quot;,
+            &quot;ends_on&quot;: &quot;2026-10-02&quot;,
             &quot;notes&quot;: null
         }
     ],
@@ -9932,7 +9886,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/parking-permits" \
+    "https://property-flow.test/api/v1/communities/1/parking-permits" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -9949,7 +9903,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/parking-permits"
+    "https://property-flow.test/api/v1/communities/1/parking-permits"
 );
 
 const headers = {
@@ -9983,16 +9937,16 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 16,
-        &quot;community_id&quot;: 1346,
+        &quot;id&quot;: 4,
+        &quot;community_id&quot;: 121,
         &quot;unit&quot;: {
-            &quot;id&quot;: 459,
+            &quot;id&quot;: 193,
             &quot;label&quot;: &quot;Tower s &middot; 54659&quot;
         },
         &quot;plate_number&quot;: &quot;wpw-7680&quot;,
         &quot;visitor_name&quot;: &quot;Rogers Leuschke PhD&quot;,
-        &quot;starts_on&quot;: &quot;2026-09-26&quot;,
-        &quot;ends_on&quot;: &quot;2026-09-28&quot;,
+        &quot;starts_on&quot;: &quot;2026-09-30&quot;,
+        &quot;ends_on&quot;: &quot;2026-10-02&quot;,
         &quot;notes&quot;: null
     }
 }</code>
@@ -10166,7 +10120,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://property-flow.test/api/v1/communities/1/parking-permits/1" \
+    "https://property-flow.test/api/v1/communities/1/parking-permits/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -10174,7 +10128,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/parking-permits/1"
+    "https://property-flow.test/api/v1/communities/1/parking-permits/1"
 );
 
 const headers = {
@@ -10306,7 +10260,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/incident-reports?filter%5Bseverity%5D=high&amp;filter%5Bopen%5D=1&amp;sort=-occurred_at" \
+    --get "https://property-flow.test/api/v1/communities/1/incident-reports?filter%5Bseverity%5D=high&amp;filter%5Bopen%5D=1&amp;sort=-occurred_at" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -10314,7 +10268,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/incident-reports"
+    "https://property-flow.test/api/v1/communities/1/incident-reports"
 );
 
 const params = {
@@ -10348,32 +10302,32 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 19,
-            &quot;community_id&quot;: 1349,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 124,
             &quot;unit&quot;: {
-                &quot;id&quot;: 460,
+                &quot;id&quot;: 194,
                 &quot;label&quot;: &quot;Tower k &middot; 93058&quot;
             },
             &quot;title&quot;: &quot;Adipisci quidem nostrum qui commodi.&quot;,
             &quot;description&quot;: &quot;Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.&quot;,
             &quot;location&quot;: &quot;Lobby&quot;,
             &quot;severity&quot;: &quot;low&quot;,
-            &quot;occurred_at&quot;: &quot;2026-09-26T11:18:04+00:00&quot;,
+            &quot;occurred_at&quot;: &quot;2026-09-30T04:33:05+00:00&quot;,
             &quot;resolved_at&quot;: null,
             &quot;resolution_notes&quot;: null
         },
         {
-            &quot;id&quot;: 20,
-            &quot;community_id&quot;: 1352,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 127,
             &quot;unit&quot;: {
-                &quot;id&quot;: 461,
+                &quot;id&quot;: 195,
                 &quot;label&quot;: &quot;Tower m &middot; 76987&quot;
             },
             &quot;title&quot;: &quot;Sunt suscipit doloribus fugiat ut aut.&quot;,
             &quot;description&quot;: &quot;Error neque recusandae et ipsam dolorem et ut dicta. Assumenda consequatur ut et sunt quisquam. Repellendus ut eaque alias ratione dolores.&quot;,
             &quot;location&quot;: &quot;Lobby&quot;,
             &quot;severity&quot;: &quot;low&quot;,
-            &quot;occurred_at&quot;: &quot;2026-09-26T11:18:04+00:00&quot;,
+            &quot;occurred_at&quot;: &quot;2026-09-30T04:33:06+00:00&quot;,
             &quot;resolved_at&quot;: null,
             &quot;resolution_notes&quot;: null
         }
@@ -10548,7 +10502,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/incident-reports" \
+    "https://property-flow.test/api/v1/communities/1/incident-reports" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
@@ -10558,12 +10512,12 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "occurred_at=2026-10-02T22:15:00-04:00"\
     --form "unit_id=1"\
     --form "location=P2, near spot 41"\
-    --form "photos[]=@/private/var/folders/yw/b2m38hv92jd695td2jqmtlnw0000gn/T/php0mtl2p89qrb03L5Cb33" </code></pre></div>
+    --form "photos[]=@/private/var/folders/yw/b2m38hv92jd695td2jqmtlnw0000gn/T/phpf57qikq8o9lj5K050E3" </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/incident-reports"
+    "https://property-flow.test/api/v1/communities/1/incident-reports"
 );
 
 const headers = {
@@ -10597,17 +10551,17 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 21,
-        &quot;community_id&quot;: 1355,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 130,
         &quot;unit&quot;: {
-            &quot;id&quot;: 462,
+            &quot;id&quot;: 196,
             &quot;label&quot;: &quot;Tower s &middot; 7627&quot;
         },
         &quot;title&quot;: &quot;Eius et animi quos.&quot;,
         &quot;description&quot;: &quot;Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.&quot;,
         &quot;location&quot;: &quot;Hallway&quot;,
         &quot;severity&quot;: &quot;low&quot;,
-        &quot;occurred_at&quot;: &quot;2026-09-26T11:18:05+00:00&quot;,
+        &quot;occurred_at&quot;: &quot;2026-09-30T04:33:08+00:00&quot;,
         &quot;resolved_at&quot;: null,
         &quot;resolution_notes&quot;: null
     }
@@ -10796,7 +10750,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/incident-reports/1" \
+    --get "https://property-flow.test/api/v1/communities/1/incident-reports/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -10804,7 +10758,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/incident-reports/1"
+    "https://property-flow.test/api/v1/communities/1/incident-reports/1"
 );
 
 const headers = {
@@ -10829,17 +10783,17 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 22,
-        &quot;community_id&quot;: 1358,
+        &quot;id&quot;: 6,
+        &quot;community_id&quot;: 133,
         &quot;unit&quot;: {
-            &quot;id&quot;: 463,
+            &quot;id&quot;: 197,
             &quot;label&quot;: &quot;Tower g &middot; 27868&quot;
         },
         &quot;title&quot;: &quot;Adipisci quidem nostrum qui commodi.&quot;,
         &quot;description&quot;: &quot;Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.&quot;,
         &quot;location&quot;: &quot;Lobby&quot;,
         &quot;severity&quot;: &quot;low&quot;,
-        &quot;occurred_at&quot;: &quot;2026-09-26T11:18:05+00:00&quot;,
+        &quot;occurred_at&quot;: &quot;2026-09-30T04:33:09+00:00&quot;,
         &quot;resolved_at&quot;: null,
         &quot;resolution_notes&quot;: null
     }
@@ -10959,7 +10913,7 @@ whether you can pay online.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/units/1/account" \
+    --get "https://property-flow.test/api/v1/communities/1/units/1/account" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -10967,7 +10921,7 @@ whether you can pay online.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/units/1/account"
+    "https://property-flow.test/api/v1/communities/1/units/1/account"
 );
 
 const headers = {
@@ -11114,20 +11068,20 @@ charge, negative a payment or credit.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/units/1/statement?from=2026-07-01&amp;to=2026-09-30" \
+    --get "https://property-flow.test/api/v1/communities/1/units/1/statement?from=2026-07-01&amp;to=2026-09-30" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"from\": \"2026-09-26\",
-    \"to\": \"2052-10-19\"
+    \"from\": \"2026-09-30\",
+    \"to\": \"2052-10-23\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/units/1/statement"
+    "https://property-flow.test/api/v1/communities/1/units/1/statement"
 );
 
 const params = {
@@ -11144,8 +11098,8 @@ const headers = {
 };
 
 let body = {
-    "from": "2026-09-26",
-    "to": "2052-10-19"
+    "from": "2026-09-30",
+    "to": "2052-10-23"
 };
 
 fetch(url, {
@@ -11302,10 +11256,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="from"                data-endpoint="GETapi-v1-communities--community--units--unit--statement"
-               value="2026-09-26"
+               value="2026-09-30"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-09-26</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-09-30</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>to</code></b>&nbsp;&nbsp;
@@ -11314,10 +11268,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="to"                data-endpoint="GETapi-v1-communities--community--units--unit--statement"
-               value="2052-10-19"
+               value="2052-10-23"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>from</code>. Example: <code>2052-10-19</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>from</code>. Example: <code>2052-10-23</code></p>
         </div>
         </form>
 
@@ -11335,20 +11289,20 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/units/1/statement.pdf" \
+    --get "https://property-flow.test/api/v1/communities/1/units/1/statement.pdf" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"from\": \"2026-09-26\",
-    \"to\": \"2052-10-19\"
+    \"from\": \"2026-09-30\",
+    \"to\": \"2052-10-23\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/units/1/statement.pdf"
+    "https://property-flow.test/api/v1/communities/1/units/1/statement.pdf"
 );
 
 const headers = {
@@ -11358,8 +11312,8 @@ const headers = {
 };
 
 let body = {
-    "from": "2026-09-26",
-    "to": "2052-10-19"
+    "from": "2026-09-30",
+    "to": "2052-10-23"
 };
 
 fetch(url, {
@@ -11478,10 +11432,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="from"                data-endpoint="GETapi-v1-communities--community--units--unit--statement-pdf"
-               value="2026-09-26"
+               value="2026-09-30"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-09-26</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-09-30</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>to</code></b>&nbsp;&nbsp;
@@ -11490,10 +11444,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="to"                data-endpoint="GETapi-v1-communities--community--units--unit--statement-pdf"
-               value="2052-10-19"
+               value="2052-10-23"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>from</code>. Example: <code>2052-10-19</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>from</code>. Example: <code>2052-10-23</code></p>
         </div>
         </form>
 
@@ -11513,7 +11467,7 @@ up in the account afterwards. Nothing owed is a 422.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/units/1/online-payments" \
+    "https://property-flow.test/api/v1/communities/1/units/1/online-payments" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -11521,7 +11475,7 @@ up in the account afterwards. Nothing owed is a 422.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/units/1/online-payments"
+    "https://property-flow.test/api/v1/communities/1/units/1/online-payments"
 );
 
 const headers = {
@@ -11661,7 +11615,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/invoices?filter%5Bunit_id%5D=1&amp;filter%5Bstatus%5D=open&amp;sort=-issued_on" \
+    --get "https://property-flow.test/api/v1/communities/1/invoices?filter%5Bunit_id%5D=1&amp;filter%5Bstatus%5D=open&amp;sort=-issued_on" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -11669,7 +11623,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/invoices"
+    "https://property-flow.test/api/v1/communities/1/invoices"
 );
 
 const params = {
@@ -11703,15 +11657,15 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 436,
-            &quot;community_id&quot;: 1361,
+            &quot;id&quot;: 421,
+            &quot;community_id&quot;: 136,
             &quot;number&quot;: &quot;INV-759832&quot;,
             &quot;unit&quot;: {
-                &quot;id&quot;: 464,
-                &quot;label&quot;: &quot;Tower j &middot; 89349&quot;
+                &quot;id&quot;: 198,
+                &quot;label&quot;: &quot;Tower u &middot; 89349&quot;
             },
-            &quot;issued_on&quot;: &quot;2026-09-26&quot;,
-            &quot;due_on&quot;: &quot;2026-10-10&quot;,
+            &quot;issued_on&quot;: &quot;2026-09-30&quot;,
+            &quot;due_on&quot;: &quot;2026-10-14&quot;,
             &quot;memo&quot;: null,
             &quot;total_cents&quot;: 10000,
             &quot;paid_cents&quot;: 0,
@@ -11721,15 +11675,15 @@ fetch(url, {
             &quot;overdue&quot;: false
         },
         {
-            &quot;id&quot;: 437,
-            &quot;community_id&quot;: 1363,
-            &quot;number&quot;: &quot;INV-192369&quot;,
+            &quot;id&quot;: 422,
+            &quot;community_id&quot;: 138,
+            &quot;number&quot;: &quot;INV-156696&quot;,
             &quot;unit&quot;: {
-                &quot;id&quot;: 465,
-                &quot;label&quot;: &quot;Tower s &middot; 27648&quot;
+                &quot;id&quot;: 199,
+                &quot;label&quot;: &quot;Tower s &middot; 54533&quot;
             },
-            &quot;issued_on&quot;: &quot;2026-09-26&quot;,
-            &quot;due_on&quot;: &quot;2026-10-10&quot;,
+            &quot;issued_on&quot;: &quot;2026-09-30&quot;,
+            &quot;due_on&quot;: &quot;2026-10-14&quot;,
             &quot;memo&quot;: null,
             &quot;total_cents&quot;: 10000,
             &quot;paid_cents&quot;: 0,
@@ -11909,7 +11863,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/invoices/1" \
+    --get "https://property-flow.test/api/v1/communities/1/invoices/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -11917,7 +11871,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/invoices/1"
+    "https://property-flow.test/api/v1/communities/1/invoices/1"
 );
 
 const headers = {
@@ -11942,15 +11896,15 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 438,
-        &quot;community_id&quot;: 1365,
+        &quot;id&quot;: 423,
+        &quot;community_id&quot;: 140,
         &quot;number&quot;: &quot;INV-935815&quot;,
         &quot;unit&quot;: {
-            &quot;id&quot;: 466,
+            &quot;id&quot;: 200,
             &quot;label&quot;: &quot;Tower x &middot; 23632&quot;
         },
-        &quot;issued_on&quot;: &quot;2026-09-26&quot;,
-        &quot;due_on&quot;: &quot;2026-10-10&quot;,
+        &quot;issued_on&quot;: &quot;2026-09-30&quot;,
+        &quot;due_on&quot;: &quot;2026-10-14&quot;,
         &quot;memo&quot;: null,
         &quot;total_cents&quot;: 10000,
         &quot;paid_cents&quot;: 0,
@@ -12075,7 +12029,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/payments?filter%5Bunit_id%5D=1&amp;filter%5Bmethod%5D=cheque&amp;sort=-received_on" \
+    --get "https://property-flow.test/api/v1/communities/1/payments?filter%5Bunit_id%5D=1&amp;filter%5Bmethod%5D=cheque&amp;sort=-received_on" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -12083,7 +12037,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/payments"
+    "https://property-flow.test/api/v1/communities/1/payments"
 );
 
 const params = {
@@ -12117,40 +12071,40 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 334,
-            &quot;community_id&quot;: 1367,
+            &quot;id&quot;: 315,
+            &quot;community_id&quot;: 142,
             &quot;number&quot;: &quot;RCT-453885&quot;,
             &quot;unit&quot;: {
-                &quot;id&quot;: 467,
+                &quot;id&quot;: 201,
                 &quot;label&quot;: &quot;Tower x &middot; 95981&quot;
             },
             &quot;method&quot;: &quot;cheque&quot;,
             &quot;method_label&quot;: &quot;Cheque&quot;,
             &quot;reference&quot;: null,
             &quot;amount_cents&quot;: 10000,
-            &quot;received_on&quot;: &quot;2026-09-26&quot;,
+            &quot;received_on&quot;: &quot;2026-09-30&quot;,
             &quot;memo&quot;: null,
             &quot;reversed&quot;: false,
             &quot;reversal_reason&quot;: null,
-            &quot;receipt_url&quot;: &quot;http://property-flow.test/api/v1/communities/1367/payments/334/receipt&quot;
+            &quot;receipt_url&quot;: &quot;http://property-flow.test/api/v1/communities/142/payments/315/receipt&quot;
         },
         {
-            &quot;id&quot;: 335,
-            &quot;community_id&quot;: 1369,
+            &quot;id&quot;: 316,
+            &quot;community_id&quot;: 144,
             &quot;number&quot;: &quot;RCT-486235&quot;,
             &quot;unit&quot;: {
-                &quot;id&quot;: 468,
-                &quot;label&quot;: &quot;Tower t &middot; 99088&quot;
+                &quot;id&quot;: 202,
+                &quot;label&quot;: &quot;Tower x &middot; 99088&quot;
             },
             &quot;method&quot;: &quot;cheque&quot;,
             &quot;method_label&quot;: &quot;Cheque&quot;,
             &quot;reference&quot;: null,
             &quot;amount_cents&quot;: 10000,
-            &quot;received_on&quot;: &quot;2026-09-26&quot;,
+            &quot;received_on&quot;: &quot;2026-09-30&quot;,
             &quot;memo&quot;: null,
             &quot;reversed&quot;: false,
             &quot;reversal_reason&quot;: null,
-            &quot;receipt_url&quot;: &quot;http://property-flow.test/api/v1/communities/1369/payments/335/receipt&quot;
+            &quot;receipt_url&quot;: &quot;http://property-flow.test/api/v1/communities/144/payments/316/receipt&quot;
         }
     ],
     &quot;links&quot;: {
@@ -12324,7 +12278,7 @@ applied to the unit's oldest open invoices; any excess stays as a credit.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/payments" \
+    "https://property-flow.test/api/v1/communities/1/payments" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -12341,7 +12295,7 @@ applied to the unit's oldest open invoices; any excess stays as a credit.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/payments"
+    "https://property-flow.test/api/v1/communities/1/payments"
 );
 
 const headers = {
@@ -12375,22 +12329,22 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 336,
-        &quot;community_id&quot;: 1371,
+        &quot;id&quot;: 317,
+        &quot;community_id&quot;: 146,
         &quot;number&quot;: &quot;RCT-592878&quot;,
         &quot;unit&quot;: {
-            &quot;id&quot;: 469,
+            &quot;id&quot;: 203,
             &quot;label&quot;: &quot;Tower s &middot; 8316&quot;
         },
         &quot;method&quot;: &quot;cheque&quot;,
         &quot;method_label&quot;: &quot;Cheque&quot;,
         &quot;reference&quot;: null,
         &quot;amount_cents&quot;: 10000,
-        &quot;received_on&quot;: &quot;2026-09-26&quot;,
+        &quot;received_on&quot;: &quot;2026-09-30&quot;,
         &quot;memo&quot;: null,
         &quot;reversed&quot;: false,
         &quot;reversal_reason&quot;: null,
-        &quot;receipt_url&quot;: &quot;http://property-flow.test/api/v1/communities/1371/payments/336/receipt&quot;
+        &quot;receipt_url&quot;: &quot;http://property-flow.test/api/v1/communities/146/payments/317/receipt&quot;
     }
 }</code>
  </pre>
@@ -12563,7 +12517,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/payments/1" \
+    --get "https://property-flow.test/api/v1/communities/1/payments/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -12571,7 +12525,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/payments/1"
+    "https://property-flow.test/api/v1/communities/1/payments/1"
 );
 
 const headers = {
@@ -12596,22 +12550,22 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 337,
-        &quot;community_id&quot;: 1373,
+        &quot;id&quot;: 318,
+        &quot;community_id&quot;: 148,
         &quot;number&quot;: &quot;RCT-701854&quot;,
         &quot;unit&quot;: {
-            &quot;id&quot;: 470,
+            &quot;id&quot;: 204,
             &quot;label&quot;: &quot;Tower x &middot; 61519&quot;
         },
         &quot;method&quot;: &quot;cheque&quot;,
         &quot;method_label&quot;: &quot;Cheque&quot;,
         &quot;reference&quot;: null,
         &quot;amount_cents&quot;: 10000,
-        &quot;received_on&quot;: &quot;2026-09-26&quot;,
+        &quot;received_on&quot;: &quot;2026-09-30&quot;,
         &quot;memo&quot;: null,
         &quot;reversed&quot;: false,
         &quot;reversal_reason&quot;: null,
-        &quot;receipt_url&quot;: &quot;http://property-flow.test/api/v1/communities/1373/payments/337/receipt&quot;
+        &quot;receipt_url&quot;: &quot;http://property-flow.test/api/v1/communities/148/payments/318/receipt&quot;
     }
 }</code>
  </pre>
@@ -12723,7 +12677,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/payments/1/receipt" \
+    --get "https://property-flow.test/api/v1/communities/1/payments/1/receipt" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -12731,7 +12685,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/payments/1/receipt"
+    "https://property-flow.test/api/v1/communities/1/payments/1/receipt"
 );
 
 const headers = {
@@ -12864,7 +12818,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/vendor-bills?filter%5Bstatus%5D=pending&amp;sort=due_on" \
+    --get "https://property-flow.test/api/v1/communities/1/vendor-bills?filter%5Bstatus%5D=pending&amp;sort=due_on" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -12872,7 +12826,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/vendor-bills"
+    "https://property-flow.test/api/v1/communities/1/vendor-bills"
 );
 
 const params = {
@@ -12905,22 +12859,22 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 31,
-            &quot;community_id&quot;: 1375,
+            &quot;id&quot;: 6,
+            &quot;community_id&quot;: 150,
             &quot;number&quot;: &quot;BILL-970482&quot;,
             &quot;vendor&quot;: {
-                &quot;id&quot;: 56,
+                &quot;id&quot;: 8,
                 &quot;name&quot;: &quot;Considine LLC&quot;
             },
             &quot;account&quot;: {
-                &quot;id&quot;: 144,
+                &quot;id&quot;: 35,
                 &quot;label&quot;: &quot;9351 &middot; deleniti nemo&quot;
             },
             &quot;vendor_reference&quot;: null,
             &quot;description&quot;: &quot;Adipisci quidem nostrum qui commodi.&quot;,
             &quot;amount_cents&quot;: 149419,
-            &quot;billed_on&quot;: &quot;2026-09-26&quot;,
-            &quot;due_on&quot;: &quot;2026-10-26&quot;,
+            &quot;billed_on&quot;: &quot;2026-09-30&quot;,
+            &quot;due_on&quot;: &quot;2026-10-30&quot;,
             &quot;status&quot;: &quot;pending&quot;,
             &quot;status_label&quot;: &quot;Awaiting approval&quot;,
             &quot;decided_at&quot;: null,
@@ -12928,22 +12882,22 @@ fetch(url, {
             &quot;paid_on&quot;: null
         },
         {
-            &quot;id&quot;: 32,
-            &quot;community_id&quot;: 1377,
+            &quot;id&quot;: 7,
+            &quot;community_id&quot;: 152,
             &quot;number&quot;: &quot;BILL-530889&quot;,
             &quot;vendor&quot;: {
-                &quot;id&quot;: 57,
+                &quot;id&quot;: 9,
                 &quot;name&quot;: &quot;Homenick, Schimmel and Glover&quot;
             },
             &quot;account&quot;: {
-                &quot;id&quot;: 145,
+                &quot;id&quot;: 36,
                 &quot;label&quot;: &quot;8330 &middot; et ut&quot;
             },
             &quot;vendor_reference&quot;: null,
             &quot;description&quot;: &quot;Rerum ex repellendus.&quot;,
             &quot;amount_cents&quot;: 18636,
-            &quot;billed_on&quot;: &quot;2026-09-26&quot;,
-            &quot;due_on&quot;: &quot;2026-10-26&quot;,
+            &quot;billed_on&quot;: &quot;2026-09-30&quot;,
+            &quot;due_on&quot;: &quot;2026-10-30&quot;,
             &quot;status&quot;: &quot;pending&quot;,
             &quot;status_label&quot;: &quot;Awaiting approval&quot;,
             &quot;decided_at&quot;: null,
@@ -13109,7 +13063,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/vendor-bills/1" \
+    --get "https://property-flow.test/api/v1/communities/1/vendor-bills/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -13117,7 +13071,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/vendor-bills/1"
+    "https://property-flow.test/api/v1/communities/1/vendor-bills/1"
 );
 
 const headers = {
@@ -13142,22 +13096,22 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 33,
-        &quot;community_id&quot;: 1379,
+        &quot;id&quot;: 8,
+        &quot;community_id&quot;: 154,
         &quot;number&quot;: &quot;BILL-634659&quot;,
         &quot;vendor&quot;: {
-            &quot;id&quot;: 58,
+            &quot;id&quot;: 10,
             &quot;name&quot;: &quot;Considine LLC&quot;
         },
         &quot;account&quot;: {
-            &quot;id&quot;: 146,
+            &quot;id&quot;: 37,
             &quot;label&quot;: &quot;6945 &middot; neque blanditiis&quot;
         },
         &quot;vendor_reference&quot;: null,
         &quot;description&quot;: &quot;Adipisci quidem nostrum qui commodi.&quot;,
         &quot;amount_cents&quot;: 149419,
-        &quot;billed_on&quot;: &quot;2026-09-26&quot;,
-        &quot;due_on&quot;: &quot;2026-10-26&quot;,
+        &quot;billed_on&quot;: &quot;2026-09-30&quot;,
+        &quot;due_on&quot;: &quot;2026-10-30&quot;,
         &quot;status&quot;: &quot;pending&quot;,
         &quot;status_label&quot;: &quot;Awaiting approval&quot;,
         &quot;decided_at&quot;: null,
@@ -13274,7 +13228,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/vendor-bills/1/decision" \
+    "https://property-flow.test/api/v1/communities/1/vendor-bills/1/decision" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -13287,7 +13241,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/vendor-bills/1/decision"
+    "https://property-flow.test/api/v1/communities/1/vendor-bills/1/decision"
 );
 
 const headers = {
@@ -13317,22 +13271,22 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 34,
-        &quot;community_id&quot;: 1381,
+        &quot;id&quot;: 9,
+        &quot;community_id&quot;: 156,
         &quot;number&quot;: &quot;BILL-153670&quot;,
         &quot;vendor&quot;: {
-            &quot;id&quot;: 59,
+            &quot;id&quot;: 11,
             &quot;name&quot;: &quot;Leuschke, Bauch and Fritsch&quot;
         },
         &quot;account&quot;: {
-            &quot;id&quot;: 147,
+            &quot;id&quot;: 38,
             &quot;label&quot;: &quot;9043 &middot; voluptatem laboriosam&quot;
         },
         &quot;vendor_reference&quot;: null,
         &quot;description&quot;: &quot;Et animi quos velit.&quot;,
         &quot;amount_cents&quot;: 97801,
-        &quot;billed_on&quot;: &quot;2026-09-26&quot;,
-        &quot;due_on&quot;: &quot;2026-10-26&quot;,
+        &quot;billed_on&quot;: &quot;2026-09-30&quot;,
+        &quot;due_on&quot;: &quot;2026-10-30&quot;,
         &quot;status&quot;: &quot;pending&quot;,
         &quot;status_label&quot;: &quot;Awaiting approval&quot;,
         &quot;decided_at&quot;: null,
@@ -13479,7 +13433,7 @@ appoint a proxy to vote for them. Results appear only once voting closes.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/ballots?filter%5Bstatus%5D=open&amp;sort=-closes_at" \
+    --get "https://property-flow.test/api/v1/communities/1/ballots?filter%5Bstatus%5D=open&amp;sort=-closes_at" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -13487,7 +13441,7 @@ appoint a proxy to vote for them. Results appear only once voting closes.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/ballots"
+    "https://property-flow.test/api/v1/communities/1/ballots"
 );
 
 const params = {
@@ -13520,34 +13474,34 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 17,
-            &quot;community_id&quot;: 1383,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 158,
             &quot;meeting&quot;: {
-                &quot;id&quot;: 35,
+                &quot;id&quot;: 3,
                 &quot;title&quot;: &quot;Annual General Meeting&quot;
             },
             &quot;title&quot;: &quot;Approve the reserve fund top-up&quot;,
             &quot;description&quot;: null,
             &quot;weighting&quot;: &quot;unit_factor&quot;,
             &quot;quorum_percent&quot;: 25,
-            &quot;opens_at&quot;: &quot;2026-09-25T11:18:09+00:00&quot;,
-            &quot;closes_at&quot;: &quot;2026-10-03T11:18:09+00:00&quot;,
+            &quot;opens_at&quot;: &quot;2026-09-29T04:33:22+00:00&quot;,
+            &quot;closes_at&quot;: &quot;2026-10-07T04:33:22+00:00&quot;,
             &quot;status&quot;: &quot;draft&quot;,
             &quot;status_label&quot;: &quot;Draft&quot;
         },
         {
-            &quot;id&quot;: 18,
-            &quot;community_id&quot;: 1385,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 160,
             &quot;meeting&quot;: {
-                &quot;id&quot;: 36,
+                &quot;id&quot;: 4,
                 &quot;title&quot;: &quot;Annual General Meeting&quot;
             },
             &quot;title&quot;: &quot;Approve the reserve fund top-up&quot;,
             &quot;description&quot;: null,
             &quot;weighting&quot;: &quot;unit_factor&quot;,
             &quot;quorum_percent&quot;: 25,
-            &quot;opens_at&quot;: &quot;2026-09-25T11:18:10+00:00&quot;,
-            &quot;closes_at&quot;: &quot;2026-10-03T11:18:10+00:00&quot;,
+            &quot;opens_at&quot;: &quot;2026-09-29T04:33:23+00:00&quot;,
+            &quot;closes_at&quot;: &quot;2026-10-07T04:33:23+00:00&quot;,
             &quot;status&quot;: &quot;draft&quot;,
             &quot;status_label&quot;: &quot;Draft&quot;
         }
@@ -13712,7 +13666,7 @@ people you may appoint while voting is open.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/ballots/1" \
+    --get "https://property-flow.test/api/v1/communities/1/ballots/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -13720,7 +13674,7 @@ people you may appoint while voting is open.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/ballots/1"
+    "https://property-flow.test/api/v1/communities/1/ballots/1"
 );
 
 const headers = {
@@ -13745,27 +13699,27 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 19,
-        &quot;community_id&quot;: 1387,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 162,
         &quot;meeting&quot;: {
-            &quot;id&quot;: 37,
+            &quot;id&quot;: 5,
             &quot;title&quot;: &quot;Annual General Meeting&quot;
         },
         &quot;title&quot;: &quot;Approve the reserve fund top-up&quot;,
         &quot;description&quot;: null,
         &quot;weighting&quot;: &quot;unit_factor&quot;,
         &quot;quorum_percent&quot;: 25,
-        &quot;opens_at&quot;: &quot;2026-09-25T11:18:10+00:00&quot;,
-        &quot;closes_at&quot;: &quot;2026-10-03T11:18:10+00:00&quot;,
+        &quot;opens_at&quot;: &quot;2026-09-29T04:33:24+00:00&quot;,
+        &quot;closes_at&quot;: &quot;2026-10-07T04:33:24+00:00&quot;,
         &quot;status&quot;: &quot;draft&quot;,
         &quot;status_label&quot;: &quot;Draft&quot;,
         &quot;questions&quot;: [
             {
-                &quot;id&quot;: 6,
+                &quot;id&quot;: 4,
                 &quot;title&quot;: &quot;Do you approve?&quot;,
                 &quot;options&quot;: [
                     {
-                        &quot;id&quot;: 13,
+                        &quot;id&quot;: 9,
                         &quot;label&quot;: &quot;Yes&quot;
                     }
                 ]
@@ -13905,7 +13859,7 @@ window, or for a unit you can't vote for is refused.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/ballots/1/votes" \
+    "https://property-flow.test/api/v1/communities/1/ballots/1/votes" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -13921,7 +13875,7 @@ window, or for a unit you can't vote for is refused.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/ballots/1/votes"
+    "https://property-flow.test/api/v1/communities/1/ballots/1/votes"
 );
 
 const headers = {
@@ -14093,7 +14047,7 @@ the ballot's <code>proxy_candidates</code>. Appointing again replaces the previo
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/ballots/1/proxies" \
+    "https://property-flow.test/api/v1/communities/1/ballots/1/proxies" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -14106,7 +14060,7 @@ the ballot's <code>proxy_candidates</code>. Appointing again replaces the previo
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/ballots/1/proxies"
+    "https://property-flow.test/api/v1/communities/1/ballots/1/proxies"
 );
 
 const headers = {
@@ -14278,7 +14232,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://property-flow.test/api/v1/communities/1/ballots/1/proxies/9" \
+    "https://property-flow.test/api/v1/communities/1/ballots/1/proxies/9" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -14286,7 +14240,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/ballots/1/proxies/9"
+    "https://property-flow.test/api/v1/communities/1/ballots/1/proxies/9"
 );
 
 const headers = {
@@ -14431,7 +14385,7 @@ once published (the team also sees drafts).</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/meetings?filter%5Bwhen%5D=upcoming&amp;sort=-starts_at" \
+    --get "https://property-flow.test/api/v1/communities/1/meetings?filter%5Bwhen%5D=upcoming&amp;sort=-starts_at" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -14439,7 +14393,7 @@ once published (the team also sees drafts).</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/meetings"
+    "https://property-flow.test/api/v1/communities/1/meetings"
 );
 
 const params = {
@@ -14472,23 +14426,23 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 38,
-            &quot;community_id&quot;: 1389,
+            &quot;id&quot;: 6,
+            &quot;community_id&quot;: 164,
             &quot;title&quot;: &quot;Annual General Meeting&quot;,
             &quot;kind&quot;: &quot;agm&quot;,
             &quot;kind_label&quot;: &quot;Annual general meeting&quot;,
-            &quot;starts_at&quot;: &quot;2026-10-17T19:00:00+00:00&quot;,
+            &quot;starts_at&quot;: &quot;2026-10-21T19:00:00+00:00&quot;,
             &quot;location&quot;: &quot;Party Room&quot;,
             &quot;description&quot;: null,
             &quot;closed&quot;: false
         },
         {
-            &quot;id&quot;: 39,
-            &quot;community_id&quot;: 1390,
+            &quot;id&quot;: 7,
+            &quot;community_id&quot;: 165,
             &quot;title&quot;: &quot;Annual General Meeting&quot;,
             &quot;kind&quot;: &quot;agm&quot;,
             &quot;kind_label&quot;: &quot;Annual general meeting&quot;,
-            &quot;starts_at&quot;: &quot;2026-10-17T19:00:00+00:00&quot;,
+            &quot;starts_at&quot;: &quot;2026-10-21T19:00:00+00:00&quot;,
             &quot;location&quot;: &quot;Party Room&quot;,
             &quot;description&quot;: null,
             &quot;closed&quot;: false
@@ -14652,7 +14606,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/meetings/1" \
+    --get "https://property-flow.test/api/v1/communities/1/meetings/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -14660,7 +14614,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/meetings/1"
+    "https://property-flow.test/api/v1/communities/1/meetings/1"
 );
 
 const headers = {
@@ -14685,12 +14639,12 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 40,
-        &quot;community_id&quot;: 1391,
+        &quot;id&quot;: 8,
+        &quot;community_id&quot;: 166,
         &quot;title&quot;: &quot;Annual General Meeting&quot;,
         &quot;kind&quot;: &quot;agm&quot;,
         &quot;kind_label&quot;: &quot;Annual general meeting&quot;,
-        &quot;starts_at&quot;: &quot;2026-10-17T19:00:00+00:00&quot;,
+        &quot;starts_at&quot;: &quot;2026-10-21T19:00:00+00:00&quot;,
         &quot;location&quot;: &quot;Party Room&quot;,
         &quot;description&quot;: null,
         &quot;closed&quot;: false,
@@ -14813,7 +14767,7 @@ their own units. Owners ask the board before renovating; the decision comes with
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/violations?filter%5Bstatus%5D=open&amp;sort=-observed_at" \
+    --get "https://property-flow.test/api/v1/communities/1/violations?filter%5Bstatus%5D=open&amp;sort=-observed_at" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -14821,7 +14775,7 @@ their own units. Owners ask the board before renovating; the decision comes with
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/violations"
+    "https://property-flow.test/api/v1/communities/1/violations"
 );
 
 const params = {
@@ -14854,18 +14808,18 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 20,
-            &quot;community_id&quot;: 1392,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 167,
             &quot;rule&quot;: {
-                &quot;id&quot;: 37,
+                &quot;id&quot;: 5,
                 &quot;title&quot;: &quot;Unauthorized parking&quot;,
                 &quot;reference&quot;: &quot;Rules, s. 15&quot;
             },
             &quot;unit&quot;: {
-                &quot;id&quot;: 471,
-                &quot;label&quot;: &quot;Tower b &middot; 9488&quot;
+                &quot;id&quot;: 205,
+                &quot;label&quot;: &quot;Tower s &middot; 9488&quot;
             },
-            &quot;observed_at&quot;: &quot;2026-09-26T11:18:11+00:00&quot;,
+            &quot;observed_at&quot;: &quot;2026-09-30T04:33:26+00:00&quot;,
             &quot;location&quot;: null,
             &quot;description&quot;: &quot;Adipisci quidem nostrum qui commodi incidunt iure.&quot;,
             &quot;status&quot;: &quot;open&quot;,
@@ -14876,20 +14830,20 @@ fetch(url, {
             &quot;resolution_notes&quot;: null
         },
         {
-            &quot;id&quot;: 21,
-            &quot;community_id&quot;: 1395,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 170,
             &quot;rule&quot;: {
-                &quot;id&quot;: 38,
+                &quot;id&quot;: 6,
                 &quot;title&quot;: &quot;Pet off leash in common areas&quot;,
-                &quot;reference&quot;: &quot;Rules, s. 16&quot;
+                &quot;reference&quot;: &quot;Rules, s. 3&quot;
             },
             &quot;unit&quot;: {
-                &quot;id&quot;: 472,
-                &quot;label&quot;: &quot;Tower w &middot; 99976&quot;
+                &quot;id&quot;: 206,
+                &quot;label&quot;: &quot;Tower n &middot; 55820&quot;
             },
-            &quot;observed_at&quot;: &quot;2026-09-26T11:18:11+00:00&quot;,
+            &quot;observed_at&quot;: &quot;2026-09-30T04:33:27+00:00&quot;,
             &quot;location&quot;: null,
-            &quot;description&quot;: &quot;Totam itaque saepe dolorem deleniti et est.&quot;,
+            &quot;description&quot;: &quot;Et dolores quia maiores.&quot;,
             &quot;status&quot;: &quot;open&quot;,
             &quot;status_label&quot;: &quot;Open&quot;,
             &quot;stage&quot;: null,
@@ -15057,7 +15011,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/violations" \
+    "https://property-flow.test/api/v1/communities/1/violations" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
@@ -15066,12 +15020,12 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "description=Dog off leash in the lobby."\
     --form "location=Lobby"\
     --form "observed_at=2026-10-01T08:00:00-04:00"\
-    --form "photos[]=@/private/var/folders/yw/b2m38hv92jd695td2jqmtlnw0000gn/T/phpjj2a8u45nckh9AdrmCZ" </code></pre></div>
+    --form "photos[]=@/private/var/folders/yw/b2m38hv92jd695td2jqmtlnw0000gn/T/php8qt792n9o6ms3UBsX5Y" </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/violations"
+    "https://property-flow.test/api/v1/communities/1/violations"
 );
 
 const headers = {
@@ -15104,18 +15058,18 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 22,
-        &quot;community_id&quot;: 1398,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 173,
         &quot;rule&quot;: {
-            &quot;id&quot;: 39,
+            &quot;id&quot;: 7,
             &quot;title&quot;: &quot;Noise after 11pm&quot;,
             &quot;reference&quot;: &quot;Rules, s. 26&quot;
         },
         &quot;unit&quot;: {
-            &quot;id&quot;: 473,
+            &quot;id&quot;: 207,
             &quot;label&quot;: &quot;Tower q &middot; 30834&quot;
         },
-        &quot;observed_at&quot;: &quot;2026-09-26T11:18:12+00:00&quot;,
+        &quot;observed_at&quot;: &quot;2026-09-30T04:33:29+00:00&quot;,
         &quot;location&quot;: null,
         &quot;description&quot;: &quot;Eius et animi quos velit et.&quot;,
         &quot;status&quot;: &quot;open&quot;,
@@ -15126,13 +15080,13 @@ fetch(url, {
         &quot;resolution_notes&quot;: null,
         &quot;notices&quot;: [
             {
-                &quot;id&quot;: 15,
+                &quot;id&quot;: 5,
                 &quot;stage&quot;: &quot;courtesy&quot;,
                 &quot;stage_label&quot;: &quot;Courtesy notice&quot;,
-                &quot;issued_on&quot;: &quot;2026-09-26&quot;,
-                &quot;cure_by&quot;: &quot;2026-10-10&quot;,
+                &quot;issued_on&quot;: &quot;2026-09-30&quot;,
+                &quot;cure_by&quot;: &quot;2026-10-14&quot;,
                 &quot;fine_invoice_id&quot;: null,
-                &quot;letter_url&quot;: &quot;http://property-flow.test/api/v1/communities/1398/violations/22/notices/15/letter&quot;
+                &quot;letter_url&quot;: &quot;http://property-flow.test/api/v1/communities/173/violations/5/notices/5/letter&quot;
             }
         ]
     }
@@ -15309,7 +15263,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/violations/1" \
+    --get "https://property-flow.test/api/v1/communities/1/violations/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -15317,7 +15271,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/violations/1"
+    "https://property-flow.test/api/v1/communities/1/violations/1"
 );
 
 const headers = {
@@ -15342,18 +15296,18 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 23,
-        &quot;community_id&quot;: 1401,
+        &quot;id&quot;: 6,
+        &quot;community_id&quot;: 176,
         &quot;rule&quot;: {
-            &quot;id&quot;: 40,
+            &quot;id&quot;: 8,
             &quot;title&quot;: &quot;Unauthorized parking&quot;,
             &quot;reference&quot;: &quot;Rules, s. 15&quot;
         },
         &quot;unit&quot;: {
-            &quot;id&quot;: 474,
+            &quot;id&quot;: 208,
             &quot;label&quot;: &quot;Tower s &middot; 40603&quot;
         },
-        &quot;observed_at&quot;: &quot;2026-09-26T11:18:12+00:00&quot;,
+        &quot;observed_at&quot;: &quot;2026-09-30T04:33:30+00:00&quot;,
         &quot;location&quot;: null,
         &quot;description&quot;: &quot;Adipisci quidem nostrum qui commodi incidunt iure.&quot;,
         &quot;status&quot;: &quot;open&quot;,
@@ -15364,13 +15318,13 @@ fetch(url, {
         &quot;resolution_notes&quot;: null,
         &quot;notices&quot;: [
             {
-                &quot;id&quot;: 16,
+                &quot;id&quot;: 6,
                 &quot;stage&quot;: &quot;courtesy&quot;,
                 &quot;stage_label&quot;: &quot;Courtesy notice&quot;,
-                &quot;issued_on&quot;: &quot;2026-09-26&quot;,
-                &quot;cure_by&quot;: &quot;2026-10-10&quot;,
+                &quot;issued_on&quot;: &quot;2026-09-30&quot;,
+                &quot;cure_by&quot;: &quot;2026-10-14&quot;,
                 &quot;fine_invoice_id&quot;: null,
-                &quot;letter_url&quot;: &quot;http://property-flow.test/api/v1/communities/1401/violations/23/notices/16/letter&quot;
+                &quot;letter_url&quot;: &quot;http://property-flow.test/api/v1/communities/176/violations/6/notices/6/letter&quot;
             }
         ]
     }
@@ -15484,7 +15438,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/violations/1/notices/1/letter" \
+    --get "https://property-flow.test/api/v1/communities/1/violations/1/notices/1/letter" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -15492,7 +15446,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/violations/1/notices/1/letter"
+    "https://property-flow.test/api/v1/communities/1/violations/1/notices/1/letter"
 );
 
 const headers = {
@@ -15637,7 +15591,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/renovation-requests?filter%5Bstatus%5D=submitted" \
+    --get "https://property-flow.test/api/v1/communities/1/renovation-requests?filter%5Bstatus%5D=submitted" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -15645,7 +15599,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/renovation-requests"
+    "https://property-flow.test/api/v1/communities/1/renovation-requests"
 );
 
 const params = {
@@ -15677,10 +15631,10 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 23,
-            &quot;community_id&quot;: 1404,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 179,
             &quot;unit&quot;: {
-                &quot;id&quot;: 475,
+                &quot;id&quot;: 209,
                 &quot;label&quot;: &quot;Tower y &middot; 77759&quot;
             },
             &quot;title&quot;: &quot;Replace flooring with hardwood&quot;,
@@ -15693,13 +15647,13 @@ fetch(url, {
             &quot;decision_notes&quot;: null,
             &quot;decided_at&quot;: null,
             &quot;decision_letter_url&quot;: null,
-            &quot;submitted_at&quot;: &quot;2026-09-26T11:18:13+00:00&quot;
+            &quot;submitted_at&quot;: &quot;2026-09-30T04:33:32+00:00&quot;
         },
         {
-            &quot;id&quot;: 24,
-            &quot;community_id&quot;: 1407,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 182,
             &quot;unit&quot;: {
-                &quot;id&quot;: 476,
+                &quot;id&quot;: 210,
                 &quot;label&quot;: &quot;Tower h &middot; 8828&quot;
             },
             &quot;title&quot;: &quot;Replace flooring with hardwood&quot;,
@@ -15712,7 +15666,7 @@ fetch(url, {
             &quot;decision_notes&quot;: null,
             &quot;decided_at&quot;: null,
             &quot;decision_letter_url&quot;: null,
-            &quot;submitted_at&quot;: &quot;2026-09-26T11:18:14+00:00&quot;
+            &quot;submitted_at&quot;: &quot;2026-09-30T04:33:34+00:00&quot;
         }
     ],
     &quot;links&quot;: {
@@ -15861,7 +15815,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/renovation-requests" \
+    "https://property-flow.test/api/v1/communities/1/renovation-requests" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
@@ -15870,12 +15824,12 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "description=Living room and hallway, about 45 m²."\
     --form "contractor=Northern Floors Ltd."\
     --form "planned_start_on=2026-11-02"\
-    --form "plans[]=@/private/var/folders/yw/b2m38hv92jd695td2jqmtlnw0000gn/T/phpbgih1vq3vgtt5Upc38P" </code></pre></div>
+    --form "plans[]=@/private/var/folders/yw/b2m38hv92jd695td2jqmtlnw0000gn/T/phpeg15k48qqjk893uXRFR" </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/renovation-requests"
+    "https://property-flow.test/api/v1/communities/1/renovation-requests"
 );
 
 const headers = {
@@ -15908,10 +15862,10 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 25,
-        &quot;community_id&quot;: 1410,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 185,
         &quot;unit&quot;: {
-            &quot;id&quot;: 477,
+            &quot;id&quot;: 211,
             &quot;label&quot;: &quot;Tower t &middot; 72743&quot;
         },
         &quot;title&quot;: &quot;Replace flooring with hardwood&quot;,
@@ -15924,7 +15878,7 @@ fetch(url, {
         &quot;decision_notes&quot;: null,
         &quot;decided_at&quot;: null,
         &quot;decision_letter_url&quot;: null,
-        &quot;submitted_at&quot;: &quot;2026-09-26T11:18:14+00:00&quot;
+        &quot;submitted_at&quot;: &quot;2026-09-30T04:33:36+00:00&quot;
     }
 }</code>
  </pre>
@@ -16099,7 +16053,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/renovation-requests/1" \
+    --get "https://property-flow.test/api/v1/communities/1/renovation-requests/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -16107,7 +16061,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/renovation-requests/1"
+    "https://property-flow.test/api/v1/communities/1/renovation-requests/1"
 );
 
 const headers = {
@@ -16132,10 +16086,10 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 26,
-        &quot;community_id&quot;: 1413,
+        &quot;id&quot;: 6,
+        &quot;community_id&quot;: 188,
         &quot;unit&quot;: {
-            &quot;id&quot;: 478,
+            &quot;id&quot;: 212,
             &quot;label&quot;: &quot;Tower t &middot; 91729&quot;
         },
         &quot;title&quot;: &quot;Replace flooring with hardwood&quot;,
@@ -16148,7 +16102,7 @@ fetch(url, {
         &quot;decision_notes&quot;: null,
         &quot;decided_at&quot;: null,
         &quot;decision_letter_url&quot;: null,
-        &quot;submitted_at&quot;: &quot;2026-09-26T11:18:14+00:00&quot;
+        &quot;submitted_at&quot;: &quot;2026-09-30T04:33:37+00:00&quot;
     }
 }</code>
  </pre>
@@ -16260,7 +16214,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/renovation-requests/1/decision" \
+    "https://property-flow.test/api/v1/communities/1/renovation-requests/1/decision" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -16274,7 +16228,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/renovation-requests/1/decision"
+    "https://property-flow.test/api/v1/communities/1/renovation-requests/1/decision"
 );
 
 const headers = {
@@ -16305,10 +16259,10 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 27,
-        &quot;community_id&quot;: 1416,
+        &quot;id&quot;: 7,
+        &quot;community_id&quot;: 191,
         &quot;unit&quot;: {
-            &quot;id&quot;: 479,
+            &quot;id&quot;: 213,
             &quot;label&quot;: &quot;Tower s &middot; 25874&quot;
         },
         &quot;title&quot;: &quot;Kitchen renovation&quot;,
@@ -16321,7 +16275,7 @@ fetch(url, {
         &quot;decision_notes&quot;: null,
         &quot;decided_at&quot;: null,
         &quot;decision_letter_url&quot;: null,
-        &quot;submitted_at&quot;: &quot;2026-09-26T11:18:15+00:00&quot;
+        &quot;submitted_at&quot;: &quot;2026-09-30T04:33:38+00:00&quot;
     }
 }</code>
  </pre>
@@ -16470,7 +16424,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/renovation-requests/1/decision-letter" \
+    --get "https://property-flow.test/api/v1/communities/1/renovation-requests/1/decision-letter" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -16478,7 +16432,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/renovation-requests/1/decision-letter"
+    "https://property-flow.test/api/v1/communities/1/renovation-requests/1/decision-letter"
 );
 
 const headers = {
@@ -16616,7 +16570,7 @@ those who answered; survey results to the team.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/surveys" \
+    --get "https://property-flow.test/api/v1/communities/1/surveys" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -16624,7 +16578,7 @@ those who answered; survey results to the team.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/surveys"
+    "https://property-flow.test/api/v1/communities/1/surveys"
 );
 
 const headers = {
@@ -16650,27 +16604,27 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 17,
-            &quot;community_id&quot;: 1419,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 194,
             &quot;title&quot;: &quot;Amenity satisfaction survey&quot;,
             &quot;description&quot;: null,
             &quot;is_poll&quot;: false,
             &quot;is_anonymous&quot;: false,
             &quot;audience&quot;: &quot;residents&quot;,
             &quot;open&quot;: true,
-            &quot;published_at&quot;: &quot;2026-09-26T11:18:15+00:00&quot;,
+            &quot;published_at&quot;: &quot;2026-09-30T04:33:38+00:00&quot;,
             &quot;closes_at&quot;: null
         },
         {
-            &quot;id&quot;: 18,
-            &quot;community_id&quot;: 1420,
+            &quot;id&quot;: 4,
+            &quot;community_id&quot;: 195,
             &quot;title&quot;: &quot;Amenity satisfaction survey&quot;,
             &quot;description&quot;: null,
             &quot;is_poll&quot;: false,
             &quot;is_anonymous&quot;: false,
             &quot;audience&quot;: &quot;residents&quot;,
             &quot;open&quot;: true,
-            &quot;published_at&quot;: &quot;2026-09-26T11:18:15+00:00&quot;,
+            &quot;published_at&quot;: &quot;2026-09-30T04:33:38+00:00&quot;,
             &quot;closes_at&quot;: null
         }
     ],
@@ -16807,7 +16761,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/surveys/1" \
+    --get "https://property-flow.test/api/v1/communities/1/surveys/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -16815,7 +16769,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/surveys/1"
+    "https://property-flow.test/api/v1/communities/1/surveys/1"
 );
 
 const headers = {
@@ -16840,25 +16794,25 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 19,
-        &quot;community_id&quot;: 1421,
+        &quot;id&quot;: 5,
+        &quot;community_id&quot;: 196,
         &quot;title&quot;: &quot;Amenity satisfaction survey&quot;,
         &quot;description&quot;: null,
         &quot;is_poll&quot;: false,
         &quot;is_anonymous&quot;: false,
         &quot;audience&quot;: &quot;residents&quot;,
         &quot;open&quot;: true,
-        &quot;published_at&quot;: &quot;2026-09-26T11:18:15+00:00&quot;,
+        &quot;published_at&quot;: &quot;2026-09-30T04:33:39+00:00&quot;,
         &quot;closes_at&quot;: null,
         &quot;questions&quot;: [
             {
-                &quot;id&quot;: 7,
+                &quot;id&quot;: 5,
                 &quot;kind&quot;: &quot;single_choice&quot;,
                 &quot;title&quot;: &quot;How satisfied are you?&quot;,
                 &quot;required&quot;: true,
                 &quot;options&quot;: [
                     {
-                        &quot;id&quot;: 9,
+                        &quot;id&quot;: 8,
                         &quot;label&quot;: &quot;Very&quot;
                     }
                 ]
@@ -16994,7 +16948,7 @@ questions must be answered.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/surveys/1/responses" \
+    "https://property-flow.test/api/v1/communities/1/surveys/1/responses" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -17014,7 +16968,7 @@ questions must be answered.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/surveys/1/responses"
+    "https://property-flow.test/api/v1/communities/1/surveys/1/responses"
 );
 
 const headers = {
@@ -17177,7 +17131,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/forms" \
+    --get "https://property-flow.test/api/v1/communities/1/forms" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -17185,7 +17139,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/forms"
+    "https://property-flow.test/api/v1/communities/1/forms"
 );
 
 const headers = {
@@ -17211,21 +17165,21 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 16,
-            &quot;community_id&quot;: 1422,
+            &quot;id&quot;: 2,
+            &quot;community_id&quot;: 197,
             &quot;title&quot;: &quot;Consent to electronic notices&quot;,
             &quot;body&quot;: &quot;I agree to receive notices from the corporation electronically.&quot;,
             &quot;audience&quot;: &quot;owners&quot;,
-            &quot;published_at&quot;: &quot;2026-09-26T11:18:15+00:00&quot;,
+            &quot;published_at&quot;: &quot;2026-09-30T04:33:39+00:00&quot;,
             &quot;closes_at&quot;: null
         },
         {
-            &quot;id&quot;: 17,
-            &quot;community_id&quot;: 1423,
+            &quot;id&quot;: 3,
+            &quot;community_id&quot;: 198,
             &quot;title&quot;: &quot;Consent to electronic notices&quot;,
             &quot;body&quot;: &quot;I agree to receive notices from the corporation electronically.&quot;,
             &quot;audience&quot;: &quot;owners&quot;,
-            &quot;published_at&quot;: &quot;2026-09-26T11:18:15+00:00&quot;,
+            &quot;published_at&quot;: &quot;2026-09-30T04:33:39+00:00&quot;,
             &quot;closes_at&quot;: null
         }
     ]
@@ -17327,7 +17281,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/forms/1" \
+    --get "https://property-flow.test/api/v1/communities/1/forms/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -17335,7 +17289,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/forms/1"
+    "https://property-flow.test/api/v1/communities/1/forms/1"
 );
 
 const headers = {
@@ -17360,12 +17314,12 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 18,
-        &quot;community_id&quot;: 1424,
+        &quot;id&quot;: 4,
+        &quot;community_id&quot;: 199,
         &quot;title&quot;: &quot;Consent to electronic notices&quot;,
         &quot;body&quot;: &quot;I agree to receive notices from the corporation electronically.&quot;,
         &quot;audience&quot;: &quot;owners&quot;,
-        &quot;published_at&quot;: &quot;2026-09-26T11:18:15+00:00&quot;,
+        &quot;published_at&quot;: &quot;2026-09-30T04:33:40+00:00&quot;,
         &quot;closes_at&quot;: null
     },
     &quot;signed_at&quot;: null
@@ -17480,7 +17434,7 @@ text is fingerprinted with the signature, so what was agreed to can be proven la
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/forms/1/signatures" \
+    "https://property-flow.test/api/v1/communities/1/forms/1/signatures" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -17494,7 +17448,7 @@ text is fingerprinted with the signature, so what was agreed to can be proven la
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/forms/1/signatures"
+    "https://property-flow.test/api/v1/communities/1/forms/1/signatures"
 );
 
 const headers = {
@@ -17684,7 +17638,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/board-posts?filter%5Bsection%5D=classifieds" \
+    --get "https://property-flow.test/api/v1/communities/1/board-posts?filter%5Bsection%5D=classifieds" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -17692,7 +17646,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/board-posts"
+    "https://property-flow.test/api/v1/communities/1/board-posts"
 );
 
 const params = {
@@ -17724,40 +17678,40 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 37,
-            &quot;community_id&quot;: 1425,
+            &quot;id&quot;: 6,
+            &quot;community_id&quot;: 200,
             &quot;kind&quot;: &quot;discussion&quot;,
             &quot;title&quot;: &quot;Adipisci quidem nostrum qui commodi incidunt.&quot;,
             &quot;body&quot;: &quot;Et et modi ipsum nostrum. Autem et consequatur aut dolores enim non facere tempora.&quot;,
             &quot;price_cents&quot;: null,
             &quot;author&quot;: {
-                &quot;id&quot;: 241,
+                &quot;id&quot;: 86,
                 &quot;name&quot;: &quot;Josiane Emard&quot;
             },
             &quot;pinned&quot;: false,
             &quot;locked&quot;: false,
             &quot;closed&quot;: false,
             &quot;hidden&quot;: false,
-            &quot;last_activity_at&quot;: &quot;2026-09-26T11:18:15+00:00&quot;,
-            &quot;created_at&quot;: &quot;2026-09-26T11:18:16+00:00&quot;
+            &quot;last_activity_at&quot;: &quot;2026-09-30T04:33:40+00:00&quot;,
+            &quot;created_at&quot;: &quot;2026-09-30T04:33:41+00:00&quot;
         },
         {
-            &quot;id&quot;: 38,
-            &quot;community_id&quot;: 1426,
+            &quot;id&quot;: 7,
+            &quot;community_id&quot;: 201,
             &quot;kind&quot;: &quot;discussion&quot;,
             &quot;title&quot;: &quot;Ratione nemo voluptate accusamus ut et recusandae.&quot;,
             &quot;body&quot;: &quot;Ex repellendus assumenda et tenetur ab reiciendis. Perspiciatis deserunt ducimus corrupti et dolores quia. Assumenda odit doloribus repellat officiis corporis nesciunt ut.&quot;,
             &quot;price_cents&quot;: null,
             &quot;author&quot;: {
-                &quot;id&quot;: 242,
-                &quot;name&quot;: &quot;Mr. Jordyn Stokes III&quot;
+                &quot;id&quot;: 87,
+                &quot;name&quot;: &quot;Mrs. Fiona Ondricka&quot;
             },
             &quot;pinned&quot;: false,
             &quot;locked&quot;: false,
             &quot;closed&quot;: false,
             &quot;hidden&quot;: false,
-            &quot;last_activity_at&quot;: &quot;2026-09-26T11:18:16+00:00&quot;,
-            &quot;created_at&quot;: &quot;2026-09-26T11:18:16+00:00&quot;
+            &quot;last_activity_at&quot;: &quot;2026-09-30T04:33:41+00:00&quot;,
+            &quot;created_at&quot;: &quot;2026-09-30T04:33:42+00:00&quot;
         }
     ],
     &quot;links&quot;: {
@@ -17907,7 +17861,7 @@ price.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/board-posts" \
+    "https://property-flow.test/api/v1/communities/1/board-posts" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -17922,7 +17876,7 @@ price.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/board-posts"
+    "https://property-flow.test/api/v1/communities/1/board-posts"
 );
 
 const headers = {
@@ -17954,22 +17908,22 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 39,
-        &quot;community_id&quot;: 1427,
+        &quot;id&quot;: 8,
+        &quot;community_id&quot;: 202,
         &quot;kind&quot;: &quot;discussion&quot;,
         &quot;title&quot;: &quot;Quos velit et fugiat sunt nihil accusantium.&quot;,
         &quot;body&quot;: &quot;Modi deserunt aut ab provident perspiciatis. Omnis nostrum aut adipisci quidem nostrum qui commodi. Iure odit et et modi ipsum nostrum omnis. Et consequatur aut dolores enim.&quot;,
         &quot;price_cents&quot;: null,
         &quot;author&quot;: {
-            &quot;id&quot;: 243,
+            &quot;id&quot;: 88,
             &quot;name&quot;: &quot;Bridget Schaden&quot;
         },
         &quot;pinned&quot;: false,
         &quot;locked&quot;: false,
         &quot;closed&quot;: false,
         &quot;hidden&quot;: false,
-        &quot;last_activity_at&quot;: &quot;2026-09-26T11:18:16+00:00&quot;,
-        &quot;created_at&quot;: &quot;2026-09-26T11:18:16+00:00&quot;
+        &quot;last_activity_at&quot;: &quot;2026-09-30T04:33:42+00:00&quot;,
+        &quot;created_at&quot;: &quot;2026-09-30T04:33:42+00:00&quot;
     }
 }</code>
  </pre>
@@ -18118,7 +18072,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/communities/1/board-posts/1" \
+    --get "https://property-flow.test/api/v1/communities/1/board-posts/1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18126,7 +18080,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/board-posts/1"
+    "https://property-flow.test/api/v1/communities/1/board-posts/1"
 );
 
 const headers = {
@@ -18151,32 +18105,32 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 40,
-        &quot;community_id&quot;: 1428,
+        &quot;id&quot;: 9,
+        &quot;community_id&quot;: 203,
         &quot;kind&quot;: &quot;discussion&quot;,
         &quot;title&quot;: &quot;Adipisci quidem nostrum qui commodi incidunt.&quot;,
         &quot;body&quot;: &quot;Et et modi ipsum nostrum. Autem et consequatur aut dolores enim non facere tempora.&quot;,
         &quot;price_cents&quot;: null,
         &quot;author&quot;: {
-            &quot;id&quot;: 244,
+            &quot;id&quot;: 89,
             &quot;name&quot;: &quot;Josiane Emard&quot;
         },
         &quot;pinned&quot;: false,
         &quot;locked&quot;: false,
         &quot;closed&quot;: false,
         &quot;hidden&quot;: false,
-        &quot;last_activity_at&quot;: &quot;2026-09-26T11:18:16+00:00&quot;,
-        &quot;created_at&quot;: &quot;2026-09-26T11:18:17+00:00&quot;,
+        &quot;last_activity_at&quot;: &quot;2026-09-30T04:33:43+00:00&quot;,
+        &quot;created_at&quot;: &quot;2026-09-30T04:33:43+00:00&quot;,
         &quot;replies&quot;: [
             {
-                &quot;id&quot;: 16,
+                &quot;id&quot;: 3,
                 &quot;body&quot;: &quot;Ut et recusandae modi rerum ex repellendus.&quot;,
                 &quot;author&quot;: {
-                    &quot;id&quot;: 245,
+                    &quot;id&quot;: 90,
                     &quot;name&quot;: &quot;Aron Ledner&quot;
                 },
                 &quot;hidden&quot;: false,
-                &quot;created_at&quot;: &quot;2026-09-26T11:18:17+00:00&quot;
+                &quot;created_at&quot;: &quot;2026-09-30T04:33:44+00:00&quot;
             }
         ]
     }
@@ -18290,7 +18244,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/board-posts/1/replies" \
+    "https://property-flow.test/api/v1/communities/1/board-posts/1/replies" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -18302,7 +18256,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/board-posts/1/replies"
+    "https://property-flow.test/api/v1/communities/1/board-posts/1/replies"
 );
 
 const headers = {
@@ -18331,14 +18285,14 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 17,
+        &quot;id&quot;: 4,
         &quot;body&quot;: &quot;Et animi quos velit et fugiat.&quot;,
         &quot;author&quot;: {
-            &quot;id&quot;: 247,
+            &quot;id&quot;: 92,
             &quot;name&quot;: &quot;Ms. Anais Conroy&quot;
         },
         &quot;hidden&quot;: false,
-        &quot;created_at&quot;: &quot;2026-09-26T11:18:17+00:00&quot;
+        &quot;created_at&quot;: &quot;2026-09-30T04:33:44+00:00&quot;
     }
 }</code>
  </pre>
@@ -18463,7 +18417,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/communities/1/board-posts/1/reports" \
+    "https://property-flow.test/api/v1/communities/1/board-posts/1/reports" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -18476,7 +18430,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/communities/1/board-posts/1/reports"
+    "https://property-flow.test/api/v1/communities/1/board-posts/1/reports"
 );
 
 const headers = {
@@ -18650,7 +18604,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://property-flow.test/api/v1/notifications?filter%5Bunread%5D=1" \
+    --get "https://property-flow.test/api/v1/notifications?filter%5Bunread%5D=1" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18658,7 +18612,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/notifications"
+    "https://property-flow.test/api/v1/notifications"
 );
 
 const params = {
@@ -18811,7 +18765,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://property-flow.test/api/v1/notifications/architecto" \
+    "https://property-flow.test/api/v1/notifications/architecto" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18819,7 +18773,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/notifications/architecto"
+    "https://property-flow.test/api/v1/notifications/architecto"
 );
 
 const headers = {
@@ -18952,7 +18906,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://property-flow.test/api/v1/notifications/read-all" \
+    "https://property-flow.test/api/v1/notifications/read-all" \
     --header "Authorization: Bearer {YOUR_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18960,7 +18914,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://property-flow.test/api/v1/notifications/read-all"
+    "https://property-flow.test/api/v1/notifications/read-all"
 );
 
 const headers = {

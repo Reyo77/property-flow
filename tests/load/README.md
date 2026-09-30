@@ -5,10 +5,7 @@ instance of the app (local Herd or staging), not the test database.
 
 ## Setup
 
-Two-factor authentication is required for staff (Phase 11), so the load-test user needs it
-pre-confirmed with a known secret — there's no way to script a real authenticator app. Seed a
-test company at whatever scale you want to test (the Phase 11 target was 10k units) and enable
-2FA for its admin with a secret you control:
+Seed a test company at whatever scale you want to test (the Phase 11 target was 10k units):
 
 ```bash
 php artisan tinker --execute '
@@ -22,36 +19,22 @@ php artisan tinker --execute '
     ]);
     $admin->communities()->attach($community);
 
-    $secret = (new \PragmaRX\Google2FA\Google2FA())->generateSecretKey();
-    $admin->forceFill([
-        "two_factor_secret" => encrypt($secret),
-        "two_factor_recovery_codes" => encrypt(json_encode(["recovery-code-load-test"])),
-        "two_factor_confirmed_at" => now(),
-    ])->save();
-
-    echo "SECRET={$secret}\nCOMMUNITY_ID={$community->id}\n";
+    echo "COMMUNITY_ID={$community->id}\n";
 '
 ```
 
-Keep the printed `SECRET` — you need a fresh one-time code from it (valid ~30s) immediately
-before each run:
-
 ```bash
-OTP=$(php artisan tinker --execute '
-    echo (new \PragmaRX\Google2FA\Google2FA())->getCurrentOtp("<SECRET>");
-' | tail -1 | tr -d '[:space:]')
-
-OTP="$OTP" COMMUNITY_ID=<COMMUNITY_ID> k6 run --insecure-skip-tls-verify tests/load/dashboard-and-lists.js
+COMMUNITY_ID=<COMMUNITY_ID> k6 run --insecure-skip-tls-verify tests/load/dashboard-and-lists.js
 ```
 
 `--insecure-skip-tls-verify` is only needed for Herd's self-signed local certificate.
 
 ## What it tests
 
-`dashboard-and-lists.js` logs in for real (password + the one-time code — the actual Fortify
-flow, not a forged session), then hits `/dashboard`, `/communities/{id}/units` and
-`/communities/{id}/residents` on a ramp from 0 to `VUS` (default 10) virtual users, asserting
-p95 latency stays under `P95_TARGET_MS` (default 300ms) for each page.
+`dashboard-and-lists.js` logs in for real (the actual Fortify flow, not a forged session), then
+hits `/dashboard`, `/communities/{id}/units` and `/communities/{id}/residents` on a ramp from 0 to
+`VUS` (default 10) virtual users, asserting p95 latency stays under `P95_TARGET_MS` (default
+300ms) for each page.
 
 ## Clean up afterwards
 

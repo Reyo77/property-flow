@@ -5,19 +5,19 @@
             "key": "baseUrl",
             "type": "string",
             "name": "string",
-            "value": "http:\/\/property-flow.test"
+            "value": "https:\/\/property-flow.test"
         }
     ],
     "info": {
         "name": "PropertyFlow API",
-        "_postman_id": "22e5aac3-626b-400a-8737-1711a2e08786",
+        "_postman_id": "8d8e55d4-dac2-4806-8744-9b11269f90ba",
         "description": "Everything a mobile or partner app needs: residents, maintenance, amenities, front desk, finance, governance and community engagement.",
         "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
     },
     "item": [
         {
             "name": "Authentication",
-            "description": "\nSign in by exchanging an email and password for a bearer token, then send it on every request\nas `Authorization: Bearer {token}`. Each device gets its own token, which can be listed and\nrevoked. Accounts with two-factor authentication also need a `code` (or `recovery_code`).",
+            "description": "\nSign in by exchanging an email and password for a bearer token, then send it on every request\nas `Authorization: Bearer {token}`. Each device gets its own token, which can be listed and\nrevoked.",
             "item": [
                 {
                     "name": "Sign in",
@@ -43,7 +43,7 @@
                             "mode": "raw",
                             "raw": "{\"email\":\"resident@propertyflow.test\",\"password\":\"password\",\"device_name\":\"Rita's iPhone\"}"
                         },
-                        "description": "Returns a new token for this device. Store it securely; it is only shown once. If the\naccount has two-factor authentication and no code is sent, the response is a 422 with\n`code: two_factor_required` \u2014 ask for the code and send the request again.",
+                        "description": "Returns a new token for this device. Store it securely; it is only shown once.",
                         "auth": {
                             "type": "noauth"
                         }
@@ -60,12 +60,6 @@
                             "code": 422,
                             "body": "{\"message\": \"These credentials do not match our records.\", \"code\": \"validation_failed\", \"errors\": {\"email\": [\"These credentials do not match our records.\"]}}",
                             "name": "Wrong email or password"
-                        },
-                        {
-                            "header": [],
-                            "code": 422,
-                            "body": "{\"message\": \"Enter the code from your authenticator app.\", \"code\": \"two_factor_required\", \"errors\": {\"code\": [\"Enter the code from your authenticator app.\"]}}",
-                            "name": "Two-factor code needed"
                         }
                     ]
                 },
@@ -206,7 +200,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":1230,\"name\":\"Noah Path Residences\",\"type\":\"condo\",\"address\":{\"line_1\":\"38862 Ferne Locks Suite 058\",\"line_2\":null,\"city\":\"Christianshire\",\"region\":\"Ontario\",\"postal_code\":\"64310-6432\",\"country\":\"CA\"},\"timezone\":\"America\\\/Toronto\",\"currency\":\"CAD\"},{\"id\":1231,\"name\":\"Leffler Coves Towers\",\"type\":\"condo\",\"address\":{\"line_1\":\"82083 Daphne Meadow Suite 788\",\"line_2\":null,\"city\":\"Verliebury\",\"region\":\"Ontario\",\"postal_code\":\"17418-7351\",\"country\":\"CA\"},\"timezone\":\"America\\\/Toronto\",\"currency\":\"CAD\"}]}",
+                            "body": "{\"data\":[{\"id\":5,\"name\":\"Noah Path Residences\",\"type\":\"condo\",\"address\":{\"line_1\":\"38862 Ferne Locks Suite 058\",\"line_2\":null,\"city\":\"Christianshire\",\"region\":\"Ontario\",\"postal_code\":\"64310-6432\",\"country\":\"CA\"},\"timezone\":\"America\\\/Toronto\",\"currency\":\"CAD\"},{\"id\":6,\"name\":\"Leffler Coves Towers\",\"type\":\"condo\",\"address\":{\"line_1\":\"82083 Daphne Meadow Suite 788\",\"line_2\":null,\"city\":\"Verliebury\",\"region\":\"Ontario\",\"postal_code\":\"17418-7351\",\"country\":\"CA\"},\"timezone\":\"America\\\/Toronto\",\"currency\":\"CAD\"}]}",
                             "name": ""
                         }
                     ]
@@ -246,7 +240,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":1232,\"name\":\"Noah Path Residences\",\"type\":\"condo\",\"address\":{\"line_1\":\"38862 Ferne Locks Suite 058\",\"line_2\":null,\"city\":\"Christianshire\",\"region\":\"Ontario\",\"postal_code\":\"64310-6432\",\"country\":\"CA\"},\"timezone\":\"America\\\/Toronto\",\"currency\":\"CAD\"}}",
+                            "body": "{\"data\":{\"id\":7,\"name\":\"Noah Path Residences\",\"type\":\"condo\",\"address\":{\"line_1\":\"38862 Ferne Locks Suite 058\",\"line_2\":null,\"city\":\"Christianshire\",\"region\":\"Ontario\",\"postal_code\":\"64310-6432\",\"country\":\"CA\"},\"timezone\":\"America\\\/Toronto\",\"currency\":\"CAD\"}}",
                             "name": ""
                         }
                     ]
@@ -299,7 +293,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":263,\"community_id\":1233,\"name\":\"Tower u\",\"address\":null,\"floors\":29},{\"id\":264,\"community_id\":1234,\"name\":\"Tower w\",\"address\":null,\"floors\":8}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":8,\"name\":\"Tower u\",\"address\":null,\"floors\":29},{\"id\":4,\"community_id\":9,\"name\":\"Tower w\",\"address\":null,\"floors\":8}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -358,7 +352,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":427,\"community_id\":1235,\"building\":{\"id\":265,\"name\":\"Tower w\"},\"number\":\"11680\",\"label\":\"Tower w \\u00b7 11680\",\"floor\":25,\"area\":\"1202.20\",\"unit_factor\":null,\"parking\":null,\"locker\":null},{\"id\":428,\"community_id\":1237,\"building\":{\"id\":266,\"name\":\"Tower y\"},\"number\":\"52497\",\"label\":\"Tower y \\u00b7 52497\",\"floor\":20,\"area\":\"2262.78\",\"unit_factor\":null,\"parking\":null,\"locker\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":161,\"community_id\":10,\"building\":{\"id\":5,\"name\":\"Tower w\"},\"number\":\"11680\",\"label\":\"Tower w \\u00b7 11680\",\"floor\":25,\"area\":\"1202.20\",\"unit_factor\":null,\"parking\":null,\"locker\":null},{\"id\":162,\"community_id\":12,\"building\":{\"id\":6,\"name\":\"Tower y\"},\"number\":\"52497\",\"label\":\"Tower y \\u00b7 52497\",\"floor\":20,\"area\":\"2262.78\",\"unit_factor\":null,\"parking\":null,\"locker\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -404,7 +398,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":429,\"community_id\":1239,\"building\":{\"id\":267,\"name\":\"Tower w\"},\"number\":\"26824\",\"label\":\"Tower w \\u00b7 26824\",\"floor\":30,\"area\":\"1807.16\",\"unit_factor\":null,\"parking\":null,\"locker\":null}}",
+                            "body": "{\"data\":{\"id\":163,\"community_id\":14,\"building\":{\"id\":7,\"name\":\"Tower w\"},\"number\":\"26824\",\"label\":\"Tower w \\u00b7 26824\",\"floor\":30,\"area\":\"1807.16\",\"unit_factor\":null,\"parking\":null,\"locker\":null}}",
                             "name": ""
                         }
                     ]
@@ -475,7 +469,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":237,\"name\":\"Morgan Hirthe\",\"email\":\"dare.emelie@example.com\",\"phone\":\"416-555-9279\",\"has_login\":false,\"residencies\":[{\"id\":179,\"unit\":{\"id\":430,\"label\":\"2665\"},\"type\":\"owner\",\"is_primary\":true,\"moved_in_on\":\"2025-09-26\",\"moved_out_on\":null}]},{\"id\":238,\"name\":\"Prof. Kyla Kutch DDS\",\"email\":\"colt.balistreri@example.net\",\"phone\":\"416-555-5933\",\"has_login\":false,\"residencies\":[{\"id\":180,\"unit\":{\"id\":431,\"label\":\"80989\"},\"type\":\"owner\",\"is_primary\":true,\"moved_in_on\":\"2025-09-26\",\"moved_out_on\":null}]}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":161,\"name\":\"Morgan Hirthe\",\"email\":\"dare.emelie@example.com\",\"phone\":\"416-555-9279\",\"has_login\":false,\"residencies\":[{\"id\":161,\"unit\":{\"id\":164,\"label\":\"2665\"},\"type\":\"owner\",\"is_primary\":true,\"moved_in_on\":\"2025-09-30\",\"moved_out_on\":null}]},{\"id\":162,\"name\":\"Prof. Kyla Kutch DDS\",\"email\":\"colt.balistreri@example.net\",\"phone\":\"416-555-5933\",\"has_login\":false,\"residencies\":[{\"id\":162,\"unit\":{\"id\":165,\"label\":\"80989\"},\"type\":\"owner\",\"is_primary\":true,\"moved_in_on\":\"2025-09-30\",\"moved_out_on\":null}]}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -521,7 +515,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":239,\"name\":\"Morgan Hirthe\",\"email\":\"imclaughlin@example.org\",\"phone\":\"416-555-5052\",\"has_login\":false,\"residencies\":[{\"id\":181,\"unit\":{\"id\":432,\"label\":\"9866\"},\"type\":\"owner\",\"is_primary\":true,\"moved_in_on\":\"2025-09-26\",\"moved_out_on\":null}]}}",
+                            "body": "{\"data\":{\"id\":163,\"name\":\"Morgan Hirthe\",\"email\":\"imclaughlin@example.org\",\"phone\":\"416-555-5052\",\"has_login\":false,\"residencies\":[{\"id\":163,\"unit\":{\"id\":166,\"label\":\"9866\"},\"type\":\"owner\",\"is_primary\":true,\"moved_in_on\":\"2025-09-30\",\"moved_out_on\":null}]}}",
                             "name": ""
                         }
                     ]
@@ -567,7 +561,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":23,\"community_id\":1244,\"title\":\"Adipisci quidem nostrum qui commodi.\",\"body\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"pinned\":false,\"audience\":\"community\",\"published_at\":null,\"publish_at\":null,\"author\":{\"id\":222,\"name\":\"Mr. Nelson Little MD\"}},{\"id\":24,\"community_id\":1245,\"title\":\"Repellendus assumenda et tenetur.\",\"body\":\"Quia perspiciatis deserunt ducimus corrupti et. Quia maiores assumenda odit. Repellat officiis corporis nesciunt ut. Iure impedit molestiae ut rem est esse sint.\",\"pinned\":false,\"audience\":\"community\",\"published_at\":null,\"publish_at\":null,\"author\":{\"id\":223,\"name\":\"Jody Wilderman\"}}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":6,\"community_id\":19,\"title\":\"Adipisci quidem nostrum qui commodi.\",\"body\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"pinned\":false,\"audience\":\"community\",\"published_at\":null,\"publish_at\":null,\"author\":{\"id\":67,\"name\":\"Mr. Nelson Little MD\"}},{\"id\":7,\"community_id\":20,\"title\":\"Repellendus assumenda et tenetur.\",\"body\":\"Quia perspiciatis deserunt ducimus corrupti et. Quia maiores assumenda odit. Repellat officiis corporis nesciunt ut. Iure impedit molestiae ut rem est esse sint.\",\"pinned\":false,\"audience\":\"community\",\"published_at\":null,\"publish_at\":null,\"author\":{\"id\":68,\"name\":\"Jody Wilderman\"}}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -613,7 +607,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":25,\"community_id\":1246,\"title\":\"Adipisci quidem nostrum qui commodi.\",\"body\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"pinned\":false,\"audience\":\"community\",\"published_at\":null,\"publish_at\":null,\"author\":{\"id\":224,\"name\":\"Mr. Nelson Little MD\"}}}",
+                            "body": "{\"data\":{\"id\":8,\"community_id\":21,\"title\":\"Adipisci quidem nostrum qui commodi.\",\"body\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"pinned\":false,\"audience\":\"community\",\"published_at\":null,\"publish_at\":null,\"author\":{\"id\":69,\"name\":\"Mr. Nelson Little MD\"}}}",
                             "name": ""
                         }
                     ]
@@ -666,7 +660,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":27,\"community_id\":1247,\"title\":\"Quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"location\":\"Party room\",\"starts_at\":\"2026-10-02T01:38:47+00:00\",\"ends_at\":\"2026-10-02T03:38:47+00:00\",\"rsvps\":{\"going\":1,\"maybe\":0,\"not_going\":0,\"mine\":null}},{\"id\":28,\"community_id\":1248,\"title\":\"Et dolores.\",\"description\":\"Assumenda odit doloribus repellat officiis corporis nesciunt ut. Iure impedit molestiae ut rem est esse sint. Molestiae sunt suscipit doloribus fugiat ut aut.\",\"location\":\"Rooftop terrace\",\"starts_at\":\"2026-11-02T17:08:17+00:00\",\"ends_at\":\"2026-11-02T19:08:17+00:00\",\"rsvps\":{\"going\":1,\"maybe\":0,\"not_going\":0,\"mine\":null}}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":22,\"title\":\"Quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"location\":\"Party room\",\"starts_at\":\"2026-10-05T18:53:11+00:00\",\"ends_at\":\"2026-10-05T20:53:11+00:00\",\"rsvps\":{\"going\":1,\"maybe\":0,\"not_going\":0,\"mine\":null}},{\"id\":4,\"community_id\":23,\"title\":\"Et dolores.\",\"description\":\"Assumenda odit doloribus repellat officiis corporis nesciunt ut. Iure impedit molestiae ut rem est esse sint. Molestiae sunt suscipit doloribus fugiat ut aut.\",\"location\":\"Rooftop terrace\",\"starts_at\":\"2026-11-06T10:22:40+00:00\",\"ends_at\":\"2026-11-06T12:22:40+00:00\",\"rsvps\":{\"going\":1,\"maybe\":0,\"not_going\":0,\"mine\":null}}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -712,7 +706,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":29,\"community_id\":1249,\"title\":\"Quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"location\":\"Party room\",\"starts_at\":\"2026-10-02T01:38:48+00:00\",\"ends_at\":\"2026-10-02T03:38:48+00:00\",\"rsvps\":{\"going\":1,\"maybe\":0,\"not_going\":0,\"mine\":null}}}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":24,\"title\":\"Quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"location\":\"Party room\",\"starts_at\":\"2026-10-05T18:53:12+00:00\",\"ends_at\":\"2026-10-05T20:53:12+00:00\",\"rsvps\":{\"going\":1,\"maybe\":0,\"not_going\":0,\"mine\":null}}}",
                             "name": ""
                         }
                     ]
@@ -761,7 +755,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":30,\"community_id\":1250,\"title\":\"Quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"location\":\"Party room\",\"starts_at\":\"2026-10-02T01:38:48+00:00\",\"ends_at\":\"2026-10-02T03:38:48+00:00\",\"rsvps\":{\"going\":1,\"maybe\":0,\"not_going\":0,\"mine\":null}}}",
+                            "body": "{\"data\":{\"id\":6,\"community_id\":25,\"title\":\"Quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"location\":\"Party room\",\"starts_at\":\"2026-10-05T18:53:13+00:00\",\"ends_at\":\"2026-10-05T20:53:13+00:00\",\"rsvps\":{\"going\":1,\"maybe\":0,\"not_going\":0,\"mine\":null}}}",
                             "name": ""
                         }
                     ]
@@ -807,7 +801,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":15,\"parent_id\":null,\"name\":\"aut adipisci\",\"visibility\":\"residents\"},{\"id\":16,\"parent_id\":null,\"name\":\"tempora ex\",\"visibility\":\"residents\"}]}",
+                            "body": "{\"data\":[{\"id\":3,\"parent_id\":null,\"name\":\"aut adipisci\",\"visibility\":\"residents\"},{\"id\":4,\"parent_id\":null,\"name\":\"tempora ex\",\"visibility\":\"residents\"}]}",
                             "name": ""
                         }
                     ]
@@ -866,7 +860,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":42,\"community_id\":1253,\"folder_id\":null,\"title\":\"Adipisci quidem nostrum qui.\",\"visibility\":\"residents\",\"file\":{\"name\":\"document.pdf\",\"mime_type\":\"application\\\/pdf\",\"size_bytes\":168927,\"version\":1,\"download_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/1253\\\/documents\\\/42\\\/download\"},\"updated_at\":\"2026-09-26T11:17:44+00:00\"},{\"id\":44,\"community_id\":1255,\"folder_id\":null,\"title\":\"Delectus fugit qui.\",\"visibility\":\"residents\",\"file\":{\"name\":\"document.pdf\",\"mime_type\":\"application\\\/pdf\",\"size_bytes\":342443,\"version\":1,\"download_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/1255\\\/documents\\\/44\\\/download\"},\"updated_at\":\"2026-09-26T11:17:44+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":6,\"community_id\":28,\"folder_id\":null,\"title\":\"Adipisci quidem nostrum qui.\",\"visibility\":\"residents\",\"file\":{\"name\":\"document.pdf\",\"mime_type\":\"application\\\/pdf\",\"size_bytes\":168927,\"version\":1,\"download_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/28\\\/documents\\\/6\\\/download\"},\"updated_at\":\"2026-09-30T04:32:09+00:00\"},{\"id\":8,\"community_id\":30,\"folder_id\":null,\"title\":\"Delectus fugit qui.\",\"visibility\":\"residents\",\"file\":{\"name\":\"document.pdf\",\"mime_type\":\"application\\\/pdf\",\"size_bytes\":342443,\"version\":1,\"download_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/30\\\/documents\\\/8\\\/download\"},\"updated_at\":\"2026-09-30T04:32:10+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -912,7 +906,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":46,\"community_id\":1257,\"folder_id\":null,\"title\":\"Adipisci quidem nostrum qui.\",\"visibility\":\"residents\",\"file\":{\"name\":\"document.pdf\",\"mime_type\":\"application\\\/pdf\",\"size_bytes\":168927,\"version\":1,\"download_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/1257\\\/documents\\\/46\\\/download\"},\"updated_at\":\"2026-09-26T11:17:45+00:00\"}}",
+                            "body": "{\"data\":{\"id\":10,\"community_id\":32,\"folder_id\":null,\"title\":\"Adipisci quidem nostrum qui.\",\"visibility\":\"residents\",\"file\":{\"name\":\"document.pdf\",\"mime_type\":\"application\\\/pdf\",\"size_bytes\":168927,\"version\":1,\"download_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/32\\\/documents\\\/10\\\/download\"},\"updated_at\":\"2026-09-30T04:32:10+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -996,7 +990,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":40,\"community_id\":1228,\"service_request_id\":null,\"title\":\"Adipisci quidem nostrum qui.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":null,\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-26T11:17:39+00:00\"},{\"id\":41,\"community_id\":1229,\"service_request_id\":null,\"title\":\"Et officiis itaque alias.\",\"description\":null,\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":null,\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-26T11:17:39+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":4,\"community_id\":3,\"service_request_id\":null,\"title\":\"Adipisci quidem nostrum qui.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":null,\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-30T04:32:00+00:00\"},{\"id\":5,\"community_id\":4,\"service_request_id\":null,\"title\":\"Similique labore nam doloremque.\",\"description\":\"Nesciunt eum explicabo molestiae nihil. Placeat exercitationem iure deleniti odit enim saepe sunt alias.\",\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":null,\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-30T04:32:00+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -1067,7 +1061,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":40,\"community_id\":1259,\"unit\":{\"id\":433,\"label\":\"Tower k \\u00b7 7852\"},\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"category\":\"plumbing\",\"priority\":\"medium\",\"status\":\"open\",\"status_label\":\"Open\",\"entry_permission\":false,\"created_at\":\"2026-09-26T11:17:45+00:00\",\"updated_at\":\"2026-09-26T11:17:45+00:00\"},{\"id\":41,\"community_id\":1262,\"unit\":{\"id\":434,\"label\":\"Tower w \\u00b7 22441\"},\"title\":\"Sunt suscipit doloribus fugiat ut aut.\",\"description\":\"Error neque recusandae et ipsam dolorem et ut dicta. Assumenda consequatur ut et sunt quisquam. Repellendus ut eaque alias ratione dolores.\",\"category\":\"plumbing\",\"priority\":\"medium\",\"status\":\"open\",\"status_label\":\"Open\",\"entry_permission\":false,\"created_at\":\"2026-09-26T11:17:46+00:00\",\"updated_at\":\"2026-09-26T11:17:46+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":4,\"community_id\":34,\"unit\":{\"id\":167,\"label\":\"Tower k \\u00b7 7852\"},\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"category\":\"plumbing\",\"priority\":\"medium\",\"status\":\"open\",\"status_label\":\"Open\",\"entry_permission\":false,\"created_at\":\"2026-09-30T04:32:11+00:00\",\"updated_at\":\"2026-09-30T04:32:11+00:00\"},{\"id\":5,\"community_id\":37,\"unit\":{\"id\":168,\"label\":\"Tower d \\u00b7 43729\"},\"title\":\"Sunt suscipit doloribus fugiat ut aut.\",\"description\":\"Error neque recusandae et ipsam dolorem et ut dicta. Assumenda consequatur ut et sunt quisquam. Repellendus ut eaque alias ratione dolores.\",\"category\":\"plumbing\",\"priority\":\"medium\",\"status\":\"open\",\"status_label\":\"Open\",\"entry_permission\":false,\"created_at\":\"2026-09-30T04:32:12+00:00\",\"updated_at\":\"2026-09-30T04:32:12+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -1152,7 +1146,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":42,\"community_id\":1265,\"unit\":null,\"title\":\"Eius et animi quos.\",\"description\":\"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.\",\"category\":\"plumbing\",\"priority\":\"medium\",\"status\":\"open\",\"status_label\":\"Open\",\"entry_permission\":false,\"created_at\":\"2026-09-26T11:17:46+00:00\",\"updated_at\":\"2026-09-26T11:17:46+00:00\"}}",
+                            "body": "{\"data\":{\"id\":6,\"community_id\":40,\"unit\":null,\"title\":\"Eius et animi quos.\",\"description\":\"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.\",\"category\":\"plumbing\",\"priority\":\"medium\",\"status\":\"open\",\"status_label\":\"Open\",\"entry_permission\":false,\"created_at\":\"2026-09-30T04:32:13+00:00\",\"updated_at\":\"2026-09-30T04:32:13+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -1198,7 +1192,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":43,\"community_id\":1266,\"unit\":{\"id\":435,\"label\":\"Tower m \\u00b7 92968\"},\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"category\":\"plumbing\",\"priority\":\"medium\",\"status\":\"open\",\"status_label\":\"Open\",\"entry_permission\":false,\"created_at\":\"2026-09-26T11:17:46+00:00\",\"updated_at\":\"2026-09-26T11:17:46+00:00\",\"comments\":[{\"id\":15,\"body\":\"Neque recusandae et ipsam dolorem et ut dicta.\",\"internal\":false,\"author\":{\"id\":229,\"name\":\"Joey Crooks\"},\"created_at\":\"2026-09-26T11:17:46+00:00\"}]}}",
+                            "body": "{\"data\":{\"id\":7,\"community_id\":41,\"unit\":{\"id\":169,\"label\":\"Tower m \\u00b7 92968\"},\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"category\":\"plumbing\",\"priority\":\"medium\",\"status\":\"open\",\"status_label\":\"Open\",\"entry_permission\":false,\"created_at\":\"2026-09-30T04:32:13+00:00\",\"updated_at\":\"2026-09-30T04:32:13+00:00\",\"comments\":[{\"id\":3,\"body\":\"Neque recusandae et ipsam dolorem et ut dicta.\",\"internal\":false,\"author\":{\"id\":74,\"name\":\"Joey Crooks\"},\"created_at\":\"2026-09-30T04:32:14+00:00\"}]}}",
                             "name": ""
                         }
                     ]
@@ -1247,7 +1241,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":44,\"community_id\":1269,\"unit\":{\"id\":436,\"label\":\"Tower t \\u00b7 65788\"},\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"category\":\"plumbing\",\"priority\":\"medium\",\"status\":\"open\",\"status_label\":\"Open\",\"entry_permission\":false,\"created_at\":\"2026-09-26T11:17:47+00:00\",\"updated_at\":\"2026-09-26T11:17:47+00:00\"}}",
+                            "body": "{\"data\":{\"id\":8,\"community_id\":44,\"unit\":{\"id\":170,\"label\":\"Tower t \\u00b7 65788\"},\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"category\":\"plumbing\",\"priority\":\"medium\",\"status\":\"open\",\"status_label\":\"Open\",\"entry_permission\":false,\"created_at\":\"2026-09-30T04:32:15+00:00\",\"updated_at\":\"2026-09-30T04:32:15+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -1296,7 +1290,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":16,\"body\":\"Et animi quos velit et fugiat.\",\"internal\":false,\"author\":{\"id\":230,\"name\":\"Josiane Emard\"},\"created_at\":\"2026-09-26T11:17:47+00:00\"}}",
+                            "body": "{\"data\":{\"id\":4,\"body\":\"Et animi quos velit et fugiat.\",\"internal\":false,\"author\":{\"id\":75,\"name\":\"Josiane Emard\"},\"created_at\":\"2026-09-30T04:32:15+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -1349,7 +1343,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":42,\"community_id\":1273,\"service_request_id\":null,\"title\":\"Adipisci quidem nostrum qui.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":{\"type\":\"vendor\",\"id\":52,\"name\":\"Corwin Ltd\"},\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-26T11:17:48+00:00\"},{\"id\":43,\"community_id\":1274,\"service_request_id\":null,\"title\":\"Ut aut deserunt et.\",\"description\":null,\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":{\"type\":\"vendor\",\"id\":53,\"name\":\"Schroeder, Stroman and Batz\"},\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-26T11:17:48+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":6,\"community_id\":48,\"service_request_id\":null,\"title\":\"Adipisci quidem nostrum qui.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":{\"type\":\"vendor\",\"id\":4,\"name\":\"Corwin Ltd\"},\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-30T04:32:16+00:00\"},{\"id\":7,\"community_id\":49,\"service_request_id\":null,\"title\":\"Ut aut deserunt et.\",\"description\":null,\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":{\"type\":\"vendor\",\"id\":5,\"name\":\"Schroeder, Stroman and Batz\"},\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-30T04:32:18+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -1395,7 +1389,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":44,\"community_id\":1275,\"service_request_id\":null,\"title\":\"Adipisci quidem nostrum qui.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":{\"type\":\"vendor\",\"id\":54,\"name\":\"Schimmel Ltd\"},\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-26T11:17:49+00:00\"}}",
+                            "body": "{\"data\":{\"id\":8,\"community_id\":50,\"service_request_id\":null,\"title\":\"Adipisci quidem nostrum qui.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":{\"type\":\"vendor\",\"id\":6,\"name\":\"Schimmel Ltd\"},\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-30T04:32:20+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -1444,7 +1438,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":45,\"community_id\":1276,\"service_request_id\":null,\"title\":\"Et animi quos.\",\"description\":null,\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":{\"type\":\"vendor\",\"id\":55,\"name\":\"Mitchell-VonRueden\"},\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-26T11:17:49+00:00\"}}",
+                            "body": "{\"data\":{\"id\":9,\"community_id\":51,\"service_request_id\":null,\"title\":\"Et animi quos.\",\"description\":null,\"status\":\"pending\",\"status_label\":\"Pending\",\"assignee\":{\"type\":\"vendor\",\"id\":7,\"name\":\"Mitchell-VonRueden\"},\"due_on\":null,\"completed_at\":null,\"completion_notes\":null,\"created_at\":\"2026-09-30T04:32:21+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -1490,7 +1484,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":52,\"community_id\":1277,\"name\":\"Party Room\",\"description\":\"Nostrum qui commodi incidunt iure.\",\"location\":null,\"opens_at\":\"08:00\",\"closes_at\":\"22:00\",\"closed_weekdays\":[],\"slot_minutes\":60,\"capacity\":1,\"needs_approval\":false,\"fee_cents\":null,\"deposit_cents\":null,\"terms\":null,\"rules\":{\"max_bookings_per_unit\":null,\"max_bookings_period_days\":null,\"advance_booking_days\":null,\"min_notice_hours\":null,\"cancellation_notice_hours\":null},\"active\":true},{\"id\":53,\"community_id\":1278,\"name\":\"Rooftop Pool\",\"description\":\"Distinctio eum doloremque id aut libero aliquam veniam corporis.\",\"location\":null,\"opens_at\":\"08:00\",\"closes_at\":\"22:00\",\"closed_weekdays\":[],\"slot_minutes\":60,\"capacity\":1,\"needs_approval\":false,\"fee_cents\":null,\"deposit_cents\":null,\"terms\":null,\"rules\":{\"max_bookings_per_unit\":null,\"max_bookings_period_days\":null,\"advance_booking_days\":null,\"min_notice_hours\":null,\"cancellation_notice_hours\":null},\"active\":true}]}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":52,\"name\":\"Party Room\",\"description\":\"Nostrum qui commodi incidunt iure.\",\"location\":null,\"opens_at\":\"08:00\",\"closes_at\":\"22:00\",\"closed_weekdays\":[],\"slot_minutes\":60,\"capacity\":1,\"needs_approval\":false,\"fee_cents\":null,\"deposit_cents\":null,\"terms\":null,\"rules\":{\"max_bookings_per_unit\":null,\"max_bookings_period_days\":null,\"advance_booking_days\":null,\"min_notice_hours\":null,\"cancellation_notice_hours\":null},\"active\":true},{\"id\":4,\"community_id\":53,\"name\":\"Rooftop Pool\",\"description\":\"Distinctio eum doloremque id aut libero aliquam veniam corporis.\",\"location\":null,\"opens_at\":\"08:00\",\"closes_at\":\"22:00\",\"closed_weekdays\":[],\"slot_minutes\":60,\"capacity\":1,\"needs_approval\":false,\"fee_cents\":null,\"deposit_cents\":null,\"terms\":null,\"rules\":{\"max_bookings_per_unit\":null,\"max_bookings_period_days\":null,\"advance_booking_days\":null,\"min_notice_hours\":null,\"cancellation_notice_hours\":null},\"active\":true}]}",
                             "name": ""
                         }
                     ]
@@ -1538,7 +1532,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"date\":\"2026-09-26\"}"
+                            "raw": "{\"date\":\"2026-09-30\"}"
                         },
                         "description": "`slots` lists the bookable times on `date` (the community's local date; default the first\nbookable day). Slots at capacity are included with `bookable: false`."
                     },
@@ -1546,7 +1540,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":54,\"community_id\":1279,\"name\":\"Party Room\",\"description\":\"Nostrum qui commodi incidunt iure.\",\"location\":null,\"opens_at\":\"08:00\",\"closes_at\":\"22:00\",\"closed_weekdays\":[],\"slot_minutes\":60,\"capacity\":1,\"needs_approval\":false,\"fee_cents\":null,\"deposit_cents\":null,\"terms\":null,\"rules\":{\"max_bookings_per_unit\":null,\"max_bookings_period_days\":null,\"advance_booking_days\":null,\"min_notice_hours\":null,\"cancellation_notice_hours\":null},\"active\":true},\"slots\":{\"date\":\"2026-10-03\",\"items\":[{\"starts_at\":\"2026-10-03T14:00:00+00:00\",\"ends_at\":\"2026-10-03T16:00:00+00:00\",\"remaining\":1,\"bookable\":true}]}}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":54,\"name\":\"Party Room\",\"description\":\"Nostrum qui commodi incidunt iure.\",\"location\":null,\"opens_at\":\"08:00\",\"closes_at\":\"22:00\",\"closed_weekdays\":[],\"slot_minutes\":60,\"capacity\":1,\"needs_approval\":false,\"fee_cents\":null,\"deposit_cents\":null,\"terms\":null,\"rules\":{\"max_bookings_per_unit\":null,\"max_bookings_period_days\":null,\"advance_booking_days\":null,\"min_notice_hours\":null,\"cancellation_notice_hours\":null},\"active\":true},\"slots\":{\"date\":\"2026-10-03\",\"items\":[{\"starts_at\":\"2026-10-03T14:00:00+00:00\",\"ends_at\":\"2026-10-03T16:00:00+00:00\",\"remaining\":1,\"bookable\":true}]}}",
                             "name": ""
                         }
                     ]
@@ -1611,7 +1605,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":40,\"community_id\":1280,\"amenity\":{\"id\":55,\"name\":\"Rooftop Pool\"},\"unit\":{\"id\":437,\"label\":\"Tower s \\u00b7 45645\"},\"starts_at\":\"2026-09-27T10:00:00+00:00\",\"ends_at\":\"2026-09-27T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-26T11:17:50+00:00\"},{\"id\":41,\"community_id\":1283,\"amenity\":{\"id\":56,\"name\":\"Tennis Court\"},\"unit\":{\"id\":438,\"label\":\"Tower p \\u00b7 34534\"},\"starts_at\":\"2026-09-27T10:00:00+00:00\",\"ends_at\":\"2026-09-27T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-26T11:17:51+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":55,\"amenity\":{\"id\":6,\"name\":\"Rooftop Pool\"},\"unit\":{\"id\":171,\"label\":\"Tower s \\u00b7 45645\"},\"starts_at\":\"2026-10-01T10:00:00+00:00\",\"ends_at\":\"2026-10-01T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-30T04:32:24+00:00\"},{\"id\":4,\"community_id\":58,\"amenity\":{\"id\":7,\"name\":\"Tennis Court\"},\"unit\":{\"id\":172,\"label\":\"Tower p \\u00b7 34534\"},\"starts_at\":\"2026-10-01T10:00:00+00:00\",\"ends_at\":\"2026-10-01T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-30T04:32:27+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -1654,7 +1648,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":42,\"community_id\":1286,\"amenity\":{\"id\":57,\"name\":\"Fitness Centre\"},\"unit\":{\"id\":439,\"label\":\"Tower b \\u00b7 87658\"},\"starts_at\":\"2026-09-27T10:00:00+00:00\",\"ends_at\":\"2026-09-27T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-26T11:17:52+00:00\"}}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":61,\"amenity\":{\"id\":8,\"name\":\"Fitness Centre\"},\"unit\":{\"id\":173,\"label\":\"Tower b \\u00b7 87658\"},\"starts_at\":\"2026-10-01T10:00:00+00:00\",\"ends_at\":\"2026-10-01T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-30T04:32:29+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -1700,7 +1694,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":43,\"community_id\":1289,\"amenity\":{\"id\":58,\"name\":\"Rooftop Pool\"},\"unit\":{\"id\":440,\"label\":\"Tower y \\u00b7 884\"},\"starts_at\":\"2026-09-27T10:00:00+00:00\",\"ends_at\":\"2026-09-27T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-26T11:17:52+00:00\"}}",
+                            "body": "{\"data\":{\"id\":6,\"community_id\":64,\"amenity\":{\"id\":9,\"name\":\"Rooftop Pool\"},\"unit\":{\"id\":174,\"label\":\"Tower y \\u00b7 884\"},\"starts_at\":\"2026-10-01T10:00:00+00:00\",\"ends_at\":\"2026-10-01T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-30T04:32:31+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -1749,7 +1743,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":44,\"community_id\":1292,\"amenity\":{\"id\":59,\"name\":\"Rooftop Pool\"},\"unit\":{\"id\":441,\"label\":\"Tower v \\u00b7 79783\"},\"starts_at\":\"2026-09-27T10:00:00+00:00\",\"ends_at\":\"2026-09-27T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-26T11:17:53+00:00\"}}",
+                            "body": "{\"data\":{\"id\":7,\"community_id\":67,\"amenity\":{\"id\":10,\"name\":\"Rooftop Pool\"},\"unit\":{\"id\":175,\"label\":\"Tower v \\u00b7 79783\"},\"starts_at\":\"2026-10-01T10:00:00+00:00\",\"ends_at\":\"2026-10-01T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-30T04:32:33+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -1798,7 +1792,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":45,\"community_id\":1295,\"amenity\":{\"id\":60,\"name\":\"Fitness Centre\"},\"unit\":{\"id\":442,\"label\":\"Tower x \\u00b7 75024\"},\"starts_at\":\"2026-09-27T10:00:00+00:00\",\"ends_at\":\"2026-09-27T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-26T11:17:53+00:00\"}}",
+                            "body": "{\"data\":{\"id\":8,\"community_id\":70,\"amenity\":{\"id\":11,\"name\":\"Fitness Centre\"},\"unit\":{\"id\":176,\"label\":\"Tower x \\u00b7 75024\"},\"starts_at\":\"2026-10-01T10:00:00+00:00\",\"ends_at\":\"2026-10-01T11:00:00+00:00\",\"status\":\"confirmed\",\"status_label\":\"Confirmed\",\"fee_cents\":null,\"deposit_cents\":null,\"notes\":null,\"decision_notes\":null,\"created_at\":\"2026-09-30T04:32:35+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -1857,7 +1851,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":33,\"community_id\":1298,\"unit\":{\"id\":443,\"label\":\"Tower t \\u00b7 75316\"},\"recipient\":{\"id\":240,\"name\":\"Michelle Cassin\"},\"carrier\":\"UPS\",\"tracking_number\":\"1Z090933724\",\"shelf_location\":\"Shelf C\",\"status\":\"awaiting_pickup\",\"arrived_at\":\"2026-09-26T11:17:54+00:00\",\"released_at\":null,\"released_to_name\":null},{\"id\":34,\"community_id\":1301,\"unit\":{\"id\":444,\"label\":\"Tower t \\u00b7 72133\"},\"recipient\":{\"id\":241,\"name\":\"Adelia Maggio\"},\"carrier\":\"Amazon\",\"tracking_number\":\"1Z395275298\",\"shelf_location\":\"Shelf C\",\"status\":\"awaiting_pickup\",\"arrived_at\":\"2026-09-26T11:17:55+00:00\",\"released_at\":null,\"released_to_name\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":73,\"unit\":{\"id\":177,\"label\":\"Tower t \\u00b7 75316\"},\"recipient\":{\"id\":164,\"name\":\"Michelle Cassin\"},\"carrier\":\"UPS\",\"tracking_number\":\"1Z090933724\",\"shelf_location\":\"Shelf C\",\"status\":\"awaiting_pickup\",\"arrived_at\":\"2026-09-30T04:32:36+00:00\",\"released_at\":null,\"released_to_name\":null},{\"id\":4,\"community_id\":76,\"unit\":{\"id\":178,\"label\":\"Tower u \\u00b7 72195\"},\"recipient\":{\"id\":165,\"name\":\"Maxie Fay\"},\"carrier\":\"Amazon\",\"tracking_number\":\"1Z395275298\",\"shelf_location\":\"Shelf C\",\"status\":\"awaiting_pickup\",\"arrived_at\":\"2026-09-30T04:32:39+00:00\",\"released_at\":null,\"released_to_name\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -1900,7 +1894,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":35,\"community_id\":1304,\"unit\":{\"id\":445,\"label\":\"Tower t \\u00b7 48309\"},\"recipient\":{\"id\":242,\"name\":\"Zachery Fadel\"},\"carrier\":\"UPS\",\"tracking_number\":\"1Z090933724\",\"shelf_location\":\"Shelf C\",\"status\":\"awaiting_pickup\",\"arrived_at\":\"2026-09-26T11:17:56+00:00\",\"released_at\":null,\"released_to_name\":null}}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":79,\"unit\":{\"id\":179,\"label\":\"Tower t \\u00b7 48309\"},\"recipient\":{\"id\":166,\"name\":\"Zachery Fadel\"},\"carrier\":\"UPS\",\"tracking_number\":\"1Z090933724\",\"shelf_location\":\"Shelf C\",\"status\":\"awaiting_pickup\",\"arrived_at\":\"2026-09-30T04:32:41+00:00\",\"released_at\":null,\"released_to_name\":null}}",
                             "name": ""
                         }
                     ]
@@ -1946,7 +1940,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":36,\"community_id\":1307,\"unit\":{\"id\":446,\"label\":\"Tower v \\u00b7 6223\"},\"recipient\":{\"id\":243,\"name\":\"Zachery Fadel\"},\"carrier\":\"UPS\",\"tracking_number\":\"1Z090933724\",\"shelf_location\":\"Shelf C\",\"status\":\"awaiting_pickup\",\"arrived_at\":\"2026-09-26T11:17:56+00:00\",\"released_at\":null,\"released_to_name\":null}}",
+                            "body": "{\"data\":{\"id\":6,\"community_id\":82,\"unit\":{\"id\":180,\"label\":\"Tower v \\u00b7 6223\"},\"recipient\":{\"id\":167,\"name\":\"Zachery Fadel\"},\"carrier\":\"UPS\",\"tracking_number\":\"1Z090933724\",\"shelf_location\":\"Shelf C\",\"status\":\"awaiting_pickup\",\"arrived_at\":\"2026-09-30T04:32:43+00:00\",\"released_at\":null,\"released_to_name\":null}}",
                             "name": ""
                         }
                     ]
@@ -1995,7 +1989,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":37,\"community_id\":1310,\"unit\":{\"id\":447,\"label\":\"Tower x \\u00b7 6802\"},\"recipient\":{\"id\":244,\"name\":\"Eileen Schmidt\"},\"carrier\":\"Amazon\",\"tracking_number\":\"1Z671936806\",\"shelf_location\":\"Shelf C\",\"status\":\"awaiting_pickup\",\"arrived_at\":\"2026-09-26T11:17:57+00:00\",\"released_at\":null,\"released_to_name\":null}}",
+                            "body": "{\"data\":{\"id\":7,\"community_id\":85,\"unit\":{\"id\":181,\"label\":\"Tower x \\u00b7 6802\"},\"recipient\":{\"id\":168,\"name\":\"Eileen Schmidt\"},\"carrier\":\"Amazon\",\"tracking_number\":\"1Z671936806\",\"shelf_location\":\"Shelf C\",\"status\":\"awaiting_pickup\",\"arrived_at\":\"2026-09-30T04:32:45+00:00\",\"released_at\":null,\"released_to_name\":null}}",
                             "name": ""
                         }
                     ]
@@ -2048,7 +2042,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":31,\"community_id\":1313,\"unit\":{\"id\":448,\"label\":\"Tower i \\u00b7 41039\"},\"visitor_name\":\"Morgan Hirthe\",\"purpose\":\"Visiting\",\"notes\":null,\"checked_in_at\":\"2026-09-26T11:17:57+00:00\",\"checked_out_at\":null},{\"id\":32,\"community_id\":1316,\"unit\":{\"id\":449,\"label\":\"Tower q \\u00b7 84637\"},\"visitor_name\":\"Dr. Mona Lemke\",\"purpose\":\"Contractor\",\"notes\":null,\"checked_in_at\":\"2026-09-26T11:17:57+00:00\",\"checked_out_at\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":88,\"unit\":{\"id\":182,\"label\":\"Tower i \\u00b7 41039\"},\"visitor_name\":\"Morgan Hirthe\",\"purpose\":\"Visiting\",\"notes\":null,\"checked_in_at\":\"2026-09-30T04:32:45+00:00\",\"checked_out_at\":null},{\"id\":4,\"community_id\":91,\"unit\":{\"id\":183,\"label\":\"Tower q \\u00b7 84637\"},\"visitor_name\":\"Dr. Mona Lemke\",\"purpose\":\"Contractor\",\"notes\":null,\"checked_in_at\":\"2026-09-30T04:32:46+00:00\",\"checked_out_at\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -2091,7 +2085,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":33,\"community_id\":1319,\"unit\":{\"id\":450,\"label\":\"Tower i \\u00b7 61170\"},\"visitor_name\":\"Morgan Hirthe\",\"purpose\":\"Visiting\",\"notes\":null,\"checked_in_at\":\"2026-09-26T11:17:58+00:00\",\"checked_out_at\":null}}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":94,\"unit\":{\"id\":184,\"label\":\"Tower i \\u00b7 61170\"},\"visitor_name\":\"Morgan Hirthe\",\"purpose\":\"Visiting\",\"notes\":null,\"checked_in_at\":\"2026-09-30T04:32:48+00:00\",\"checked_out_at\":null}}",
                             "name": ""
                         }
                     ]
@@ -2140,7 +2134,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":34,\"community_id\":1322,\"unit\":{\"id\":451,\"label\":\"Tower i \\u00b7 95181\"},\"visitor_name\":\"Morgan Hirthe\",\"purpose\":\"Visiting\",\"notes\":null,\"checked_in_at\":\"2026-09-26T11:17:58+00:00\",\"checked_out_at\":null}}",
+                            "body": "{\"data\":{\"id\":6,\"community_id\":97,\"unit\":{\"id\":185,\"label\":\"Tower i \\u00b7 95181\"},\"visitor_name\":\"Morgan Hirthe\",\"purpose\":\"Visiting\",\"notes\":null,\"checked_in_at\":\"2026-09-30T04:32:49+00:00\",\"checked_out_at\":null}}",
                             "name": ""
                         }
                     ]
@@ -2187,7 +2181,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":22,\"community_id\":1325,\"unit\":{\"id\":452,\"label\":\"Tower s \\u00b7 10406\"},\"guest_name\":\"Morgan Hirthe\",\"code\":\"4Q2LQK\",\"valid_from\":\"2026-09-26T00:00:00+00:00\",\"valid_until\":\"2026-09-27T00:00:00+00:00\",\"used_at\":null},{\"id\":23,\"community_id\":1328,\"unit\":{\"id\":453,\"label\":\"Tower a \\u00b7 85609\"},\"guest_name\":\"Hattie Mayert\",\"code\":\"PFKIN5\",\"valid_from\":\"2026-09-26T00:00:00+00:00\",\"valid_until\":\"2026-09-27T00:00:00+00:00\",\"used_at\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":2,\"community_id\":100,\"unit\":{\"id\":186,\"label\":\"Tower s \\u00b7 10406\"},\"guest_name\":\"Morgan Hirthe\",\"code\":\"P6FH2F\",\"valid_from\":\"2026-09-30T00:00:00+00:00\",\"valid_until\":\"2026-10-01T00:00:00+00:00\",\"used_at\":null},{\"id\":3,\"community_id\":103,\"unit\":{\"id\":187,\"label\":\"Tower q \\u00b7 85609\"},\"guest_name\":\"Hattie Mayert\",\"code\":\"F5DT2Z\",\"valid_from\":\"2026-09-30T00:00:00+00:00\",\"valid_until\":\"2026-10-01T00:00:00+00:00\",\"used_at\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -2230,7 +2224,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":24,\"community_id\":1331,\"unit\":{\"id\":454,\"label\":\"Tower b \\u00b7 61751\"},\"guest_name\":\"Morgan Hirthe\",\"code\":\"SJRORX\",\"valid_from\":\"2026-09-26T00:00:00+00:00\",\"valid_until\":\"2026-09-27T00:00:00+00:00\",\"used_at\":null}}",
+                            "body": "{\"data\":{\"id\":4,\"community_id\":106,\"unit\":{\"id\":188,\"label\":\"Tower b \\u00b7 61751\"},\"guest_name\":\"Morgan Hirthe\",\"code\":\"RDZCKO\",\"valid_from\":\"2026-09-30T00:00:00+00:00\",\"valid_until\":\"2026-10-01T00:00:00+00:00\",\"used_at\":null}}",
                             "name": ""
                         }
                     ]
@@ -2276,7 +2270,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":25,\"community_id\":1334,\"unit\":{\"id\":455,\"label\":\"Tower h \\u00b7 82869\"},\"guest_name\":\"Morgan Hirthe\",\"code\":\"4WJBLG\",\"valid_from\":\"2026-09-26T00:00:00+00:00\",\"valid_until\":\"2026-09-27T00:00:00+00:00\",\"used_at\":null}}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":109,\"unit\":{\"id\":189,\"label\":\"Tower h \\u00b7 82869\"},\"guest_name\":\"Morgan Hirthe\",\"code\":\"TBSGQN\",\"valid_from\":\"2026-09-30T00:00:00+00:00\",\"valid_until\":\"2026-10-01T00:00:00+00:00\",\"used_at\":null}}",
                             "name": ""
                         }
                     ]
@@ -2319,7 +2313,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":35,\"community_id\":1337,\"unit\":{\"id\":456,\"label\":\"Tower x \\u00b7 84047\"},\"visitor_name\":\"Mr. Adriel Romaguera\",\"purpose\":\"Contractor\",\"notes\":null,\"checked_in_at\":\"2026-09-26T11:18:02+00:00\",\"checked_out_at\":null}}",
+                            "body": "{\"data\":{\"id\":7,\"community_id\":112,\"unit\":{\"id\":190,\"label\":\"Tower x \\u00b7 84047\"},\"visitor_name\":\"Mr. Adriel Romaguera\",\"purpose\":\"Contractor\",\"notes\":null,\"checked_in_at\":\"2026-09-30T04:32:59+00:00\",\"checked_out_at\":null}}",
                             "name": ""
                         }
                     ]
@@ -2372,7 +2366,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":14,\"community_id\":1340,\"unit\":{\"id\":457,\"label\":\"Tower s \\u00b7 62982\"},\"plate_number\":\"wpw-7680\",\"visitor_name\":\"Rogers Leuschke PhD\",\"starts_on\":\"2026-09-26\",\"ends_on\":\"2026-09-28\",\"notes\":null},{\"id\":15,\"community_id\":1343,\"unit\":{\"id\":458,\"label\":\"Tower u \\u00b7 72195\"},\"plate_number\":\"mkf-9382\",\"visitor_name\":\"Korey Marvin PhD\",\"starts_on\":\"2026-09-26\",\"ends_on\":\"2026-09-28\",\"notes\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":2,\"community_id\":115,\"unit\":{\"id\":191,\"label\":\"Tower s \\u00b7 62982\"},\"plate_number\":\"wpw-7680\",\"visitor_name\":\"Rogers Leuschke PhD\",\"starts_on\":\"2026-09-30\",\"ends_on\":\"2026-10-02\",\"notes\":null},{\"id\":3,\"community_id\":118,\"unit\":{\"id\":192,\"label\":\"Tower g \\u00b7 7556\"},\"plate_number\":\"mkf-9382\",\"visitor_name\":\"Korey Marvin PhD\",\"starts_on\":\"2026-09-30\",\"ends_on\":\"2026-10-02\",\"notes\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -2415,7 +2409,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":16,\"community_id\":1346,\"unit\":{\"id\":459,\"label\":\"Tower s \\u00b7 54659\"},\"plate_number\":\"wpw-7680\",\"visitor_name\":\"Rogers Leuschke PhD\",\"starts_on\":\"2026-09-26\",\"ends_on\":\"2026-09-28\",\"notes\":null}}",
+                            "body": "{\"data\":{\"id\":4,\"community_id\":121,\"unit\":{\"id\":193,\"label\":\"Tower s \\u00b7 54659\"},\"plate_number\":\"wpw-7680\",\"visitor_name\":\"Rogers Leuschke PhD\",\"starts_on\":\"2026-09-30\",\"ends_on\":\"2026-10-02\",\"notes\":null}}",
                             "name": ""
                         }
                     ]
@@ -2520,7 +2514,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":19,\"community_id\":1349,\"unit\":{\"id\":460,\"label\":\"Tower k \\u00b7 93058\"},\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"location\":\"Lobby\",\"severity\":\"low\",\"occurred_at\":\"2026-09-26T11:18:04+00:00\",\"resolved_at\":null,\"resolution_notes\":null},{\"id\":20,\"community_id\":1352,\"unit\":{\"id\":461,\"label\":\"Tower m \\u00b7 76987\"},\"title\":\"Sunt suscipit doloribus fugiat ut aut.\",\"description\":\"Error neque recusandae et ipsam dolorem et ut dicta. Assumenda consequatur ut et sunt quisquam. Repellendus ut eaque alias ratione dolores.\",\"location\":\"Lobby\",\"severity\":\"low\",\"occurred_at\":\"2026-09-26T11:18:04+00:00\",\"resolved_at\":null,\"resolution_notes\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":124,\"unit\":{\"id\":194,\"label\":\"Tower k \\u00b7 93058\"},\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"location\":\"Lobby\",\"severity\":\"low\",\"occurred_at\":\"2026-09-30T04:33:05+00:00\",\"resolved_at\":null,\"resolution_notes\":null},{\"id\":4,\"community_id\":127,\"unit\":{\"id\":195,\"label\":\"Tower m \\u00b7 76987\"},\"title\":\"Sunt suscipit doloribus fugiat ut aut.\",\"description\":\"Error neque recusandae et ipsam dolorem et ut dicta. Assumenda consequatur ut et sunt quisquam. Repellendus ut eaque alias ratione dolores.\",\"location\":\"Lobby\",\"severity\":\"low\",\"occurred_at\":\"2026-09-30T04:33:06+00:00\",\"resolved_at\":null,\"resolution_notes\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -2605,7 +2599,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":21,\"community_id\":1355,\"unit\":{\"id\":462,\"label\":\"Tower s \\u00b7 7627\"},\"title\":\"Eius et animi quos.\",\"description\":\"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.\",\"location\":\"Hallway\",\"severity\":\"low\",\"occurred_at\":\"2026-09-26T11:18:05+00:00\",\"resolved_at\":null,\"resolution_notes\":null}}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":130,\"unit\":{\"id\":196,\"label\":\"Tower s \\u00b7 7627\"},\"title\":\"Eius et animi quos.\",\"description\":\"Fugiat sunt nihil accusantium harum mollitia. Deserunt aut ab provident perspiciatis quo omnis nostrum. Adipisci quidem nostrum qui commodi incidunt iure.\",\"location\":\"Hallway\",\"severity\":\"low\",\"occurred_at\":\"2026-09-30T04:33:08+00:00\",\"resolved_at\":null,\"resolution_notes\":null}}",
                             "name": ""
                         }
                     ]
@@ -2651,7 +2645,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":22,\"community_id\":1358,\"unit\":{\"id\":463,\"label\":\"Tower g \\u00b7 27868\"},\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"location\":\"Lobby\",\"severity\":\"low\",\"occurred_at\":\"2026-09-26T11:18:05+00:00\",\"resolved_at\":null,\"resolution_notes\":null}}",
+                            "body": "{\"data\":{\"id\":6,\"community_id\":133,\"unit\":{\"id\":197,\"label\":\"Tower g \\u00b7 27868\"},\"title\":\"Adipisci quidem nostrum qui commodi.\",\"description\":\"Odit et et modi. Nostrum omnis autem et consequatur aut. Enim non facere tempora ex voluptatem laboriosam praesentium. Adipisci molestias fugit deleniti distinctio eum doloremque id.\",\"location\":\"Lobby\",\"severity\":\"low\",\"occurred_at\":\"2026-09-30T04:33:09+00:00\",\"resolved_at\":null,\"resolution_notes\":null}}",
                             "name": ""
                         }
                     ]
@@ -2757,7 +2751,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"from\":\"2026-09-26\",\"to\":\"2052-10-19\"}"
+                            "raw": "{\"from\":\"2026-09-30\",\"to\":\"2052-10-23\"}"
                         },
                         "description": "Every charge and payment in the period with a running balance. Positive `amount_cents` is a\ncharge, negative a payment or credit."
                     },
@@ -2806,7 +2800,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"from\":\"2026-09-26\",\"to\":\"2052-10-19\"}"
+                            "raw": "{\"from\":\"2026-09-30\",\"to\":\"2052-10-23\"}"
                         },
                         "description": "The same statement as `GET \u2026\/units\/{unit}\/statement`, as a PDF to keep or print. Takes the same `from` and `to`."
                     },
@@ -2919,7 +2913,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":436,\"community_id\":1361,\"number\":\"INV-759832\",\"unit\":{\"id\":464,\"label\":\"Tower j \\u00b7 89349\"},\"issued_on\":\"2026-09-26\",\"due_on\":\"2026-10-10\",\"memo\":null,\"total_cents\":10000,\"paid_cents\":0,\"balance_cents\":10000,\"status\":\"open\",\"status_label\":\"Open\",\"overdue\":false},{\"id\":437,\"community_id\":1363,\"number\":\"INV-192369\",\"unit\":{\"id\":465,\"label\":\"Tower s \\u00b7 27648\"},\"issued_on\":\"2026-09-26\",\"due_on\":\"2026-10-10\",\"memo\":null,\"total_cents\":10000,\"paid_cents\":0,\"balance_cents\":10000,\"status\":\"open\",\"status_label\":\"Open\",\"overdue\":false}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":421,\"community_id\":136,\"number\":\"INV-759832\",\"unit\":{\"id\":198,\"label\":\"Tower u \\u00b7 89349\"},\"issued_on\":\"2026-09-30\",\"due_on\":\"2026-10-14\",\"memo\":null,\"total_cents\":10000,\"paid_cents\":0,\"balance_cents\":10000,\"status\":\"open\",\"status_label\":\"Open\",\"overdue\":false},{\"id\":422,\"community_id\":138,\"number\":\"INV-156696\",\"unit\":{\"id\":199,\"label\":\"Tower s \\u00b7 54533\"},\"issued_on\":\"2026-09-30\",\"due_on\":\"2026-10-14\",\"memo\":null,\"total_cents\":10000,\"paid_cents\":0,\"balance_cents\":10000,\"status\":\"open\",\"status_label\":\"Open\",\"overdue\":false}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -2965,7 +2959,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":438,\"community_id\":1365,\"number\":\"INV-935815\",\"unit\":{\"id\":466,\"label\":\"Tower x \\u00b7 23632\"},\"issued_on\":\"2026-09-26\",\"due_on\":\"2026-10-10\",\"memo\":null,\"total_cents\":10000,\"paid_cents\":0,\"balance_cents\":10000,\"status\":\"open\",\"status_label\":\"Open\",\"overdue\":false,\"lines\":[{\"description\":\"Monthly fees\",\"amount_cents\":10000}]}}",
+                            "body": "{\"data\":{\"id\":423,\"community_id\":140,\"number\":\"INV-935815\",\"unit\":{\"id\":200,\"label\":\"Tower x \\u00b7 23632\"},\"issued_on\":\"2026-09-30\",\"due_on\":\"2026-10-14\",\"memo\":null,\"total_cents\":10000,\"paid_cents\":0,\"balance_cents\":10000,\"status\":\"open\",\"status_label\":\"Open\",\"overdue\":false,\"lines\":[{\"description\":\"Monthly fees\",\"amount_cents\":10000}]}}",
                             "name": ""
                         }
                     ]
@@ -3024,7 +3018,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":334,\"community_id\":1367,\"number\":\"RCT-453885\",\"unit\":{\"id\":467,\"label\":\"Tower x \\u00b7 95981\"},\"method\":\"cheque\",\"method_label\":\"Cheque\",\"reference\":null,\"amount_cents\":10000,\"received_on\":\"2026-09-26\",\"memo\":null,\"reversed\":false,\"reversal_reason\":null,\"receipt_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/1367\\\/payments\\\/334\\\/receipt\"},{\"id\":335,\"community_id\":1369,\"number\":\"RCT-486235\",\"unit\":{\"id\":468,\"label\":\"Tower t \\u00b7 99088\"},\"method\":\"cheque\",\"method_label\":\"Cheque\",\"reference\":null,\"amount_cents\":10000,\"received_on\":\"2026-09-26\",\"memo\":null,\"reversed\":false,\"reversal_reason\":null,\"receipt_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/1369\\\/payments\\\/335\\\/receipt\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":315,\"community_id\":142,\"number\":\"RCT-453885\",\"unit\":{\"id\":201,\"label\":\"Tower x \\u00b7 95981\"},\"method\":\"cheque\",\"method_label\":\"Cheque\",\"reference\":null,\"amount_cents\":10000,\"received_on\":\"2026-09-30\",\"memo\":null,\"reversed\":false,\"reversal_reason\":null,\"receipt_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/142\\\/payments\\\/315\\\/receipt\"},{\"id\":316,\"community_id\":144,\"number\":\"RCT-486235\",\"unit\":{\"id\":202,\"label\":\"Tower x \\u00b7 99088\"},\"method\":\"cheque\",\"method_label\":\"Cheque\",\"reference\":null,\"amount_cents\":10000,\"received_on\":\"2026-09-30\",\"memo\":null,\"reversed\":false,\"reversal_reason\":null,\"receipt_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/144\\\/payments\\\/316\\\/receipt\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -3067,7 +3061,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":336,\"community_id\":1371,\"number\":\"RCT-592878\",\"unit\":{\"id\":469,\"label\":\"Tower s \\u00b7 8316\"},\"method\":\"cheque\",\"method_label\":\"Cheque\",\"reference\":null,\"amount_cents\":10000,\"received_on\":\"2026-09-26\",\"memo\":null,\"reversed\":false,\"reversal_reason\":null,\"receipt_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/1371\\\/payments\\\/336\\\/receipt\"}}",
+                            "body": "{\"data\":{\"id\":317,\"community_id\":146,\"number\":\"RCT-592878\",\"unit\":{\"id\":203,\"label\":\"Tower s \\u00b7 8316\"},\"method\":\"cheque\",\"method_label\":\"Cheque\",\"reference\":null,\"amount_cents\":10000,\"received_on\":\"2026-09-30\",\"memo\":null,\"reversed\":false,\"reversal_reason\":null,\"receipt_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/146\\\/payments\\\/317\\\/receipt\"}}",
                             "name": ""
                         }
                     ]
@@ -3113,7 +3107,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":337,\"community_id\":1373,\"number\":\"RCT-701854\",\"unit\":{\"id\":470,\"label\":\"Tower x \\u00b7 61519\"},\"method\":\"cheque\",\"method_label\":\"Cheque\",\"reference\":null,\"amount_cents\":10000,\"received_on\":\"2026-09-26\",\"memo\":null,\"reversed\":false,\"reversal_reason\":null,\"receipt_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/1373\\\/payments\\\/337\\\/receipt\"}}",
+                            "body": "{\"data\":{\"id\":318,\"community_id\":148,\"number\":\"RCT-701854\",\"unit\":{\"id\":204,\"label\":\"Tower x \\u00b7 61519\"},\"method\":\"cheque\",\"method_label\":\"Cheque\",\"reference\":null,\"amount_cents\":10000,\"received_on\":\"2026-09-30\",\"memo\":null,\"reversed\":false,\"reversal_reason\":null,\"receipt_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/148\\\/payments\\\/318\\\/receipt\"}}",
                             "name": ""
                         }
                     ]
@@ -3212,7 +3206,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":31,\"community_id\":1375,\"number\":\"BILL-970482\",\"vendor\":{\"id\":56,\"name\":\"Considine LLC\"},\"account\":{\"id\":144,\"label\":\"9351 \\u00b7 deleniti nemo\"},\"vendor_reference\":null,\"description\":\"Adipisci quidem nostrum qui commodi.\",\"amount_cents\":149419,\"billed_on\":\"2026-09-26\",\"due_on\":\"2026-10-26\",\"status\":\"pending\",\"status_label\":\"Awaiting approval\",\"decided_at\":null,\"decision_notes\":null,\"paid_on\":null},{\"id\":32,\"community_id\":1377,\"number\":\"BILL-530889\",\"vendor\":{\"id\":57,\"name\":\"Homenick, Schimmel and Glover\"},\"account\":{\"id\":145,\"label\":\"8330 \\u00b7 et ut\"},\"vendor_reference\":null,\"description\":\"Rerum ex repellendus.\",\"amount_cents\":18636,\"billed_on\":\"2026-09-26\",\"due_on\":\"2026-10-26\",\"status\":\"pending\",\"status_label\":\"Awaiting approval\",\"decided_at\":null,\"decision_notes\":null,\"paid_on\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":6,\"community_id\":150,\"number\":\"BILL-970482\",\"vendor\":{\"id\":8,\"name\":\"Considine LLC\"},\"account\":{\"id\":35,\"label\":\"9351 \\u00b7 deleniti nemo\"},\"vendor_reference\":null,\"description\":\"Adipisci quidem nostrum qui commodi.\",\"amount_cents\":149419,\"billed_on\":\"2026-09-30\",\"due_on\":\"2026-10-30\",\"status\":\"pending\",\"status_label\":\"Awaiting approval\",\"decided_at\":null,\"decision_notes\":null,\"paid_on\":null},{\"id\":7,\"community_id\":152,\"number\":\"BILL-530889\",\"vendor\":{\"id\":9,\"name\":\"Homenick, Schimmel and Glover\"},\"account\":{\"id\":36,\"label\":\"8330 \\u00b7 et ut\"},\"vendor_reference\":null,\"description\":\"Rerum ex repellendus.\",\"amount_cents\":18636,\"billed_on\":\"2026-09-30\",\"due_on\":\"2026-10-30\",\"status\":\"pending\",\"status_label\":\"Awaiting approval\",\"decided_at\":null,\"decision_notes\":null,\"paid_on\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -3258,7 +3252,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":33,\"community_id\":1379,\"number\":\"BILL-634659\",\"vendor\":{\"id\":58,\"name\":\"Considine LLC\"},\"account\":{\"id\":146,\"label\":\"6945 \\u00b7 neque blanditiis\"},\"vendor_reference\":null,\"description\":\"Adipisci quidem nostrum qui commodi.\",\"amount_cents\":149419,\"billed_on\":\"2026-09-26\",\"due_on\":\"2026-10-26\",\"status\":\"pending\",\"status_label\":\"Awaiting approval\",\"decided_at\":null,\"decision_notes\":null,\"paid_on\":null}}",
+                            "body": "{\"data\":{\"id\":8,\"community_id\":154,\"number\":\"BILL-634659\",\"vendor\":{\"id\":10,\"name\":\"Considine LLC\"},\"account\":{\"id\":37,\"label\":\"6945 \\u00b7 neque blanditiis\"},\"vendor_reference\":null,\"description\":\"Adipisci quidem nostrum qui commodi.\",\"amount_cents\":149419,\"billed_on\":\"2026-09-30\",\"due_on\":\"2026-10-30\",\"status\":\"pending\",\"status_label\":\"Awaiting approval\",\"decided_at\":null,\"decision_notes\":null,\"paid_on\":null}}",
                             "name": ""
                         }
                     ]
@@ -3307,7 +3301,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":34,\"community_id\":1381,\"number\":\"BILL-153670\",\"vendor\":{\"id\":59,\"name\":\"Leuschke, Bauch and Fritsch\"},\"account\":{\"id\":147,\"label\":\"9043 \\u00b7 voluptatem laboriosam\"},\"vendor_reference\":null,\"description\":\"Et animi quos velit.\",\"amount_cents\":97801,\"billed_on\":\"2026-09-26\",\"due_on\":\"2026-10-26\",\"status\":\"pending\",\"status_label\":\"Awaiting approval\",\"decided_at\":null,\"decision_notes\":null,\"paid_on\":null}}",
+                            "body": "{\"data\":{\"id\":9,\"community_id\":156,\"number\":\"BILL-153670\",\"vendor\":{\"id\":11,\"name\":\"Leuschke, Bauch and Fritsch\"},\"account\":{\"id\":38,\"label\":\"9043 \\u00b7 voluptatem laboriosam\"},\"vendor_reference\":null,\"description\":\"Et animi quos velit.\",\"amount_cents\":97801,\"billed_on\":\"2026-09-30\",\"due_on\":\"2026-10-30\",\"status\":\"pending\",\"status_label\":\"Awaiting approval\",\"decided_at\":null,\"decision_notes\":null,\"paid_on\":null}}",
                             "name": ""
                         }
                     ]
@@ -3366,7 +3360,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":17,\"community_id\":1383,\"meeting\":{\"id\":35,\"title\":\"Annual General Meeting\"},\"title\":\"Approve the reserve fund top-up\",\"description\":null,\"weighting\":\"unit_factor\",\"quorum_percent\":25,\"opens_at\":\"2026-09-25T11:18:09+00:00\",\"closes_at\":\"2026-10-03T11:18:09+00:00\",\"status\":\"draft\",\"status_label\":\"Draft\"},{\"id\":18,\"community_id\":1385,\"meeting\":{\"id\":36,\"title\":\"Annual General Meeting\"},\"title\":\"Approve the reserve fund top-up\",\"description\":null,\"weighting\":\"unit_factor\",\"quorum_percent\":25,\"opens_at\":\"2026-09-25T11:18:10+00:00\",\"closes_at\":\"2026-10-03T11:18:10+00:00\",\"status\":\"draft\",\"status_label\":\"Draft\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":158,\"meeting\":{\"id\":3,\"title\":\"Annual General Meeting\"},\"title\":\"Approve the reserve fund top-up\",\"description\":null,\"weighting\":\"unit_factor\",\"quorum_percent\":25,\"opens_at\":\"2026-09-29T04:33:22+00:00\",\"closes_at\":\"2026-10-07T04:33:22+00:00\",\"status\":\"draft\",\"status_label\":\"Draft\"},{\"id\":4,\"community_id\":160,\"meeting\":{\"id\":4,\"title\":\"Annual General Meeting\"},\"title\":\"Approve the reserve fund top-up\",\"description\":null,\"weighting\":\"unit_factor\",\"quorum_percent\":25,\"opens_at\":\"2026-09-29T04:33:23+00:00\",\"closes_at\":\"2026-10-07T04:33:23+00:00\",\"status\":\"draft\",\"status_label\":\"Draft\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -3412,7 +3406,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":19,\"community_id\":1387,\"meeting\":{\"id\":37,\"title\":\"Annual General Meeting\"},\"title\":\"Approve the reserve fund top-up\",\"description\":null,\"weighting\":\"unit_factor\",\"quorum_percent\":25,\"opens_at\":\"2026-09-25T11:18:10+00:00\",\"closes_at\":\"2026-10-03T11:18:10+00:00\",\"status\":\"draft\",\"status_label\":\"Draft\",\"questions\":[{\"id\":6,\"title\":\"Do you approve?\",\"options\":[{\"id\":13,\"label\":\"Yes\"}]}]},\"turnout\":{\"eligible_units\":96,\"voted_units\":24},\"my_units\":[{\"unit\":{\"id\":1,\"label\":\"North Tower \\u00b7 101\"},\"as_proxy\":false,\"voted_at\":null,\"proxy\":null}],\"proxy_candidates\":[{\"id\":3,\"name\":\"Ben Board\"}]}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":162,\"meeting\":{\"id\":5,\"title\":\"Annual General Meeting\"},\"title\":\"Approve the reserve fund top-up\",\"description\":null,\"weighting\":\"unit_factor\",\"quorum_percent\":25,\"opens_at\":\"2026-09-29T04:33:24+00:00\",\"closes_at\":\"2026-10-07T04:33:24+00:00\",\"status\":\"draft\",\"status_label\":\"Draft\",\"questions\":[{\"id\":4,\"title\":\"Do you approve?\",\"options\":[{\"id\":9,\"label\":\"Yes\"}]}]},\"turnout\":{\"eligible_units\":96,\"voted_units\":24},\"my_units\":[{\"unit\":{\"id\":1,\"label\":\"North Tower \\u00b7 101\"},\"as_proxy\":false,\"voted_at\":null,\"proxy\":null}],\"proxy_candidates\":[{\"id\":3,\"name\":\"Ben Board\"}]}",
                             "name": ""
                         }
                     ]
@@ -3615,7 +3609,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":38,\"community_id\":1389,\"title\":\"Annual General Meeting\",\"kind\":\"agm\",\"kind_label\":\"Annual general meeting\",\"starts_at\":\"2026-10-17T19:00:00+00:00\",\"location\":\"Party Room\",\"description\":null,\"closed\":false},{\"id\":39,\"community_id\":1390,\"title\":\"Annual General Meeting\",\"kind\":\"agm\",\"kind_label\":\"Annual general meeting\",\"starts_at\":\"2026-10-17T19:00:00+00:00\",\"location\":\"Party Room\",\"description\":null,\"closed\":false}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":6,\"community_id\":164,\"title\":\"Annual General Meeting\",\"kind\":\"agm\",\"kind_label\":\"Annual general meeting\",\"starts_at\":\"2026-10-21T19:00:00+00:00\",\"location\":\"Party Room\",\"description\":null,\"closed\":false},{\"id\":7,\"community_id\":165,\"title\":\"Annual General Meeting\",\"kind\":\"agm\",\"kind_label\":\"Annual general meeting\",\"starts_at\":\"2026-10-21T19:00:00+00:00\",\"location\":\"Party Room\",\"description\":null,\"closed\":false}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -3661,7 +3655,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":40,\"community_id\":1391,\"title\":\"Annual General Meeting\",\"kind\":\"agm\",\"kind_label\":\"Annual general meeting\",\"starts_at\":\"2026-10-17T19:00:00+00:00\",\"location\":\"Party Room\",\"description\":null,\"closed\":false,\"agenda\":[\"Election of directors\"]}}",
+                            "body": "{\"data\":{\"id\":8,\"community_id\":166,\"title\":\"Annual General Meeting\",\"kind\":\"agm\",\"kind_label\":\"Annual general meeting\",\"starts_at\":\"2026-10-21T19:00:00+00:00\",\"location\":\"Party Room\",\"description\":null,\"closed\":false,\"agenda\":[\"Election of directors\"]}}",
                             "name": ""
                         }
                     ]
@@ -3720,7 +3714,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":20,\"community_id\":1392,\"rule\":{\"id\":37,\"title\":\"Unauthorized parking\",\"reference\":\"Rules, s. 15\"},\"unit\":{\"id\":471,\"label\":\"Tower b \\u00b7 9488\"},\"observed_at\":\"2026-09-26T11:18:11+00:00\",\"location\":null,\"description\":\"Adipisci quidem nostrum qui commodi incidunt iure.\",\"status\":\"open\",\"status_label\":\"Open\",\"stage\":null,\"fines_issued\":0,\"next_action_on\":null,\"resolution_notes\":null},{\"id\":21,\"community_id\":1395,\"rule\":{\"id\":38,\"title\":\"Pet off leash in common areas\",\"reference\":\"Rules, s. 16\"},\"unit\":{\"id\":472,\"label\":\"Tower w \\u00b7 99976\"},\"observed_at\":\"2026-09-26T11:18:11+00:00\",\"location\":null,\"description\":\"Totam itaque saepe dolorem deleniti et est.\",\"status\":\"open\",\"status_label\":\"Open\",\"stage\":null,\"fines_issued\":0,\"next_action_on\":null,\"resolution_notes\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":167,\"rule\":{\"id\":5,\"title\":\"Unauthorized parking\",\"reference\":\"Rules, s. 15\"},\"unit\":{\"id\":205,\"label\":\"Tower s \\u00b7 9488\"},\"observed_at\":\"2026-09-30T04:33:26+00:00\",\"location\":null,\"description\":\"Adipisci quidem nostrum qui commodi incidunt iure.\",\"status\":\"open\",\"status_label\":\"Open\",\"stage\":null,\"fines_issued\":0,\"next_action_on\":null,\"resolution_notes\":null},{\"id\":4,\"community_id\":170,\"rule\":{\"id\":6,\"title\":\"Pet off leash in common areas\",\"reference\":\"Rules, s. 3\"},\"unit\":{\"id\":206,\"label\":\"Tower n \\u00b7 55820\"},\"observed_at\":\"2026-09-30T04:33:27+00:00\",\"location\":null,\"description\":\"Et dolores quia maiores.\",\"status\":\"open\",\"status_label\":\"Open\",\"stage\":null,\"fines_issued\":0,\"next_action_on\":null,\"resolution_notes\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -3799,7 +3793,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":22,\"community_id\":1398,\"rule\":{\"id\":39,\"title\":\"Noise after 11pm\",\"reference\":\"Rules, s. 26\"},\"unit\":{\"id\":473,\"label\":\"Tower q \\u00b7 30834\"},\"observed_at\":\"2026-09-26T11:18:12+00:00\",\"location\":null,\"description\":\"Eius et animi quos velit et.\",\"status\":\"open\",\"status_label\":\"Open\",\"stage\":null,\"fines_issued\":0,\"next_action_on\":null,\"resolution_notes\":null,\"notices\":[{\"id\":15,\"stage\":\"courtesy\",\"stage_label\":\"Courtesy notice\",\"issued_on\":\"2026-09-26\",\"cure_by\":\"2026-10-10\",\"fine_invoice_id\":null,\"letter_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/1398\\\/violations\\\/22\\\/notices\\\/15\\\/letter\"}]}}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":173,\"rule\":{\"id\":7,\"title\":\"Noise after 11pm\",\"reference\":\"Rules, s. 26\"},\"unit\":{\"id\":207,\"label\":\"Tower q \\u00b7 30834\"},\"observed_at\":\"2026-09-30T04:33:29+00:00\",\"location\":null,\"description\":\"Eius et animi quos velit et.\",\"status\":\"open\",\"status_label\":\"Open\",\"stage\":null,\"fines_issued\":0,\"next_action_on\":null,\"resolution_notes\":null,\"notices\":[{\"id\":5,\"stage\":\"courtesy\",\"stage_label\":\"Courtesy notice\",\"issued_on\":\"2026-09-30\",\"cure_by\":\"2026-10-14\",\"fine_invoice_id\":null,\"letter_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/173\\\/violations\\\/5\\\/notices\\\/5\\\/letter\"}]}}",
                             "name": ""
                         }
                     ]
@@ -3845,7 +3839,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":23,\"community_id\":1401,\"rule\":{\"id\":40,\"title\":\"Unauthorized parking\",\"reference\":\"Rules, s. 15\"},\"unit\":{\"id\":474,\"label\":\"Tower s \\u00b7 40603\"},\"observed_at\":\"2026-09-26T11:18:12+00:00\",\"location\":null,\"description\":\"Adipisci quidem nostrum qui commodi incidunt iure.\",\"status\":\"open\",\"status_label\":\"Open\",\"stage\":null,\"fines_issued\":0,\"next_action_on\":null,\"resolution_notes\":null,\"notices\":[{\"id\":16,\"stage\":\"courtesy\",\"stage_label\":\"Courtesy notice\",\"issued_on\":\"2026-09-26\",\"cure_by\":\"2026-10-10\",\"fine_invoice_id\":null,\"letter_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/1401\\\/violations\\\/23\\\/notices\\\/16\\\/letter\"}]}}",
+                            "body": "{\"data\":{\"id\":6,\"community_id\":176,\"rule\":{\"id\":8,\"title\":\"Unauthorized parking\",\"reference\":\"Rules, s. 15\"},\"unit\":{\"id\":208,\"label\":\"Tower s \\u00b7 40603\"},\"observed_at\":\"2026-09-30T04:33:30+00:00\",\"location\":null,\"description\":\"Adipisci quidem nostrum qui commodi incidunt iure.\",\"status\":\"open\",\"status_label\":\"Open\",\"stage\":null,\"fines_issued\":0,\"next_action_on\":null,\"resolution_notes\":null,\"notices\":[{\"id\":6,\"stage\":\"courtesy\",\"stage_label\":\"Courtesy notice\",\"issued_on\":\"2026-09-30\",\"cure_by\":\"2026-10-14\",\"fine_invoice_id\":null,\"letter_url\":\"http:\\\/\\\/property-flow.test\\\/api\\\/v1\\\/communities\\\/176\\\/violations\\\/6\\\/notices\\\/6\\\/letter\"}]}}",
                             "name": ""
                         }
                     ]
@@ -3944,7 +3938,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":23,\"community_id\":1404,\"unit\":{\"id\":475,\"label\":\"Tower y \\u00b7 77759\"},\"title\":\"Replace flooring with hardwood\",\"description\":\"Nostrum qui commodi incidunt iure. Et et modi ipsum nostrum. Autem et consequatur aut dolores enim non facere tempora. Voluptatem laboriosam praesentium quis adipisci.\",\"contractor\":null,\"planned_start_on\":null,\"status\":\"submitted\",\"status_label\":\"Submitted\",\"conditions\":null,\"decision_notes\":null,\"decided_at\":null,\"decision_letter_url\":null,\"submitted_at\":\"2026-09-26T11:18:13+00:00\"},{\"id\":24,\"community_id\":1407,\"unit\":{\"id\":476,\"label\":\"Tower h \\u00b7 8828\"},\"title\":\"Replace flooring with hardwood\",\"description\":\"Esse sint aut molestiae sunt suscipit doloribus fugiat. Aut deserunt et error neque recusandae et.\",\"contractor\":null,\"planned_start_on\":null,\"status\":\"submitted\",\"status_label\":\"Submitted\",\"conditions\":null,\"decision_notes\":null,\"decided_at\":null,\"decision_letter_url\":null,\"submitted_at\":\"2026-09-26T11:18:14+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":179,\"unit\":{\"id\":209,\"label\":\"Tower y \\u00b7 77759\"},\"title\":\"Replace flooring with hardwood\",\"description\":\"Nostrum qui commodi incidunt iure. Et et modi ipsum nostrum. Autem et consequatur aut dolores enim non facere tempora. Voluptatem laboriosam praesentium quis adipisci.\",\"contractor\":null,\"planned_start_on\":null,\"status\":\"submitted\",\"status_label\":\"Submitted\",\"conditions\":null,\"decision_notes\":null,\"decided_at\":null,\"decision_letter_url\":null,\"submitted_at\":\"2026-09-30T04:33:32+00:00\"},{\"id\":4,\"community_id\":182,\"unit\":{\"id\":210,\"label\":\"Tower h \\u00b7 8828\"},\"title\":\"Replace flooring with hardwood\",\"description\":\"Esse sint aut molestiae sunt suscipit doloribus fugiat. Aut deserunt et error neque recusandae et.\",\"contractor\":null,\"planned_start_on\":null,\"status\":\"submitted\",\"status_label\":\"Submitted\",\"conditions\":null,\"decision_notes\":null,\"decided_at\":null,\"decision_letter_url\":null,\"submitted_at\":\"2026-09-30T04:33:34+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -4023,7 +4017,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":25,\"community_id\":1410,\"unit\":{\"id\":477,\"label\":\"Tower t \\u00b7 72743\"},\"title\":\"Replace flooring with hardwood\",\"description\":\"Animi quos velit et fugiat. Nihil accusantium harum mollitia modi deserunt. Ab provident perspiciatis quo omnis nostrum aut adipisci.\",\"contractor\":null,\"planned_start_on\":null,\"status\":\"submitted\",\"status_label\":\"Submitted\",\"conditions\":null,\"decision_notes\":null,\"decided_at\":null,\"decision_letter_url\":null,\"submitted_at\":\"2026-09-26T11:18:14+00:00\"}}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":185,\"unit\":{\"id\":211,\"label\":\"Tower t \\u00b7 72743\"},\"title\":\"Replace flooring with hardwood\",\"description\":\"Animi quos velit et fugiat. Nihil accusantium harum mollitia modi deserunt. Ab provident perspiciatis quo omnis nostrum aut adipisci.\",\"contractor\":null,\"planned_start_on\":null,\"status\":\"submitted\",\"status_label\":\"Submitted\",\"conditions\":null,\"decision_notes\":null,\"decided_at\":null,\"decision_letter_url\":null,\"submitted_at\":\"2026-09-30T04:33:36+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -4069,7 +4063,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":26,\"community_id\":1413,\"unit\":{\"id\":478,\"label\":\"Tower t \\u00b7 91729\"},\"title\":\"Replace flooring with hardwood\",\"description\":\"Nostrum qui commodi incidunt iure. Et et modi ipsum nostrum. Autem et consequatur aut dolores enim non facere tempora. Voluptatem laboriosam praesentium quis adipisci.\",\"contractor\":null,\"planned_start_on\":null,\"status\":\"submitted\",\"status_label\":\"Submitted\",\"conditions\":null,\"decision_notes\":null,\"decided_at\":null,\"decision_letter_url\":null,\"submitted_at\":\"2026-09-26T11:18:14+00:00\"}}",
+                            "body": "{\"data\":{\"id\":6,\"community_id\":188,\"unit\":{\"id\":212,\"label\":\"Tower t \\u00b7 91729\"},\"title\":\"Replace flooring with hardwood\",\"description\":\"Nostrum qui commodi incidunt iure. Et et modi ipsum nostrum. Autem et consequatur aut dolores enim non facere tempora. Voluptatem laboriosam praesentium quis adipisci.\",\"contractor\":null,\"planned_start_on\":null,\"status\":\"submitted\",\"status_label\":\"Submitted\",\"conditions\":null,\"decision_notes\":null,\"decided_at\":null,\"decision_letter_url\":null,\"submitted_at\":\"2026-09-30T04:33:37+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -4118,7 +4112,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":27,\"community_id\":1416,\"unit\":{\"id\":479,\"label\":\"Tower s \\u00b7 25874\"},\"title\":\"Kitchen renovation\",\"description\":\"Et fugiat sunt nihil accusantium. Mollitia modi deserunt aut ab provident perspiciatis quo. Nostrum aut adipisci quidem nostrum.\",\"contractor\":null,\"planned_start_on\":null,\"status\":\"submitted\",\"status_label\":\"Submitted\",\"conditions\":null,\"decision_notes\":null,\"decided_at\":null,\"decision_letter_url\":null,\"submitted_at\":\"2026-09-26T11:18:15+00:00\"}}",
+                            "body": "{\"data\":{\"id\":7,\"community_id\":191,\"unit\":{\"id\":213,\"label\":\"Tower s \\u00b7 25874\"},\"title\":\"Kitchen renovation\",\"description\":\"Et fugiat sunt nihil accusantium. Mollitia modi deserunt aut ab provident perspiciatis quo. Nostrum aut adipisci quidem nostrum.\",\"contractor\":null,\"planned_start_on\":null,\"status\":\"submitted\",\"status_label\":\"Submitted\",\"conditions\":null,\"decision_notes\":null,\"decided_at\":null,\"decision_letter_url\":null,\"submitted_at\":\"2026-09-30T04:33:38+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -4210,7 +4204,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":17,\"community_id\":1419,\"title\":\"Amenity satisfaction survey\",\"description\":null,\"is_poll\":false,\"is_anonymous\":false,\"audience\":\"residents\",\"open\":true,\"published_at\":\"2026-09-26T11:18:15+00:00\",\"closes_at\":null},{\"id\":18,\"community_id\":1420,\"title\":\"Amenity satisfaction survey\",\"description\":null,\"is_poll\":false,\"is_anonymous\":false,\"audience\":\"residents\",\"open\":true,\"published_at\":\"2026-09-26T11:18:15+00:00\",\"closes_at\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":3,\"community_id\":194,\"title\":\"Amenity satisfaction survey\",\"description\":null,\"is_poll\":false,\"is_anonymous\":false,\"audience\":\"residents\",\"open\":true,\"published_at\":\"2026-09-30T04:33:38+00:00\",\"closes_at\":null},{\"id\":4,\"community_id\":195,\"title\":\"Amenity satisfaction survey\",\"description\":null,\"is_poll\":false,\"is_anonymous\":false,\"audience\":\"residents\",\"open\":true,\"published_at\":\"2026-09-30T04:33:38+00:00\",\"closes_at\":null}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -4256,7 +4250,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":19,\"community_id\":1421,\"title\":\"Amenity satisfaction survey\",\"description\":null,\"is_poll\":false,\"is_anonymous\":false,\"audience\":\"residents\",\"open\":true,\"published_at\":\"2026-09-26T11:18:15+00:00\",\"closes_at\":null,\"questions\":[{\"id\":7,\"kind\":\"single_choice\",\"title\":\"How satisfied are you?\",\"required\":true,\"options\":[{\"id\":9,\"label\":\"Very\"}]}]},\"answered\":true,\"can_answer\":false,\"results\":{\"responses\":19,\"questions\":[{\"title\":\"Which colour do you prefer?\",\"options\":[{\"label\":\"Warm grey\",\"count\":5,\"percent\":\"26.3\"}]}]}}",
+                            "body": "{\"data\":{\"id\":5,\"community_id\":196,\"title\":\"Amenity satisfaction survey\",\"description\":null,\"is_poll\":false,\"is_anonymous\":false,\"audience\":\"residents\",\"open\":true,\"published_at\":\"2026-09-30T04:33:39+00:00\",\"closes_at\":null,\"questions\":[{\"id\":5,\"kind\":\"single_choice\",\"title\":\"How satisfied are you?\",\"required\":true,\"options\":[{\"id\":8,\"label\":\"Very\"}]}]},\"answered\":true,\"can_answer\":false,\"results\":{\"responses\":19,\"questions\":[{\"title\":\"Which colour do you prefer?\",\"options\":[{\"label\":\"Warm grey\",\"count\":5,\"percent\":\"26.3\"}]}]}}",
                             "name": ""
                         }
                     ]
@@ -4345,7 +4339,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":16,\"community_id\":1422,\"title\":\"Consent to electronic notices\",\"body\":\"I agree to receive notices from the corporation electronically.\",\"audience\":\"owners\",\"published_at\":\"2026-09-26T11:18:15+00:00\",\"closes_at\":null},{\"id\":17,\"community_id\":1423,\"title\":\"Consent to electronic notices\",\"body\":\"I agree to receive notices from the corporation electronically.\",\"audience\":\"owners\",\"published_at\":\"2026-09-26T11:18:15+00:00\",\"closes_at\":null}]}",
+                            "body": "{\"data\":[{\"id\":2,\"community_id\":197,\"title\":\"Consent to electronic notices\",\"body\":\"I agree to receive notices from the corporation electronically.\",\"audience\":\"owners\",\"published_at\":\"2026-09-30T04:33:39+00:00\",\"closes_at\":null},{\"id\":3,\"community_id\":198,\"title\":\"Consent to electronic notices\",\"body\":\"I agree to receive notices from the corporation electronically.\",\"audience\":\"owners\",\"published_at\":\"2026-09-30T04:33:39+00:00\",\"closes_at\":null}]}",
                             "name": ""
                         }
                     ]
@@ -4391,7 +4385,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":18,\"community_id\":1424,\"title\":\"Consent to electronic notices\",\"body\":\"I agree to receive notices from the corporation electronically.\",\"audience\":\"owners\",\"published_at\":\"2026-09-26T11:18:15+00:00\",\"closes_at\":null},\"signed_at\":null}",
+                            "body": "{\"data\":{\"id\":4,\"community_id\":199,\"title\":\"Consent to electronic notices\",\"body\":\"I agree to receive notices from the corporation electronically.\",\"audience\":\"owners\",\"published_at\":\"2026-09-30T04:33:40+00:00\",\"closes_at\":null},\"signed_at\":null}",
                             "name": ""
                         }
                     ]
@@ -4487,7 +4481,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":[{\"id\":37,\"community_id\":1425,\"kind\":\"discussion\",\"title\":\"Adipisci quidem nostrum qui commodi incidunt.\",\"body\":\"Et et modi ipsum nostrum. Autem et consequatur aut dolores enim non facere tempora.\",\"price_cents\":null,\"author\":{\"id\":241,\"name\":\"Josiane Emard\"},\"pinned\":false,\"locked\":false,\"closed\":false,\"hidden\":false,\"last_activity_at\":\"2026-09-26T11:18:15+00:00\",\"created_at\":\"2026-09-26T11:18:16+00:00\"},{\"id\":38,\"community_id\":1426,\"kind\":\"discussion\",\"title\":\"Ratione nemo voluptate accusamus ut et recusandae.\",\"body\":\"Ex repellendus assumenda et tenetur ab reiciendis. Perspiciatis deserunt ducimus corrupti et dolores quia. Assumenda odit doloribus repellat officiis corporis nesciunt ut.\",\"price_cents\":null,\"author\":{\"id\":242,\"name\":\"Mr. Jordyn Stokes III\"},\"pinned\":false,\"locked\":false,\"closed\":false,\"hidden\":false,\"last_activity_at\":\"2026-09-26T11:18:16+00:00\",\"created_at\":\"2026-09-26T11:18:16+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
+                            "body": "{\"data\":[{\"id\":6,\"community_id\":200,\"kind\":\"discussion\",\"title\":\"Adipisci quidem nostrum qui commodi incidunt.\",\"body\":\"Et et modi ipsum nostrum. Autem et consequatur aut dolores enim non facere tempora.\",\"price_cents\":null,\"author\":{\"id\":86,\"name\":\"Josiane Emard\"},\"pinned\":false,\"locked\":false,\"closed\":false,\"hidden\":false,\"last_activity_at\":\"2026-09-30T04:33:40+00:00\",\"created_at\":\"2026-09-30T04:33:41+00:00\"},{\"id\":7,\"community_id\":201,\"kind\":\"discussion\",\"title\":\"Ratione nemo voluptate accusamus ut et recusandae.\",\"body\":\"Ex repellendus assumenda et tenetur ab reiciendis. Perspiciatis deserunt ducimus corrupti et dolores quia. Assumenda odit doloribus repellat officiis corporis nesciunt ut.\",\"price_cents\":null,\"author\":{\"id\":87,\"name\":\"Mrs. Fiona Ondricka\"},\"pinned\":false,\"locked\":false,\"closed\":false,\"hidden\":false,\"last_activity_at\":\"2026-09-30T04:33:41+00:00\",\"created_at\":\"2026-09-30T04:33:42+00:00\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":25,\"to\":2,\"total\":2}}",
                             "name": ""
                         }
                     ]
@@ -4530,7 +4524,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":39,\"community_id\":1427,\"kind\":\"discussion\",\"title\":\"Quos velit et fugiat sunt nihil accusantium.\",\"body\":\"Modi deserunt aut ab provident perspiciatis. Omnis nostrum aut adipisci quidem nostrum qui commodi. Iure odit et et modi ipsum nostrum omnis. Et consequatur aut dolores enim.\",\"price_cents\":null,\"author\":{\"id\":243,\"name\":\"Bridget Schaden\"},\"pinned\":false,\"locked\":false,\"closed\":false,\"hidden\":false,\"last_activity_at\":\"2026-09-26T11:18:16+00:00\",\"created_at\":\"2026-09-26T11:18:16+00:00\"}}",
+                            "body": "{\"data\":{\"id\":8,\"community_id\":202,\"kind\":\"discussion\",\"title\":\"Quos velit et fugiat sunt nihil accusantium.\",\"body\":\"Modi deserunt aut ab provident perspiciatis. Omnis nostrum aut adipisci quidem nostrum qui commodi. Iure odit et et modi ipsum nostrum omnis. Et consequatur aut dolores enim.\",\"price_cents\":null,\"author\":{\"id\":88,\"name\":\"Bridget Schaden\"},\"pinned\":false,\"locked\":false,\"closed\":false,\"hidden\":false,\"last_activity_at\":\"2026-09-30T04:33:42+00:00\",\"created_at\":\"2026-09-30T04:33:42+00:00\"}}",
                             "name": ""
                         }
                     ]
@@ -4576,7 +4570,7 @@
                         {
                             "header": [],
                             "code": 200,
-                            "body": "{\"data\":{\"id\":40,\"community_id\":1428,\"kind\":\"discussion\",\"title\":\"Adipisci quidem nostrum qui commodi incidunt.\",\"body\":\"Et et modi ipsum nostrum. Autem et consequatur aut dolores enim non facere tempora.\",\"price_cents\":null,\"author\":{\"id\":244,\"name\":\"Josiane Emard\"},\"pinned\":false,\"locked\":false,\"closed\":false,\"hidden\":false,\"last_activity_at\":\"2026-09-26T11:18:16+00:00\",\"created_at\":\"2026-09-26T11:18:17+00:00\",\"replies\":[{\"id\":16,\"body\":\"Ut et recusandae modi rerum ex repellendus.\",\"author\":{\"id\":245,\"name\":\"Aron Ledner\"},\"hidden\":false,\"created_at\":\"2026-09-26T11:18:17+00:00\"}]}}",
+                            "body": "{\"data\":{\"id\":9,\"community_id\":203,\"kind\":\"discussion\",\"title\":\"Adipisci quidem nostrum qui commodi incidunt.\",\"body\":\"Et et modi ipsum nostrum. Autem et consequatur aut dolores enim non facere tempora.\",\"price_cents\":null,\"author\":{\"id\":89,\"name\":\"Josiane Emard\"},\"pinned\":false,\"locked\":false,\"closed\":false,\"hidden\":false,\"last_activity_at\":\"2026-09-30T04:33:43+00:00\",\"created_at\":\"2026-09-30T04:33:43+00:00\",\"replies\":[{\"id\":3,\"body\":\"Ut et recusandae modi rerum ex repellendus.\",\"author\":{\"id\":90,\"name\":\"Aron Ledner\"},\"hidden\":false,\"created_at\":\"2026-09-30T04:33:44+00:00\"}]}}",
                             "name": ""
                         }
                     ]
@@ -4625,7 +4619,7 @@
                         {
                             "header": [],
                             "code": 201,
-                            "body": "{\"data\":{\"id\":17,\"body\":\"Et animi quos velit et fugiat.\",\"author\":{\"id\":247,\"name\":\"Ms. Anais Conroy\"},\"hidden\":false,\"created_at\":\"2026-09-26T11:18:17+00:00\"}}",
+                            "body": "{\"data\":{\"id\":4,\"body\":\"Et animi quos velit et fugiat.\",\"author\":{\"id\":92,\"name\":\"Ms. Anais Conroy\"},\"hidden\":false,\"created_at\":\"2026-09-30T04:33:44+00:00\"}}",
                             "name": ""
                         }
                     ]

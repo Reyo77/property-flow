@@ -4,10 +4,8 @@ use App\Enums\CompanyRole;
 use App\Models\Community;
 use App\Models\User;
 use Illuminate\Testing\TestResponse;
-use Laravel\Fortify\Fortify;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
-use PragmaRX\Google2FA\Google2FA;
 
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\getJson;
@@ -18,19 +16,6 @@ function signIn(array $overrides = []): TestResponse
     return postJson(route('api.v1.auth.token.store'), [
         'email' => 'rita@example.test', 'password' => 'password', 'device_name' => 'Rita\'s phone', ...$overrides,
     ]);
-}
-
-function ritaWithTwoFactor(): array
-{
-    $secret = app(Google2FA::class)->generateSecretKey();
-    $user = User::factory()->create(['email' => 'rita@example.test']);
-    $user->forceFill([
-        'two_factor_secret' => Fortify::currentEncrypter()->encrypt($secret),
-        'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['recovery-one', 'recovery-two'])),
-        'two_factor_confirmed_at' => now(),
-    ])->save();
-
-    return [$user, $secret];
 }
 
 describe('signing in', function () {
@@ -82,27 +67,6 @@ describe('signing in', function () {
         }
 
         signIn()->assertTooManyRequests()->assertJsonPath('code', 'too_many_requests')->assertHeader('Retry-After');
-    });
-});
-
-describe('two-factor accounts', function () {
-    it('asks for the code, then accepts a valid one', function () {
-        [, $secret] = ritaWithTwoFactor();
-
-        signIn()->assertUnprocessable()->assertJsonPath('code', 'two_factor_required');
-        signIn(['code' => '000000'])->assertUnprocessable()->assertJsonPath('code', 'validation_failed');
-        expect(PersonalAccessToken::count())->toBe(0);
-
-        signIn(['code' => app(Google2FA::class)->getCurrentOtp($secret)])->assertCreated();
-    });
-
-    it('accepts a recovery code once', function () {
-        [$user] = ritaWithTwoFactor();
-
-        signIn(['recovery_code' => 'recovery-one'])->assertCreated();
-        signIn(['recovery_code' => 'recovery-one'])->assertUnprocessable();
-
-        expect($user->fresh()?->recoveryCodes())->not->toContain('recovery-one')->toContain('recovery-two');
     });
 });
 

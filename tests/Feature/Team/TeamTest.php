@@ -163,7 +163,6 @@ it('signs out a member who is deactivated while signed in', function () {
 
 it('lets a reactivated member sign in again', function () {
     $admin = companyAdmin();
-    // No two-factor here: this test signs in for real and only exercises the deactivation gate.
     $member = User::factory()->for($admin->company)->withRole(CompanyRole::Staff)->create();
     $member->forceFill(['deactivated_at' => now()])->save();
 

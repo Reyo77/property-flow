@@ -109,33 +109,22 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
 use LogicException;
-use PragmaRX\Google2FA\Google2FA;
 
 /**
  * A realistic company for trying the app. Every demo login uses the password "password":
  * demo@ (company admin), manager@ (Harbour Towers only), board@, staff@, resident@,
  * vendor@propertyflow.test (a vendor with a work order to view and update), and
  * platform@propertyflow.test (a super admin, for the /platform panel).
- *
- * Staff/admin roles require two-factor authentication (Phase 11): each gets a real, freshly
- * generated secret (printed to the console below) rather than a stored QR code, since there's no
- * real authenticator app to scan it into. Add it to an authenticator app manually, or compute a
- * one-time code straight from the secret — see `tests/load/README.md` for the tinker one-liner.
  */
 class DemoSeeder extends Seeder
 {
-    /** @var array<string, string> email => two-factor secret, printed once seeding finishes. */
-    private array $twoFactorSecrets = [];
-
     public function run(): void
     {
-        $this->createWithTwoFactor(fn (string $secret) => User::factory()->withTwoFactor($secret)->superAdmin()
-            ->create(['name' => 'Pat Admin', 'email' => 'platform@propertyflow.test']));
+        User::factory()->superAdmin()->create(['name' => 'Pat Admin', 'email' => 'platform@propertyflow.test']);
 
         $company = Company::factory()->create(['name' => 'Maple Property Management']);
 
-        $this->createWithTwoFactor(fn (string $secret) => User::factory()->for($company)->withTwoFactor($secret)->companyAdmin()
-            ->create(['name' => 'Demo Admin', 'email' => 'demo@propertyflow.test']));
+        User::factory()->for($company)->companyAdmin()->create(['name' => 'Demo Admin', 'email' => 'demo@propertyflow.test']);
 
         $condo = $this->seedCondo($company);
         $hoa = $this->seedHoa($company);
@@ -150,27 +139,6 @@ class DemoSeeder extends Seeder
         $this->seedGovernance($condo);
         $this->seedViolationsAndRenovations($condo);
         $this->seedEngagement($condo);
-
-        $this->command->newLine();
-        $this->command->info('Two-factor secrets for demo logins (add to an authenticator app):');
-        foreach ($this->twoFactorSecrets as $email => $secret) {
-            $this->command->line("  {$email}: {$secret}");
-        }
-    }
-
-    /**
-     * Creates a two-factor-enabled demo user with a fresh secret, recording it for the summary
-     * printed once seeding finishes.
-     *
-     * @param  callable(string): User  $create
-     */
-    private function createWithTwoFactor(callable $create): User
-    {
-        $secret = (new Google2FA)->generateSecretKey();
-        $user = $create($secret);
-        $this->twoFactorSecrets[$user->email] = $secret;
-
-        return $user;
     }
 
     /**
@@ -229,16 +197,16 @@ class DemoSeeder extends Seeder
 
     private function seedTeam(Company $company, Community $condo, Community $hoa): void
     {
-        $manager = $this->createWithTwoFactor(fn (string $secret) => User::factory()->for($company)->withTwoFactor($secret)->withRole(CompanyRole::PropertyManager)
-            ->create(['name' => 'Priya Manager', 'email' => 'manager@propertyflow.test']));
+        $manager = User::factory()->for($company)->withRole(CompanyRole::PropertyManager)
+            ->create(['name' => 'Priya Manager', 'email' => 'manager@propertyflow.test']);
         $manager->communities()->attach($condo);
 
-        $board = $this->createWithTwoFactor(fn (string $secret) => User::factory()->for($company)->withTwoFactor($secret)->withRole(CompanyRole::BoardMember)
-            ->create(['name' => 'Ben Board', 'email' => 'board@propertyflow.test']));
+        $board = User::factory()->for($company)->withRole(CompanyRole::BoardMember)
+            ->create(['name' => 'Ben Board', 'email' => 'board@propertyflow.test']);
         $board->communities()->attach($condo);
 
-        $staff = $this->createWithTwoFactor(fn (string $secret) => User::factory()->for($company)->withTwoFactor($secret)->withRole(CompanyRole::Staff)
-            ->create(['name' => 'Sam Concierge', 'email' => 'staff@propertyflow.test']));
+        $staff = User::factory()->for($company)->withRole(CompanyRole::Staff)
+            ->create(['name' => 'Sam Concierge', 'email' => 'staff@propertyflow.test']);
         $staff->communities()->attach([$condo->id, $hoa->id]);
     }
 

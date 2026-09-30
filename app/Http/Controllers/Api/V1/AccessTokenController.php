@@ -13,8 +13,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider;
-use Laravel\Fortify\Fortify;
 use Laravel\Sanctum\PersonalAccessToken;
 
 /**
@@ -22,24 +20,21 @@ use Laravel\Sanctum\PersonalAccessToken;
  *
  * Sign in by exchanging an email and password for a bearer token, then send it on every request
  * as `Authorization: Bearer {token}`. Each device gets its own token, which can be listed and
- * revoked. Accounts with two-factor authentication also need a `code` (or `recovery_code`).
+ * revoked.
  */
 class AccessTokenController extends Controller
 {
     /**
      * Sign in
      *
-     * Returns a new token for this device. Store it securely; it is only shown once. If the
-     * account has two-factor authentication and no code is sent, the response is a 422 with
-     * `code: two_factor_required` — ask for the code and send the request again.
+     * Returns a new token for this device. Store it securely; it is only shown once.
      *
      * @unauthenticated
      *
      * @response 201 {"token": "1|Z3f...", "token_type": "Bearer", "user": {"id": 5, "name": "Rita Resident", "email": "resident@propertyflow.test"}}
      * @response 422 scenario="Wrong email or password" {"message": "These credentials do not match our records.", "code": "validation_failed", "errors": {"email": ["These credentials do not match our records."]}}
-     * @response 422 scenario="Two-factor code needed" {"message": "Enter the code from your authenticator app.", "code": "two_factor_required", "errors": {"code": ["Enter the code from your authenticator app."]}}
      */
-    public function store(IssueAccessTokenRequest $request, TwoFactorAuthenticationProvider $twoFactor): JsonResponse
+    public function store(IssueAccessTokenRequest $request): JsonResponse
     {
         $user = User::query()->where('email', $request->string('email')->toString())->first();
 
@@ -49,18 +44,6 @@ class AccessTokenController extends Controller
 
         if ($user->isDeactivated()) {
             throw ValidationException::withMessages(['email' => __('Your account has been deactivated. Contact your company admin.')]);
-        }
-
-        if ($user->two_factor_secret !== null && $user->two_factor_confirmed_at !== null && ! $this->passesTwoFactor($request, $user, $twoFactor)) {
-            $message = $request->filled('code') || $request->filled('recovery_code')
-                ? __('That code is not valid.')
-                : __('Enter the code from your authenticator app.');
-
-            return response()->json([
-                'message' => $message,
-                'code' => $request->filled('code') || $request->filled('recovery_code') ? 'validation_failed' : 'two_factor_required',
-                'errors' => ['code' => [$message]],
-            ], 422);
         }
 
         $token = $user->createToken($request->string('device_name')->toString());
@@ -115,24 +98,5 @@ class AccessTokenController extends Controller
         $query->firstOrFail()->delete();
 
         return response()->noContent();
-    }
-
-    private function passesTwoFactor(Request $request, User $user, TwoFactorAuthenticationProvider $twoFactor): bool
-    {
-        $code = $request->string('code')->trim()->toString();
-
-        if ($code !== '') {
-            return $twoFactor->verify(Fortify::currentEncrypter()->decrypt((string) $user->two_factor_secret), $code);
-        }
-
-        $recoveryCode = $request->string('recovery_code')->trim()->toString();
-
-        if ($recoveryCode !== '' && in_array($recoveryCode, $user->recoveryCodes(), true)) {
-            $user->replaceRecoveryCode($recoveryCode);
-
-            return true;
-        }
-
-        return false;
     }
 }

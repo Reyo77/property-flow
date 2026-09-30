@@ -11,10 +11,6 @@ You'll receive a link from your property manager or board to set up your login �
 public sign-up, since your community adds you first. Once you're in, everything for your unit
 (and any others you're connected to) is in one place.
 
-**Two-factor authentication** isn't required for residents — it's only required for the
-management team. You can still turn it on yourself if you'd like the extra security
-(Settings → Security).
-
 ---
 
 ## Your dashboard

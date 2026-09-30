@@ -1,19 +1,14 @@
 // Load test for the dashboard and the two main community lists (units, residents). See README.md
-// in this directory for setup (a seeded company at scale, and a two-factor one-time code).
+// in this directory for setup (a seeded company at scale).
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 const BASE = __ENV.BASE_URL || 'https://property-flow.test';
 const EMAIL = __ENV.EMAIL || 'loadtest@propertyflow.test';
 const PASSWORD = __ENV.PASSWORD || 'password';
-const OTP = __ENV.OTP;
 const COMMUNITY_ID = __ENV.COMMUNITY_ID || '1';
 const VUS = Number(__ENV.VUS || 10);
 const P95_TARGET_MS = Number(__ENV.P95_TARGET_MS || 300);
-
-if (!OTP) {
-  throw new Error('Set OTP to a current one-time code for the load-test admin (see README.md)');
-}
 
 export const options = {
   scenarios: {
@@ -53,23 +48,8 @@ export function setup() {
     { email: EMAIL, password: PASSWORD, _token: token },
     { redirects: 0 },
   );
-  if (res.status !== 302 || (res.headers.Location || '').indexOf('two-factor-challenge') === -1) {
-    throw new Error(`Expected a redirect to two-factor-challenge, got ${res.status} -> ${res.headers.Location}`);
-  }
-
-  res = http.get(`${BASE}/two-factor-challenge`);
-  token = extractCsrfToken(res.body);
-  if (!token) {
-    throw new Error('Could not find a CSRF token on the two-factor-challenge page');
-  }
-
-  res = http.post(
-    `${BASE}/two-factor-challenge`,
-    { code: OTP, _token: token },
-    { redirects: 0 },
-  );
   if (res.status !== 302 || (res.headers.Location || '').indexOf('dashboard') === -1) {
-    throw new Error(`Two-factor challenge failed (code may have expired): ${res.status} -> ${res.headers.Location}`);
+    throw new Error(`Expected a redirect to dashboard, got ${res.status} -> ${res.headers.Location}`);
   }
 
   const cookies = jar.cookiesForURL(`${BASE}/`);
