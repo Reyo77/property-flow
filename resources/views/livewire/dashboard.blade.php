@@ -39,6 +39,21 @@
                     <flux:heading size="xl">{{ number_format($this->totals['residents']) }}</flux:heading>
                 </div>
             </div>
+
+            @if ($this->portfolioTrend !== null)
+                <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="portfolio-trend">
+                    <flux:heading size="lg">{{ __('Occupancy') }}</flux:heading>
+                    <x-charts.trend-line
+                        :series="[[
+                            'label' => __('Occupancy'),
+                            'color' => 'emerald-500',
+                            'values' => array_column($this->portfolioTrend, 'occupancy_percent'),
+                            'display' => array_map(fn (array $point) => $point['occupancy_percent'].'%', $this->portfolioTrend),
+                        ]]"
+                        :labels="array_map(fn (array $point) => $point['month']->translatedFormat('M'), $this->portfolioTrend)"
+                    />
+                </div>
+            @endif
         @endif
     @endif
 

@@ -10,6 +10,7 @@ use App\Models\Unit;
 use App\Models\WorkOrder;
 use App\Support\Finance\Money;
 use App\Support\Finance\UnitLedger;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -87,6 +88,67 @@ class Dashboard extends Component
         }
 
         return $balances;
+    }
+
+    /**
+     * Occupancy percentage at each of the last 6 month-ends, across every community the user can
+     * access — or null if there's under a month of history to show (a brand-new company), or the
+     * user has no team role at all.
+     *
+     * Residency::active() is hard-coded to today() and can't be pointed at a past date, so
+     * occupancy at each past month-end is reconstructed directly: a unit was occupied then if it
+     * had a residency that had already moved in and hadn't moved out yet, as of that date.
+     *
+     * @return list<array{month: CarbonImmutable, occupancy_percent: float}>|null
+     */
+    #[Computed]
+    public function portfolioTrend(): ?array
+    {
+        $user = $this->currentUser();
+
+        if (! $user->can('viewAny', Community::class)) {
+            return null;
+        }
+
+        $communityIds = Community::query()->accessibleBy($user)->pluck('id')->map(intval(...))->values()->all();
+        $oldestCommunity = Community::query()->accessibleBy($user)->min('created_at');
+
+        if ($oldestCommunity === null || CarbonImmutable::parse($oldestCommunity)->greaterThan(CarbonImmutable::now()->subMonth())) {
+            return null;
+        }
+
+        return Cache::remember("dashboard-trend:user:{$user->id}", 60, fn () => $this->monthlyOccupancy($communityIds));
+    }
+
+    /**
+     * @param  array<int, int>  $communityIds
+     * @return list<array{month: CarbonImmutable, occupancy_percent: float}>
+     */
+    private function monthlyOccupancy(array $communityIds, int $months = 6): array
+    {
+        $today = CarbonImmutable::now();
+        $points = [];
+
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $monthEnd = $today->subMonthsNoOverflow($i)->endOfMonth();
+            $monthEnd = $monthEnd->greaterThan($today) ? $today : $monthEnd;
+
+            $unitsAsOf = Unit::query()->whereIn('community_id', $communityIds)->whereHas('community')
+                ->where('created_at', '<=', $monthEnd);
+
+            $unitCount = (clone $unitsAsOf)->count();
+            $occupiedCount = $unitCount === 0 ? 0 : (clone $unitsAsOf)->whereHas('residencies', fn (Builder $query) => $query
+                ->where('moved_in_on', '<=', $monthEnd->toDateString())
+                ->where(fn (Builder $query) => $query->whereNull('moved_out_on')->orWhere('moved_out_on', '>', $monthEnd->toDateString())))
+                ->count();
+
+            $points[] = [
+                'month' => $monthEnd,
+                'occupancy_percent' => $unitCount === 0 ? 0.0 : round($occupiedCount / $unitCount * 100, 1),
+            ];
+        }
+
+        return $points;
     }
 
     /**
