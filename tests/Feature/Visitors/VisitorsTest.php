@@ -4,6 +4,7 @@ use App\Enums\CompanyRole;
 use App\Livewire\Visitors\Index;
 use App\Models\Community;
 use App\Models\GuestPass;
+use App\Models\Package;
 use App\Models\Residency;
 use App\Models\Visitor;
 use Livewire\Livewire;
@@ -89,6 +90,32 @@ it('refuses to redeem an already-used guest pass', function () {
         ->set('redeemCode', $pass->code)
         ->call('redeem')
         ->assertHasErrors('redeemCode');
+});
+
+it('charts today\'s front desk activity across visitors, packages and guest passes', function () {
+    $admin = companyAdmin();
+    $community = Community::factory()->for($admin->company)->create();
+    Visitor::factory()->for($community)->count(2)->create();
+    Package::factory()->for($community)->create();
+
+    actingAs($admin);
+
+    $chart = Livewire::test(Index::class, ['community' => $community])->instance()->frontDeskActivity();
+    $byLabel = collect($chart['series'])->keyBy('label');
+
+    expect(last($chart['labels']))->toBe(now()->translatedFormat('M j'))
+        ->and(last($byLabel['Visitors']['values']))->toBe(2)
+        ->and(last($byLabel['Packages']['values']))->toBe(1)
+        ->and(last($byLabel['Guest passes']['values']))->toBe(0);
+});
+
+it('has no front desk activity chart for a community with no logged activity', function () {
+    $admin = companyAdmin();
+    $community = Community::factory()->for($admin->company)->create();
+
+    actingAs($admin);
+
+    expect(Livewire::test(Index::class, ['community' => $community])->instance()->frontDeskActivity())->toBeNull();
 });
 
 it('does not give residents visibility into the visitor log', function () {

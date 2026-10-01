@@ -10,6 +10,13 @@
         @endcan
     </div>
 
+    @if ($this->severityBreakdown !== null)
+        <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="severity-breakdown">
+            <flux:heading size="lg">{{ __('By severity') }}</flux:heading>
+            <x-charts.donut :segments="$this->severityBreakdown" />
+        </div>
+    @endif
+
     @if ($this->incidentReports->isEmpty())
         <div class="rounded-xl border border-dashed border-zinc-300 p-10 text-center dark:border-zinc-600">
             <flux:heading>{{ __('No incidents reported') }}</flux:heading>

@@ -8,6 +8,13 @@
         <flux:button variant="primary" icon="plus" wire:click="create">{{ __('Log visitor') }}</flux:button>
     </div>
 
+    @if ($this->frontDeskActivity !== null)
+        <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="front-desk-activity">
+            <flux:heading size="lg">{{ __('Front desk activity') }}</flux:heading>
+            <x-charts.trend-line :series="$this->frontDeskActivity['series']" :labels="$this->frontDeskActivity['labels']" />
+        </div>
+    @endif
+
     <form wire:submit="redeem" class="flex flex-wrap items-end gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
         <flux:input wire:model="redeemCode" :label="__('Redeem guest pass code')" placeholder="ABC123" class="uppercase" />
         <flux:button type="submit">{{ __('Redeem') }}</flux:button>

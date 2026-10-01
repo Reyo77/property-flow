@@ -1,11 +1,14 @@
 <?php
 
 use App\Enums\CompanyRole;
+use App\Enums\VendorBillStatus;
 use App\Livewire\Invitations\Accept;
 use App\Livewire\Vendors\Index;
+use App\Models\Community;
 use App\Models\Invitation;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Models\VendorBill;
 use App\Support\Tenancy\PermissionTeam;
 use Livewire\Livewire;
 
@@ -129,6 +132,34 @@ it('cannot invite the same vendor twice while already linked', function () {
     actingAs($admin);
 
     Livewire::test(Index::class)->call('invite', $vendor->id)->assertForbidden();
+});
+
+it('ranks vendors by paid and approved bill amount, ignoring pending bills', function () {
+    $admin = companyAdmin();
+    $community = Community::factory()->for($admin->company)->create(['currency' => 'CAD']);
+    $ace = Vendor::factory()->for($admin->company)->create(['name' => 'Ace Plumbing']);
+    $bright = Vendor::factory()->for($admin->company)->create(['name' => 'Bright Electric']);
+    VendorBill::factory()->for($community)->for($ace)->create(['amount_cents' => 50000, 'status' => VendorBillStatus::Paid]);
+    VendorBill::factory()->for($community)->for($bright)->create(['amount_cents' => 25000, 'status' => VendorBillStatus::Approved]);
+    VendorBill::factory()->for($community)->for($bright)->create(['amount_cents' => 99999, 'status' => VendorBillStatus::Pending]);
+
+    actingAs($admin);
+
+    $chart = Livewire::test(Index::class)->instance()->spendByVendor();
+    $byLabel = collect($chart)->keyBy('label');
+
+    expect($byLabel['Ace Plumbing']['percent'])->toBe(100.0)
+        ->and($byLabel['Bright Electric']['value'])->toBe('$250.00')
+        ->and($byLabel)->not->toHaveKey('Unknown vendor');
+});
+
+it('hides vendor spend from staff without the view-finance permission', function () {
+    $admin = companyAdmin();
+    $staff = teamMember(CompanyRole::Staff, $admin->company);
+
+    actingAs($staff);
+
+    expect(Livewire::test(Index::class)->instance()->spendByVendor())->toBeNull();
 });
 
 it('cannot manage a vendor from another company', function () {

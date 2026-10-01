@@ -10,6 +10,13 @@
         @endcan
     </div>
 
+    @if ($this->spendByVendor !== null)
+        <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="spend-by-vendor">
+            <flux:heading size="lg">{{ __('Top vendors by spend') }}</flux:heading>
+            <x-charts.bar-list :bars="$this->spendByVendor" />
+        </div>
+    @endif
+
     <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" :placeholder="__('Search name, trade or email')" class="max-w-xs" />
 
     @if ($this->vendors->isEmpty())

@@ -4,8 +4,13 @@ namespace App\Livewire\Vendors;
 
 use App\Actions\Invitations\InviteVendor;
 use App\Concerns\VendorValidationRules;
+use App\Enums\Permission;
+use App\Enums\VendorBillStatus;
 use App\Livewire\Concerns\InteractsWithCurrentUser;
+use App\Models\Community;
 use App\Models\Vendor;
+use App\Models\VendorBill;
+use App\Support\Finance\Money;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -60,6 +65,52 @@ class Index extends Component
             })
             ->orderBy('name')
             ->get();
+    }
+
+    /**
+     * Top vendors by paid or approved bill amount, for whoever can see finances. Null for
+     * everyone else, when there's nothing to show, or when the company's communities don't
+     * share one currency (summing across currencies would be wrong).
+     *
+     * @return array<int, array{label: string, value: string, percent: float, color: string}>|null
+     */
+    #[Computed]
+    public function spendByVendor(): ?array
+    {
+        if (! $this->currentUser()->hasCompanyPermission(Permission::ViewFinance)) {
+            return null;
+        }
+
+        $currencies = Community::query()->pluck('currency')->unique();
+
+        if ($currencies->count() !== 1) {
+            return null;
+        }
+
+        $totals = VendorBill::query()
+            ->whereIn('status', [VendorBillStatus::Approved, VendorBillStatus::Paid])
+            ->selectRaw('vendor_id, sum(amount_cents) as total')
+            ->groupBy('vendor_id')
+            ->orderByDesc('total')
+            ->limit(8)
+            ->pluck('total', 'vendor_id');
+
+        if ($totals->isEmpty()) {
+            return null;
+        }
+
+        $vendors = Vendor::query()->whereIn('id', $totals->keys())->get()->keyBy('id');
+        $currency = $currencies->first();
+        $max = (int) $totals->max();
+
+        return $vendors
+            ->sortByDesc(fn (Vendor $vendor) => (int) $totals[$vendor->id])
+            ->map(fn (Vendor $vendor) => [
+                'label' => $vendor->name,
+                'value' => Money::of((int) $totals[$vendor->id], $currency)->format(),
+                'percent' => round((int) $totals[$vendor->id] / $max * 100, 1),
+                'color' => 'emerald-500',
+            ])->values()->all();
     }
 
     public function create(): void

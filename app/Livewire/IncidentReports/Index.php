@@ -64,6 +64,40 @@ class Index extends Component
         return $this->community->units()->with('building')->orderBy('number')->get();
     }
 
+    /**
+     * Incident counts by severity, or null when nothing has been reported yet.
+     *
+     * @return array<int, array{label: string, value: int, percent: float, color: string}>|null
+     */
+    #[Computed]
+    public function severityBreakdown(): ?array
+    {
+        $colors = [
+            IncidentSeverity::Low->value => 'zinc-400',
+            IncidentSeverity::Medium->value => 'amber-500',
+            IncidentSeverity::High->value => 'violet-500',
+            IncidentSeverity::Critical->value => 'red-500',
+        ];
+
+        $counts = $this->community->incidentReports()
+            ->selectRaw('severity, count(*) as total')
+            ->groupBy('severity')
+            ->pluck('total', 'severity');
+
+        $total = (int) $counts->sum();
+
+        if ($total === 0) {
+            return null;
+        }
+
+        return collect(IncidentSeverity::cases())->map(fn (IncidentSeverity $severity) => [
+            'label' => $severity->label(),
+            'value' => (int) ($counts[$severity->value] ?? 0),
+            'percent' => round(($counts[$severity->value] ?? 0) / $total * 100, 1),
+            'color' => $colors[$severity->value],
+        ])->values()->all();
+    }
+
     public function create(): void
     {
         $this->authorize('create', [IncidentReport::class, $this->community]);

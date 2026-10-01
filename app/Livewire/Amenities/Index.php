@@ -3,6 +3,7 @@
 namespace App\Livewire\Amenities;
 
 use App\Concerns\AmenityValidationRules;
+use App\Enums\AmenityBookingStatus;
 use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Amenity;
 use App\Models\Community;
@@ -85,6 +86,39 @@ class Index extends Component
     public function canManage(): bool
     {
         return $this->currentUser()->can('create', [Amenity::class, $this->community]);
+    }
+
+    /**
+     * Booking volume per amenity, for staff deciding which spaces to expand or retire — null
+     * for residents, or when there's nothing to compare yet.
+     *
+     * @return array<int, array{label: string, value: string, percent: float, color: string}>|null
+     */
+    #[Computed]
+    public function bookingsChart(): ?array
+    {
+        if (! $this->canManage() || $this->amenities()->count() < 2) {
+            return null;
+        }
+
+        $counts = $this->community->amenityBookings()
+            ->whereIn('status', [AmenityBookingStatus::Pending, AmenityBookingStatus::Confirmed])
+            ->selectRaw('amenity_id, count(*) as total')
+            ->groupBy('amenity_id')
+            ->pluck('total', 'amenity_id');
+
+        $max = max(1, (int) $counts->max());
+
+        return $this->amenities()->map(function (Amenity $amenity) use ($counts, $max) {
+            $count = (int) ($counts[$amenity->id] ?? 0);
+
+            return [
+                'label' => $amenity->name,
+                'value' => trans_choice(':count booking|:count bookings', $count, ['count' => $count]),
+                'percent' => round($count / $max * 100, 1),
+                'color' => 'blue-500',
+            ];
+        })->values()->all();
     }
 
     public function create(): void

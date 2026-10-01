@@ -77,6 +77,32 @@ it('marks an incident resolved with notes', function () {
     expect($incident->refresh())->isResolved()->toBeTrue()->resolution_notes->toBe('Motor replaced.');
 });
 
+it('breaks down incident counts by severity', function () {
+    $admin = companyAdmin();
+    $community = Community::factory()->for($admin->company)->create();
+    IncidentReport::factory()->for($community)->count(2)->create(['severity' => IncidentSeverity::Low]);
+    IncidentReport::factory()->for($community)->create(['severity' => IncidentSeverity::Critical]);
+
+    actingAs($admin);
+
+    $chart = Livewire::test(Index::class, ['community' => $community])->instance()->severityBreakdown();
+    $byLabel = collect($chart)->keyBy('label');
+
+    expect($byLabel['Low']['value'])->toBe(2)
+        ->and($byLabel['Critical']['value'])->toBe(1)
+        ->and($byLabel['Medium']['value'])->toBe(0)
+        ->and($byLabel['Critical']['color'])->toBe('red-500');
+});
+
+it('returns no severity breakdown until something has been reported', function () {
+    $admin = companyAdmin();
+    $community = Community::factory()->for($admin->company)->create();
+
+    actingAs($admin);
+
+    expect(Livewire::test(Index::class, ['community' => $community])->instance()->severityBreakdown())->toBeNull();
+});
+
 it('does not give residents access to incident reports', function () {
     $community = Community::factory()->create();
     $resident = residentOf($community);

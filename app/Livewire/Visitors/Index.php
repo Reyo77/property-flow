@@ -9,9 +9,12 @@ use App\Livewire\Concerns\InteractsWithCurrentUser;
 use App\Models\Community;
 use App\Models\Unit;
 use App\Models\Visitor;
+use Carbon\CarbonImmutable;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -46,6 +49,56 @@ class Index extends Component
     public function visitors(): Collection
     {
         return $this->community->visitors()->with('unit.building')->latest('checked_in_at')->limit(100)->get();
+    }
+
+    /**
+     * Daily visitor, package and guest-pass volume over the last 14 days, or null when none of
+     * the three have had any activity in that window.
+     *
+     * @return array{series: list<array{label: string, color: string, values: list<int>}>, labels: list<string>}|null
+     */
+    #[Computed]
+    public function frontDeskActivity(): ?array
+    {
+        $today = CarbonImmutable::now($this->community->timezone)->startOfDay();
+        $since = $today->subDays(13);
+
+        $countsByDay = fn (HasMany $query): BaseCollection => $query
+            ->where('created_at', '>=', $since)
+            ->selectRaw('DATE(created_at) as day, count(*) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+
+        $visitors = $countsByDay($this->community->visitors());
+        $packages = $countsByDay($this->community->packages());
+        $guestPasses = $countsByDay($this->community->guestPasses());
+
+        if ($visitors->sum() + $packages->sum() + $guestPasses->sum() === 0) {
+            return null;
+        }
+
+        $labels = [];
+        $visitorValues = [];
+        $packageValues = [];
+        $guestPassValues = [];
+
+        for ($i = 13; $i >= 0; $i--) {
+            $day = $today->subDays($i);
+            $key = $day->toDateString();
+            $labels[] = $day->translatedFormat('M j');
+            $visitorValues[] = (int) ($visitors[$key] ?? 0);
+            $packageValues[] = (int) ($packages[$key] ?? 0);
+            $guestPassValues[] = (int) ($guestPasses[$key] ?? 0);
+        }
+
+        return [
+            'series' => [
+                ['label' => __('Visitors'), 'color' => 'blue-500', 'values' => $visitorValues],
+                ['label' => __('Packages'), 'color' => 'amber-500', 'values' => $packageValues],
+                ['label' => __('Guest passes'), 'color' => 'violet-500', 'values' => $guestPassValues],
+            ],
+            'labels' => $labels,
+        ];
     }
 
     /**

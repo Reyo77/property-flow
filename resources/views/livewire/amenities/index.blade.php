@@ -14,6 +14,13 @@
         @endif
     </div>
 
+    @if ($this->bookingsChart !== null)
+        <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="bookings-chart">
+            <flux:heading size="lg">{{ __('Bookings per amenity') }}</flux:heading>
+            <x-charts.bar-list :bars="$this->bookingsChart" />
+        </div>
+    @endif
+
     @if ($this->amenities->isEmpty())
         <div class="rounded-xl border border-dashed border-zinc-300 p-10 text-center dark:border-zinc-600">
             <flux:heading>{{ __('No amenities yet') }}</flux:heading>

@@ -3,6 +3,7 @@
 use App\Enums\CompanyRole;
 use App\Livewire\Amenities\Index;
 use App\Models\Amenity;
+use App\Models\AmenityBooking;
 use App\Models\Community;
 use Livewire\Livewire;
 
@@ -120,6 +121,34 @@ it('hides inactive amenities from residents but shows them to managers', functio
 
     actingAs($admin);
     Livewire::test(Index::class, ['community' => $community])->assertSee('Closed For Renovation');
+});
+
+it('ranks amenities by booking volume for managers', function () {
+    $admin = companyAdmin();
+    $community = Community::factory()->for($admin->company)->create();
+    $pool = Amenity::factory()->for($community)->create(['name' => 'Pool']);
+    $partyRoom = Amenity::factory()->for($community)->create(['name' => 'Party Room']);
+    AmenityBooking::factory()->for($pool)->count(4)->create();
+    AmenityBooking::factory()->for($partyRoom)->count(2)->create();
+    AmenityBooking::factory()->for($partyRoom)->cancelled()->create();
+
+    actingAs($admin);
+
+    $chart = Livewire::test(Index::class, ['community' => $community])->instance()->bookingsChart();
+    $byLabel = collect($chart)->keyBy('label');
+
+    expect($byLabel['Pool']['percent'])->toBe(100.0)
+        ->and($byLabel['Party Room']['percent'])->toBe(50.0);
+});
+
+it('hides the bookings chart from residents', function () {
+    $community = Community::factory()->create();
+    Amenity::factory()->for($community)->count(2)->create();
+    $resident = residentOf($community);
+
+    actingAs($resident->user);
+
+    expect(Livewire::test(Index::class, ['community' => $community])->instance()->bookingsChart())->toBeNull();
 });
 
 it('cannot manage an amenity from another company', function () {
