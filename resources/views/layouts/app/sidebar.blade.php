@@ -45,11 +45,6 @@
                             {{ __('Vendors') }}
                         </flux:sidebar.item>
                     @endcan
-                    @can('viewAny', App\Models\WebhookEndpoint::class)
-                        <flux:sidebar.item icon="bolt" :href="route('webhooks.index')" :current="request()->routeIs('webhooks.*')" wire:navigate>
-                            {{ __('Webhooks') }}
-                        </flux:sidebar.item>
-                    @endcan
                     @if (auth()->user()->company && auth()->user()->can('manageSettings', auth()->user()->company))
                         <flux:sidebar.item icon="building-office" :href="route('settings.company')" :current="request()->routeIs('settings.company')" wire:navigate>
                             {{ __('Company settings') }}
