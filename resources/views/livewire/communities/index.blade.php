@@ -19,6 +19,13 @@
             <flux:text class="mt-1">{{ __('Add your first condo, HOA or rental community to get started.') }}</flux:text>
         </div>
     @else
+        @if ($this->communities->count() > 1)
+            <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="units-chart">
+                <flux:heading size="lg">{{ __('Units per community') }}</flux:heading>
+                <x-charts.bar-list :bars="$this->unitsChart" />
+            </div>
+        @endif
+
         <flux:table>
             <flux:table.columns>
                 <flux:table.column>{{ __('Name') }}</flux:table.column>

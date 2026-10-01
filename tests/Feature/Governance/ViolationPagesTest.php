@@ -122,6 +122,33 @@ describe('violations', function () {
 
         get(route('communities.violations.show', [$foreign->community_id, $foreign->id]))->assertNotFound();
     });
+
+    it('breaks down violation counts by status for staff', function () {
+        $admin = companyAdmin();
+        $community = Community::factory()->for($admin->company)->create();
+        $rule = ViolationRule::factory()->for($community)->create();
+        Violation::factory()->for($rule, 'rule')->count(2)->create(['status' => ViolationStatus::Open]);
+        Violation::factory()->for($rule, 'rule')->create(['status' => ViolationStatus::Dismissed]);
+
+        actingAs($admin);
+
+        $chart = Livewire::test(ViolationsIndex::class, ['community' => $community])->instance()->statusBreakdown();
+        $byLabel = collect($chart)->keyBy('label');
+
+        expect($byLabel['Open']['value'])->toBe(2)
+            ->and($byLabel['Resolved']['value'])->toBe(0)
+            ->and($byLabel['Dismissed']['value'])->toBe(1)
+            ->and($byLabel['Open']['color'])->toBe('amber-500');
+    });
+
+    it('hides the status breakdown from owners', function () {
+        $community = Community::factory()->create();
+        [, $owner] = residentUnit($community);
+
+        actingAs($owner);
+
+        expect(Livewire::test(ViolationsIndex::class, ['community' => $community])->instance()->statusBreakdown())->toBeNull();
+    });
 });
 
 describe('renovation requests', function () {

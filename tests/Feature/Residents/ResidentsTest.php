@@ -62,6 +62,26 @@ it('filters residents by status, type and search term', function () {
     expect($names())->toBe([$owner->resident->name]);
 });
 
+it('breaks down current residents by owner, tenant and occupant', function () {
+    $admin = companyAdmin();
+    $community = Community::factory()->for($admin->company)->create();
+    residencyIn($community, ['type' => 'owner']);
+    residencyIn($community, ['type' => 'owner']);
+    residencyIn($community, ['type' => 'tenant']);
+    residencyIn($community, ['type' => 'owner', 'moved_out_on' => now()->subDay()]);
+    residencyIn(Community::factory()->for($admin->company)->create(), ['type' => 'owner']);
+
+    actingAs($admin);
+
+    $chart = Livewire::test(Index::class, ['community' => $community])->instance()->typeBreakdown();
+    $byLabel = collect($chart)->keyBy('label');
+
+    expect($byLabel['Owner']['value'])->toBe(2)
+        ->and($byLabel['Tenant']['value'])->toBe(1)
+        ->and($byLabel['Occupant']['value'])->toBe(0)
+        ->and($byLabel['Owner']['percent'])->toBe(66.7);
+});
+
 it('forbids a manager from the residents of a community they are not assigned to', function () {
     $admin = companyAdmin();
     $community = Community::factory()->for($admin->company)->create();

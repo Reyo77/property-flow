@@ -79,6 +79,40 @@ class Index extends Component
     }
 
     /**
+     * How many current residents are owners vs. tenants vs. occupants — independent of whatever
+     * filters are currently applied to the table below, so the chart stays a stable overview.
+     *
+     * @return array<int, array{label: string, value: int, percent: float, color: string}>
+     */
+    #[Computed]
+    public function typeBreakdown(): array
+    {
+        $colors = [
+            ResidencyType::Owner->value => 'blue-500',
+            ResidencyType::Tenant->value => 'emerald-500',
+            ResidencyType::Occupant->value => 'amber-500',
+        ];
+
+        $counts = Residency::query()
+            ->where('community_id', $this->community->id)
+            ->active()
+            ->selectRaw('type, count(*) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
+
+        $total = (int) $counts->sum();
+
+        return collect(ResidencyType::cases())
+            ->map(fn (ResidencyType $type) => [
+                'label' => $type->label(),
+                'value' => (int) ($counts[$type->value] ?? 0),
+                'percent' => $total === 0 ? 0.0 : round(($counts[$type->value] ?? 0) / $total * 100, 1),
+                'color' => $colors[$type->value],
+            ])
+            ->all();
+    }
+
+    /**
      * Residencies in this community that match the status and type filters.
      *
      * @param  Builder<Residency>  $query

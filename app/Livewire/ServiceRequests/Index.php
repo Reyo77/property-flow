@@ -85,6 +85,46 @@ class Index extends Component
     }
 
     /**
+     * How many requests are in each stage of the lifecycle, for the team view only — a resident's
+     * own handful of requests isn't worth charting. Always includes every status, even at zero, so
+     * the chart's shape doesn't jump around as requests move through their lifecycle.
+     *
+     * @return array<int, array{label: string, value: int, percent: float, color: string}>|null
+     */
+    #[Computed]
+    public function statusBreakdown(): ?array
+    {
+        if (! $this->isTeamViewer()) {
+            return null;
+        }
+
+        $colors = [
+            ServiceRequestStatus::Open->value => 'red-500',
+            ServiceRequestStatus::Assigned->value => 'amber-500',
+            ServiceRequestStatus::InProgress->value => 'blue-500',
+            ServiceRequestStatus::OnHold->value => 'violet-500',
+            ServiceRequestStatus::Resolved->value => 'emerald-500',
+            ServiceRequestStatus::Closed->value => 'zinc-400',
+        ];
+
+        $counts = $this->community->serviceRequests()
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $total = (int) $counts->sum();
+
+        return collect(ServiceRequestStatus::cases())
+            ->map(fn (ServiceRequestStatus $status) => [
+                'label' => $status->label(),
+                'value' => (int) ($counts[$status->value] ?? 0),
+                'percent' => $total === 0 ? 0.0 : round(($counts[$status->value] ?? 0) / $total * 100, 1),
+                'color' => $colors[$status->value],
+            ])
+            ->all();
+    }
+
+    /**
      * @return list<ServiceRequestCategory>
      */
     public function categories(): array

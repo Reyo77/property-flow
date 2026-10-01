@@ -115,6 +115,38 @@ class Index extends Component
     }
 
     /**
+     * How many violations are in each status, for staff only — an owner only ever sees notices
+     * against their own unit, which isn't worth charting.
+     *
+     * @return array<int, array{label: string, value: int, percent: float, color: string}>|null
+     */
+    #[Computed]
+    public function statusBreakdown(): ?array
+    {
+        if (! $this->isStaff()) {
+            return null;
+        }
+
+        $badgeToChartColor = ['amber' => 'amber-500', 'green' => 'emerald-500', 'zinc' => 'zinc-400'];
+
+        $counts = $this->community->violations()
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $total = (int) $counts->sum();
+
+        return collect(ViolationStatus::cases())
+            ->map(fn (ViolationStatus $status) => [
+                'label' => $status->label(),
+                'value' => (int) ($counts[$status->value] ?? 0),
+                'percent' => $total === 0 ? 0.0 : round(($counts[$status->value] ?? 0) / $total * 100, 1),
+                'color' => $badgeToChartColor[$status->color()],
+            ])
+            ->all();
+    }
+
+    /**
      * @return Collection<int, ViolationRule>
      */
     #[Computed]

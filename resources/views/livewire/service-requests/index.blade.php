@@ -12,6 +12,13 @@
         @endcan
     </div>
 
+    @if ($this->statusBreakdown !== null)
+        <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="status-breakdown">
+            <flux:heading size="lg">{{ __('By status') }}</flux:heading>
+            <x-charts.donut :segments="$this->statusBreakdown" />
+        </div>
+    @endif
+
     <div class="flex flex-wrap gap-3">
         <flux:select wire:model.live="statusFilter" class="max-w-40">
             <flux:select.option value="">{{ __('All statuses') }}</flux:select.option>

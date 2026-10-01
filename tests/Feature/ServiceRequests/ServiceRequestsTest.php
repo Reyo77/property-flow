@@ -151,6 +151,32 @@ it('lists requests for team members and filters by status, category and priority
     expect($titles())->toBe(['Assigned electrical']);
 });
 
+it('breaks down request counts by status for team members, including statuses with zero requests', function () {
+    $admin = companyAdmin();
+    $community = Community::factory()->for($admin->company)->create();
+    ServiceRequest::factory()->for($community)->count(2)->create(['status' => ServiceRequestStatus::Open]);
+    ServiceRequest::factory()->for($community)->create(['status' => ServiceRequestStatus::Resolved]);
+
+    actingAs($admin);
+
+    $chart = Livewire::test(Index::class, ['community' => $community])->instance()->statusBreakdown();
+    $byLabel = collect($chart)->keyBy('label');
+
+    expect($byLabel['Open']['value'])->toBe(2)
+        ->and($byLabel['Resolved']['value'])->toBe(1)
+        ->and($byLabel['Closed']['value'])->toBe(0)
+        ->and($byLabel['Open']['percent'])->toBe(66.7);
+});
+
+it('hides the status breakdown from residents', function () {
+    $community = Community::factory()->create();
+    $resident = residentOf($community);
+
+    actingAs($resident->user);
+
+    expect(Livewire::test(Index::class, ['community' => $community])->instance()->statusBreakdown())->toBeNull();
+});
+
 it('shows residents only their own requests in the list', function () {
     $community = Community::factory()->create();
     $resident = residentOf($community);

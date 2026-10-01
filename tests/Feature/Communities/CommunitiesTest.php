@@ -4,9 +4,11 @@ use App\Enums\AreaUnit;
 use App\Enums\CommunityType;
 use App\Livewire\Communities\Create;
 use App\Livewire\Communities\Edit;
+use App\Livewire\Communities\Index;
 use App\Models\Community;
 use App\Models\Company;
 use App\Models\Plan;
+use App\Models\Unit;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
 
@@ -47,6 +49,37 @@ describe('index', function () {
             ->assertOk()
             ->assertSee('&lt;script&gt;', escape: false)
             ->assertDontSee('<script>alert(1)</script>', escape: false);
+    });
+});
+
+describe('units chart', function () {
+    it('scales each community\'s unit count relative to the largest', function () {
+        $admin = companyAdmin();
+        $big = Community::factory()->for($admin->company)->create(['name' => 'Harbour Towers']);
+        Unit::factory()->for($big)->count(4)->create();
+        $small = Community::factory()->for($admin->company)->create(['name' => 'Maple Grove']);
+        Unit::factory()->for($small)->count(2)->create();
+
+        actingAs($admin);
+
+        $chart = Livewire::test(Index::class)->instance()->unitsChart();
+        $byLabel = collect($chart)->keyBy('label');
+
+        expect($chart)->toHaveCount(2)
+            ->and($byLabel['Harbour Towers']['percent'])->toBe(100.0)
+            ->and($byLabel['Maple Grove']['percent'])->toBe(50.0);
+    });
+
+    it('only counts the company\'s own communities', function () {
+        $admin = companyAdmin();
+        Community::factory()->for($admin->company)->create(['name' => 'Harbour Towers']);
+        Community::factory()->create(['name' => 'Someone Else\'s Place']);
+
+        actingAs($admin);
+
+        $chart = Livewire::test(Index::class)->instance()->unitsChart();
+
+        expect(collect($chart)->pluck('label')->all())->toBe(['Harbour Towers']);
     });
 });
 

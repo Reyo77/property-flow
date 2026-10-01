@@ -9,6 +9,13 @@
         @endif
     </div>
 
+    @if ($this->statusBreakdown !== null)
+        <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="status-breakdown">
+            <flux:heading size="lg">{{ __('By status') }}</flux:heading>
+            <x-charts.donut :segments="$this->statusBreakdown" />
+        </div>
+    @endif
+
     <flux:radio.group wire:model.live="status" variant="segmented" class="max-w-md">
         <flux:radio value="open" :label="__('Open')" />
         <flux:radio value="resolved" :label="__('Resolved')" />

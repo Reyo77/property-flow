@@ -7,6 +7,7 @@
         'emerald-200' => 'bg-emerald-200',
         'emerald-500' => 'bg-emerald-500',
         'amber-500' => 'bg-amber-500',
+        'violet-500' => 'bg-violet-500',
         'red-500' => 'bg-red-500',
         'red-700' => 'bg-red-700',
         'blue-500' => 'bg-blue-500',

@@ -4,6 +4,13 @@
         <flux:subheading>{{ __(':community · add residents from a unit page', ['community' => $community->name]) }}</flux:subheading>
     </div>
 
+    @if (array_sum(array_column($this->typeBreakdown, 'value')) > 0)
+        <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="type-breakdown">
+            <flux:heading size="lg">{{ __('Owners vs. tenants') }}</flux:heading>
+            <x-charts.donut :segments="$this->typeBreakdown" />
+        </div>
+    @endif
+
     <div class="flex flex-wrap gap-3">
         <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" :placeholder="__('Search name, email, phone or unit')" class="max-w-xs" />
 

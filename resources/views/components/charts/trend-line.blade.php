@@ -7,8 +7,10 @@
     $hex = fn (string $color): string => match ($color) {
         'emerald-500' => '#10b981',
         'red-500' => '#ef4444',
-        'zinc-400' => '#a1a1aa',
+        'amber-500' => '#f59e0b',
+        'violet-500' => '#8b5cf6',
         'blue-500' => '#3b82f6',
+        'zinc-400' => '#a1a1aa',
         default => '#a1a1aa',
     };
 
