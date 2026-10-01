@@ -146,7 +146,7 @@ class DemoSeeder extends Seeder
      */
     private function seedCondo(Company $company): Community
     {
-        $community = Community::factory()->for($company)->create(['name' => 'Harbour Towers']);
+        $community = Community::factory()->for($company)->create(['name' => 'Harbour Towers', 'created_at' => now()->subMonths(8)]);
 
         $towers = collect(['North Tower', 'South Tower'])->map(
             fn (string $name) => Building::factory()->for($community)->create(['name' => $name, 'floors' => 15]),
@@ -169,6 +169,7 @@ class DemoSeeder extends Seeder
                         'floor' => $floor,
                         'unit_factor' => $created === $unitCount ? $remainder : $factor,
                         'parking' => 'P'.(($created % 3) + 1).'-'.$created,
+                        'created_at' => now()->subMonths(8),
                     ]);
                 }
             }
@@ -182,13 +183,14 @@ class DemoSeeder extends Seeder
      */
     private function seedHoa(Company $company): Community
     {
-        $community = Community::factory()->for($company)->hoa()->create(['name' => 'Maple Grove HOA']);
+        $community = Community::factory()->for($company)->hoa()->create(['name' => 'Maple Grove HOA', 'created_at' => now()->subMonths(8)]);
 
         foreach (range(1, 40) as $lot) {
             Unit::factory()->for($community)->create([
                 'number' => sprintf('%d Maple Grove Lane', $lot * 2),
                 'floor' => null,
                 'area' => null,
+                'created_at' => now()->subMonths(8),
             ]);
         }
 

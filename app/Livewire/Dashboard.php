@@ -99,7 +99,7 @@ class Dashboard extends Component
      * occupancy at each past month-end is reconstructed directly: a unit was occupied then if it
      * had a residency that had already moved in and hadn't moved out yet, as of that date.
      *
-     * @return list<array{month: CarbonImmutable, occupancy_percent: float}>|null
+     * @return list<array{month: string, occupancy_percent: float}>|null
      */
     #[Computed]
     public function portfolioTrend(): ?array
@@ -122,7 +122,7 @@ class Dashboard extends Component
 
     /**
      * @param  array<int, int>  $communityIds
-     * @return list<array{month: CarbonImmutable, occupancy_percent: float}>
+     * @return list<array{month: string, occupancy_percent: float}>
      */
     private function monthlyOccupancy(array $communityIds, int $months = 6): array
     {
@@ -143,7 +143,7 @@ class Dashboard extends Component
                 ->count();
 
             $points[] = [
-                'month' => $monthEnd,
+                'month' => $monthEnd->toDateString(),
                 'occupancy_percent' => $unitCount === 0 ? 0.0 : round($occupiedCount / $unitCount * 100, 1),
             ];
         }

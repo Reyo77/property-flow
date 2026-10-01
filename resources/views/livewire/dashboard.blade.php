@@ -84,7 +84,7 @@
                             'values' => array_column($this->portfolioTrend, 'occupancy_percent'),
                             'display' => array_map(fn (array $point) => $point['occupancy_percent'].'%', $this->portfolioTrend),
                         ]]"
-                        :labels="array_map(fn (array $point) => $point['month']->translatedFormat('M'), $this->portfolioTrend)"
+                        :labels="array_map(fn (array $point) => \Illuminate\Support\Carbon::parse($point['month'])->translatedFormat('M'), $this->portfolioTrend)"
                     />
                 </div>
             @endif
