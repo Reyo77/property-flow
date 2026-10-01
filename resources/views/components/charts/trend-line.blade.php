@@ -4,79 +4,42 @@
 ])
 
 @php
-    $strokeClass = fn (string $color): string => match ($color) {
-        'emerald-500' => 'stroke-emerald-500',
-        'red-500' => 'stroke-red-500',
-        'zinc-400' => 'stroke-zinc-400',
-        'blue-500' => 'stroke-blue-500',
-        default => 'stroke-zinc-400',
-    };
-    $fillClass = fn (string $color): string => match ($color) {
-        'emerald-500' => 'fill-emerald-500/10',
-        'red-500' => 'fill-red-500/10',
-        'zinc-400' => 'fill-zinc-400/10',
-        'blue-500' => 'fill-blue-500/10',
-        default => 'fill-zinc-400/10',
-    };
-    $dotClass = fn (string $color): string => match ($color) {
-        'emerald-500' => 'fill-emerald-500',
-        'red-500' => 'fill-red-500',
-        'zinc-400' => 'fill-zinc-400',
-        'blue-500' => 'fill-blue-500',
-        default => 'fill-zinc-400',
-    };
-    // Legend swatches are plain <span>s, not SVG — `fill-*` has no effect there, only `bg-*` does.
-    $swatchClass = fn (string $color): string => match ($color) {
-        'emerald-500' => 'bg-emerald-500',
-        'red-500' => 'bg-red-500',
-        'zinc-400' => 'bg-zinc-400',
-        'blue-500' => 'bg-blue-500',
-        default => 'bg-zinc-400',
+    $hex = fn (string $color): string => match ($color) {
+        'emerald-500' => '#10b981',
+        'red-500' => '#ef4444',
+        'zinc-400' => '#a1a1aa',
+        'blue-500' => '#3b82f6',
+        default => '#a1a1aa',
     };
 
-    $allValues = collect($series)->flatMap(fn (array $s) => $s['values'])->all();
-    $min = min(0, $allValues === [] ? 0 : min($allValues));
-    $max = max(0, $allValues === [] ? 0 : max($allValues));
+    $datasets = collect($series)->map(fn (array $s) => [
+        'label' => $s['label'],
+        'data' => array_values($s['values']),
+        'borderColor' => $hex($s['color']),
+        'backgroundColor' => $hex($s['color']).'22',
+        'fill' => count($series) === 1,
+        'tension' => 0.3,
+        'pointRadius' => 3,
+        'pointHoverRadius' => 5,
+    ])->all();
 
-    $charted = collect($series)->map(fn (array $s) => [
-        ...$s,
-        'chart' => App\Support\Charts\ChartMath::linePath($s['values'], forceMin: $min, forceMax: $max),
-    ]);
+    $chartConfig = [
+        'type' => 'line',
+        'data' => ['labels' => $labels, 'datasets' => $datasets],
+        'options' => [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'interaction' => ['mode' => 'index', 'intersect' => false],
+            'plugins' => [
+                'legend' => ['display' => count($series) > 1, 'position' => 'bottom'],
+            ],
+            'scales' => [
+                'y' => ['beginAtZero' => true],
+            ],
+        ],
+    ];
 @endphp
 
-<div {{ $attributes->class('space-y-3') }}>
-    <svg viewBox="0 0 400 120" preserveAspectRatio="none" class="h-28 w-full overflow-visible">
-        @foreach ($charted as $s)
-            @if ($s['chart']['areaPath'] !== '' && $charted->count() === 1)
-                <path d="{{ $s['chart']['areaPath'] }}" stroke="none" class="{{ $fillClass($s['color']) }}" />
-            @endif
-            @if ($s['chart']['path'] !== '')
-                <path d="{{ $s['chart']['path'] }}" fill="none" stroke-width="2" class="{{ $strokeClass($s['color']) }}" />
-            @endif
-            @foreach ($s['chart']['points'] as $i => $point)
-                <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="2.5" class="{{ $dotClass($s['color']) }}">
-                    <title>{{ $s['label'] }}: {{ $s['display'][$i] ?? $s['values'][$i] }}</title>
-                </circle>
-            @endforeach
-        @endforeach
-    </svg>
-
-    @if ($labels !== [])
-        <div class="flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
-            @foreach ($labels as $label)
-                <span>{{ $label }}</span>
-            @endforeach
-        </div>
-    @endif
-
-    @if (count($series) > 1)
-        <div class="flex flex-wrap gap-4 text-sm">
-            @foreach ($series as $s)
-                <div class="flex items-center gap-1.5">
-                    <span class="size-2 rounded-full {{ $swatchClass($s['color']) }}"></span>
-                    <span>{{ $s['label'] }}</span>
-                </div>
-            @endforeach
-        </div>
-    @endif
+<div {{ $attributes->class('h-40 w-full') }} x-data="{ init() { new Chart($refs.canvas, {{ \Illuminate\Support\Js::from($chartConfig) }}); } }" wire:ignore>
+    <canvas x-ref="canvas" role="img" aria-label="{{ __('Trend chart') }}"></canvas>
 </div>
