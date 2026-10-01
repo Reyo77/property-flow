@@ -37,7 +37,7 @@
                     </div>
                     <flux:heading size="xl" class="mt-3">{{ number_format($this->totals['communities']) }}</flux:heading>
                 </a>
-                <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700">
+                <a href="{{ route('communities.index') }}" wire:navigate class="group rounded-xl border border-zinc-200 p-5 transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-sm dark:border-zinc-700 dark:hover:border-zinc-500/40">
                     <div class="flex items-center gap-3">
                         <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-zinc-500/10 text-zinc-600 dark:text-zinc-400">
                             <flux:icon name="home-modern" class="size-5" />
@@ -45,8 +45,8 @@
                         <flux:text>{{ __('Units') }}</flux:text>
                     </div>
                     <flux:heading size="xl" class="mt-3">{{ number_format($this->totals['units']) }}</flux:heading>
-                </div>
-                <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700">
+                </a>
+                <a href="{{ $this->portfolioTrend !== null ? '#portfolio-trend' : route('communities.index') }}" @if ($this->portfolioTrend === null) wire:navigate @endif class="group rounded-xl border border-zinc-200 p-5 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-sm dark:border-zinc-700 dark:hover:border-emerald-500/40">
                     <div class="flex items-center gap-3">
                         <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                             <flux:icon name="chart-pie" class="size-5" />
@@ -57,8 +57,8 @@
                         {{ $this->totals['units'] === 0 ? '—' : round($this->totals['occupied_units'] / $this->totals['units'] * 100).'%' }}
                     </flux:heading>
                     <flux:text class="text-xs">{{ __(':occupied of :units units', ['occupied' => number_format($this->totals['occupied_units']), 'units' => number_format($this->totals['units'])]) }}</flux:text>
-                </div>
-                <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700">
+                </a>
+                <a href="{{ route('communities.index') }}" wire:navigate class="group rounded-xl border border-zinc-200 p-5 transition hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-sm dark:border-zinc-700 dark:hover:border-amber-500/40">
                     <div class="flex items-center gap-3">
                         <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
                             <flux:icon name="users" class="size-5" />
@@ -66,11 +66,11 @@
                         <flux:text>{{ __('Residents') }}</flux:text>
                     </div>
                     <flux:heading size="xl" class="mt-3">{{ number_format($this->totals['residents']) }}</flux:heading>
-                </div>
+                </a>
             </div>
 
             @if ($this->portfolioTrend !== null)
-                <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="portfolio-trend">
+                <div id="portfolio-trend" class="scroll-mt-20 rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="portfolio-trend">
                     <div class="flex items-center gap-3">
                         <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                             <flux:icon name="presentation-chart-line" class="size-5" />
@@ -86,6 +86,68 @@
                         ]]"
                         :labels="array_map(fn (array $point) => \Illuminate\Support\Carbon::parse($point['month'])->translatedFormat('M'), $this->portfolioTrend)"
                     />
+                </div>
+            @endif
+
+            @if ($this->recentAnnouncements !== null || $this->upcomingEvents !== null)
+                <div class="grid gap-4 lg:grid-cols-2">
+                    @if ($this->recentAnnouncements !== null)
+                        <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="recent-announcements">
+                            <div class="flex items-center gap-3">
+                                <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                                    <flux:icon name="megaphone" class="size-5" />
+                                </div>
+                                <flux:heading size="lg">{{ __('Recent announcements') }}</flux:heading>
+                            </div>
+                            @if ($this->recentAnnouncements->isEmpty())
+                                <flux:text class="text-sm">{{ __('Nothing published yet.') }}</flux:text>
+                            @else
+                                <ul class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                                    @foreach ($this->recentAnnouncements as $announcement)
+                                        <li class="py-2.5 first:pt-0 last:pb-0">
+                                            <a href="{{ route('communities.announcements.index', $announcement->community) }}" wire:navigate class="group flex items-start justify-between gap-3">
+                                                <div class="min-w-0">
+                                                    <flux:text class="block truncate font-medium text-zinc-900 group-hover:underline dark:text-white">{{ $announcement->title }}</flux:text>
+                                                    <flux:text class="block text-xs">{{ $announcement->community->name }} · {{ $announcement->published_at->diffForHumans() }}</flux:text>
+                                                </div>
+                                                @if ($announcement->pinned)
+                                                    <flux:badge size="sm" color="amber" class="shrink-0">{{ __('Pinned') }}</flux:badge>
+                                                @endif
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                    @endif
+
+                    @if ($this->upcomingEvents !== null)
+                        <div class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 space-y-3" data-test="upcoming-events">
+                            <div class="flex items-center gap-3">
+                                <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                    <flux:icon name="calendar-days" class="size-5" />
+                                </div>
+                                <flux:heading size="lg">{{ __('Upcoming events') }}</flux:heading>
+                            </div>
+                            @if ($this->upcomingEvents->isEmpty())
+                                <flux:text class="text-sm">{{ __('Nothing scheduled.') }}</flux:text>
+                            @else
+                                <ul class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                                    @foreach ($this->upcomingEvents as $event)
+                                        <li class="py-2.5 first:pt-0 last:pb-0">
+                                            <a href="{{ route('communities.events.index', $event->community) }}" wire:navigate class="group flex items-start justify-between gap-3">
+                                                <div class="min-w-0">
+                                                    <flux:text class="block truncate font-medium text-zinc-900 group-hover:underline dark:text-white">{{ $event->title }}</flux:text>
+                                                    <flux:text class="block text-xs">{{ $event->community->name }}</flux:text>
+                                                </div>
+                                                <flux:text class="shrink-0 text-xs">{{ \App\Support\LocalTime::local($event->starts_at, $event->community)->format('M j, g:ia') }}</flux:text>
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             @endif
         @endif

@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Livewire\Dashboard;
+use App\Models\Announcement;
 use App\Models\Community;
+use App\Models\Event;
 use App\Models\Residency;
 use App\Models\Unit;
 use App\Models\User;
@@ -136,6 +138,52 @@ class DashboardTest extends TestCase
         $trend = Livewire::test(Dashboard::class)->instance()->portfolioTrend();
 
         $this->assertSame([100.0, 100.0, 100.0, 100.0, 100.0, 100.0], array_column($trend, 'occupancy_percent'));
+    }
+
+    public function test_recent_announcements_list_published_ones_across_accessible_communities_newest_first(): void
+    {
+        $admin = companyAdmin();
+        $community = Community::factory()->for($admin->company)->create();
+        $older = Announcement::factory()->for($community)->published()->create(['title' => 'Older notice', 'published_at' => now()->subDays(3)]);
+        $newer = Announcement::factory()->for($community)->published()->create(['title' => 'Newer notice', 'published_at' => now()->subDay()]);
+        Announcement::factory()->for($community)->draft()->create(['title' => 'Draft notice']);
+        Announcement::factory()->for($community)->scheduled()->create(['title' => 'Scheduled notice']);
+        Announcement::factory()->published()->create(['title' => 'Someone else\'s notice']);
+
+        $this->actingAs($admin);
+
+        $titles = Livewire::test(Dashboard::class)->instance()->recentAnnouncements()->pluck('title')->all();
+
+        $this->assertSame([$newer->title, $older->title], $titles);
+    }
+
+    public function test_recent_announcements_are_null_without_the_view_announcements_permission(): void
+    {
+        $this->actingAs(memberWithoutRole());
+
+        $this->assertNull(Livewire::test(Dashboard::class)->instance()->recentAnnouncements());
+    }
+
+    public function test_upcoming_events_list_future_ones_across_accessible_communities_excluding_past(): void
+    {
+        $admin = companyAdmin();
+        $community = Community::factory()->for($admin->company)->create();
+        $upcoming = Event::factory()->for($community)->create(['title' => 'Annual meeting']);
+        Event::factory()->for($community)->past()->create(['title' => 'Old meeting']);
+        Event::factory()->create(['title' => 'Someone else\'s event']);
+
+        $this->actingAs($admin);
+
+        $titles = Livewire::test(Dashboard::class)->instance()->upcomingEvents()->pluck('title')->all();
+
+        $this->assertSame([$upcoming->title], $titles);
+    }
+
+    public function test_upcoming_events_are_null_without_the_view_events_permission(): void
+    {
+        $this->actingAs(memberWithoutRole());
+
+        $this->assertNull(Livewire::test(Dashboard::class)->instance()->upcomingEvents());
     }
 
     public function test_vendors_see_their_open_work_order_count_instead_of_the_no_access_message(): void

@@ -2,9 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Enums\Permission;
 use App\Enums\WorkOrderStatus;
 use App\Livewire\Concerns\InteractsWithCurrentUser;
+use App\Models\Announcement;
 use App\Models\Community;
+use App\Models\Event;
 use App\Models\Residency;
 use App\Models\Unit;
 use App\Models\WorkOrder;
@@ -149,6 +152,48 @@ class Dashboard extends Component
         }
 
         return $points;
+    }
+
+    /**
+     * The 5 most recently published announcements across every community the user can access,
+     * or null if they can't view announcements at all.
+     *
+     * @return Collection<int, Announcement>|null
+     */
+    #[Computed]
+    public function recentAnnouncements(): ?Collection
+    {
+        $user = $this->currentUser();
+
+        if (! $user->hasCompanyPermission(Permission::ViewAnnouncements)) {
+            return null;
+        }
+
+        $communityIds = Community::query()->accessibleBy($user)->pluck('id');
+
+        return Announcement::query()->whereIn('community_id', $communityIds)->published()
+            ->with('community')->latest('published_at')->limit(5)->get();
+    }
+
+    /**
+     * The next 5 upcoming events across every community the user can access, or null if they
+     * can't view events at all.
+     *
+     * @return Collection<int, Event>|null
+     */
+    #[Computed]
+    public function upcomingEvents(): ?Collection
+    {
+        $user = $this->currentUser();
+
+        if (! $user->hasCompanyPermission(Permission::ViewEvents)) {
+            return null;
+        }
+
+        $communityIds = Community::query()->accessibleBy($user)->pluck('id');
+
+        return Event::query()->whereIn('community_id', $communityIds)->upcoming()
+            ->with('community')->limit(5)->get();
     }
 
     /**
