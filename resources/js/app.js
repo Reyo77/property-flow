@@ -5,3 +5,4 @@ window.Chart = Chart;
 
 import './echo';
 import './pwa';
+import './sidebar-scroll';
